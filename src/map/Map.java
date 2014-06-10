@@ -43,10 +43,12 @@ public class Map
             {
                 if(s == null) break;
                 trans = s.split(",");
+                //System.out.println(trans.length);
                 for (int j = 0; j < trans.length; j++)
                 {
+                    //System.out.println("i:" + i + " j:" + j + " n:" + Integer.parseInt(trans[j]));
                     grid[i][j] = Integer.parseInt(trans[j]);
-                    //System.out.println("i:" + i + " j:" + j + " n:" + grid[i][j]);
+                    
                 }
                 s = br.readLine();
             }
@@ -62,17 +64,27 @@ public class Map
         } 
     }
     
-    public int getTile(int x, int y)
+    public int[][] getGrid()
     {
-        return grid[y][x];
+        return grid;
     }
     
-    public static void main(String[] args) throws IOException
+    public int getWidth()
+    {
+        return y;
+    }
+    
+    public int getHeight()
+    {
+        return x;
+    }
+    
+    /*public static void main(String[] args) throws IOException
     {
         Map test = new Map("/map.txt");
         for(int i = 0; i < test.y; i++)
         {
             System.out.println(Arrays.toString(test.grid[i]));
         }
-    }
+    }*/
 }

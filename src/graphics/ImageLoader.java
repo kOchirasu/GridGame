@@ -6,7 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
-public class SpriteLoader 
+public class ImageLoader 
 {
     public BufferedImage load(String path)
     {
@@ -16,7 +16,7 @@ public class SpriteLoader
         } 
         catch (IOException ex) 
         {
-            Logger.getLogger(SpriteLoader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ImageLoader.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }

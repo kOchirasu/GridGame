@@ -1,37 +1,63 @@
 package gridGame;
 
+import character.Path;
 import character.Unit;
-import graphics.SpriteLoader;
+import graphics.Image;
+import graphics.ImageLoader;
 import graphics.SpriteSheet;
 import java.awt.Canvas;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
+import map.Map;
+import map.MapLoader;
 
 public class Game extends Canvas implements Runnable
 {
     private static final long serialVersionUID = 1L;
-    public static final int WIDTH = 200, HEIGHT = 200, SCALE = 2;
+    public static final int WIDTH = 700, HEIGHT = 575;
+    public static int mapWidth, mapHeight;
     public static boolean running = false;
+    public static Path paths;
     public Thread gameThread;
     
-    private BufferedImage spriteMain;
+    private static Map map;
+    private BufferedImage spriteMain, damageNum, gui;
+    private Image im;
     
-    private Unit firstUnit;
+    private static final Unit[][] unitGrid = new Unit[16][12];
+    private final ArrayList<Unit> unitList = new ArrayList<>();
     
     public void init()
     {
-        SpriteLoader loader = new SpriteLoader();
+        MapLoader mloader = new MapLoader();
+        map = mloader.load("/map.txt");
+        mapWidth = map.getWidth();
+        mapHeight = map.getHeight();
+        ImageLoader loader = new ImageLoader();
+        gui = loader.load("/gui.png");
         spriteMain = loader.load("/spritesheet.png");
+        damageNum = loader.load("/number.png");
+        SpriteSheet ss = new SpriteSheet(spriteMain);
+        SpriteSheet ds = new SpriteSheet(damageNum);
+        im = new Image(ss, ds);
+        paths = new Path(im);
         
-        SpriteSheet sheet = new SpriteSheet(spriteMain);
+        addUnit(1, 0, 0);
+        addUnit(1, 1, 0);
+        addUnit(1, 2, 0);
+        addUnit(0, 0, 0);
+        addUnit(0, 3, 0);
+        addUnit(5, 3, 0);
         
-        firstUnit = new Unit(0, 0, sheet);
+        MouseHandler mh = new MouseHandler();
+        this.addMouseListener(mh);
+        this.addMouseMotionListener(mh);
     }
     
     public synchronized void start() //Use synchronized when starting thread
@@ -64,7 +90,7 @@ public class Game extends Canvas implements Runnable
     {
         init();
         long time = System.nanoTime();
-        final double maxTick = 60.0;
+        final double maxTick = 20.0;
         double ns = 1000000000 / maxTick;
         double delta = 0;
         
@@ -78,14 +104,17 @@ public class Game extends Canvas implements Runnable
                 tick();
                 delta--;
             }
-            render();
         }
         stop();
     }
     
     public void tick()
     {
-        firstUnit.tick();
+        for(Unit u : unitList) 
+        {
+            u.tick();
+        }
+        render();
     }
     
     public void render()
@@ -98,24 +127,53 @@ public class Game extends Canvas implements Runnable
         }
         Graphics g = bs.getDrawGraphics();
         //Render Here
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, WIDTH * SCALE, HEIGHT * SCALE); //Draws rectangle to screen
-        firstUnit.render(g);
-        
+        g.drawImage(gui, 0, 0, null);
+        for(Unit u : unitList)
+        {
+            u.render(g);
+        }
+        paths.render(g);
         
         g.dispose(); //Clean
         bs.show(); //Shows render
+    }
+    
+    public void addUnit(int x, int y, int type)
+    {
+        Unit temp = new Unit(x, y, im);
+        unitGrid[x][y] = temp;
+        unitList.add(temp);
+    }
+    
+    public static Unit getUnit(int x, int y)
+    {
+        return unitGrid[x][y];
+    }
+    
+    public static void moveUnit(int oX, int oY, int nX, int nY, Unit u)
+    {
+        unitGrid[oX][oY] = null;
+        unitGrid[nX][nY] = u;
+    }
+    
+    public static int[][] getMap()
+    {
+        return map.getGrid();
     }
 
     public static void main(String[] args) 
     {
         Game game = new Game();
-        game.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
-        game.setMaximumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
-        game.setMinimumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
+        game.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        game.setMaximumSize(new Dimension(WIDTH, HEIGHT));
+        game.setMinimumSize(new Dimension(WIDTH, HEIGHT));
         
         JFrame frame = new JFrame("Grid Game");
-        frame.setSize(WIDTH * SCALE, HEIGHT * SCALE);
+        frame.pack();
+        int nW = WIDTH + frame.getWidth() - frame.getContentPane().getWidth() - 10;
+        int nH = HEIGHT + frame.getHeight() - frame.getContentPane().getHeight() - 10;
+        frame.setSize(nW, nH);
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
         frame.add(game);

@@ -1,11 +1,11 @@
 package character;
 
-import graphics.SpriteSheet;
+import graphics.Image;
 
 
 public class Warrior extends Unit 
 {
-    public Warrior(int x, int y, SpriteSheet ss) 
+    public Warrior(int x, int y, Image ss) 
     {
         super(x, y, ss);
     }
