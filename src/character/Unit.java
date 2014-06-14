@@ -9,7 +9,7 @@ public class Unit
     private int x, y, n0, n1, n2;
     private int dmglen = 0;
     private long timer;
-    private int LVL, EXP, HP, maxHP, MP, maxMP, FTG, MOV, ATK, MATK, DEF, ACC, AVO, CRIT, RANGE = 2;
+    private int LVL, EXP, HP, maxHP, MP, maxMP, FTG, MOV, ATK, MATK, DEF, ACC, AVO, CRIT, minRANGE = 1, maxRANGE = 10;
     
     private boolean dead = false;
     private short ClassID;
@@ -117,7 +117,7 @@ public class Unit
     }
     
     public int[] pathInfo() {
-        return new int[]{x, y, MOV, RANGE};
+        return new int[]{x, y, MOV, minRANGE, maxRANGE};
     }
     public int getX() {
         return x;
@@ -167,7 +167,10 @@ public class Unit
     public int getCRIT() {
         return CRIT;
     }
-    public int getRANGE() {
-        return RANGE;
+    public int getMinRANGE() {
+        return minRANGE;
+    }
+    public int getMaxRANGE() {
+        return maxRANGE;
     }
 }

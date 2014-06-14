@@ -7,10 +7,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
+/*
+Make it so that you can walk through allied units
+Can also walk through enemy units but take damage from each unit that you walk over
 
+*/
 public class Path 
 {
-    private int x, y, MOV, RANGE;
+    private int x, y, MOV, minRANGE, maxRANGE;
     private int[][] movement;
     private ArrayList<int[]> pathList = new ArrayList<>();
     private ArrayList<int[]> attList = new ArrayList<>();
@@ -50,13 +54,15 @@ public class Path
         this.x = pathInfo[0];
         this.y = pathInfo[1];
         this.MOV = pathInfo[2];
-        this.RANGE = pathInfo[3];
+        this.minRANGE = pathInfo[3];
+        this.maxRANGE = pathInfo[4];
         int dat[], able, dist;
         pathList.clear();
-                
+        attList.clear();
+        
         movement = new int[Game.mapWidth][Game.mapHeight];
         Queue<int[]> check = new LinkedList<>();
-        Queue checkAtt = new LinkedList();
+        Queue<int[]> checkAtt = new LinkedList<>();
         
         movement[x][y] = 0;
         //System.out.println("Labled: " + x + " & " + y + " as \t" + 0);
@@ -75,24 +81,65 @@ public class Path
                     movement[dat[0]][dat[1]] = ++dat[2];
                     pathList.add(dat);
                     //System.out.println("Labled:" + dat[0] + " & " + dat[1] + " as \t" + dat[2]);
-                    check.add(new int[]{dat[0] - 1, dat[1], dat[2]});
-                    check.add(new int[]{dat[0], dat[1] - 1, dat[2]});
-                    check.add(new int[]{dat[0] + 1, dat[1], dat[2]});
-                    check.add(new int[]{dat[0], dat[1] + 1, dat[2]});
+                    if(dat[2] < MOV)
+                    {
+                        check.add(new int[]{dat[0] - 1, dat[1], dat[2]});
+                        check.add(new int[]{dat[0], dat[1] - 1, dat[2]});
+                        check.add(new int[]{dat[0] + 1, dat[1], dat[2]});
+                        check.add(new int[]{dat[0], dat[1] + 1, dat[2]});
+                    }
+                    else
+                    {
+                        checkAtt.add(new int[]{dat[0] - 1, dat[1], dat[2]});
+                        checkAtt.add(new int[]{dat[0], dat[1] - 1, dat[2]});
+                        checkAtt.add(new int[]{dat[0] + 1, dat[1], dat[2]});
+                        checkAtt.add(new int[]{dat[0], dat[1] + 1, dat[2]});
+                    }
                 }
                 else if(able == 2)
                 {
-                    if(RANGE > 1)
+                    if(maxRANGE > 1)
                     {
-                        check.add(new int[]{dat[0] - 1, dat[1], MOV + 1});
-                        check.add(new int[]{dat[0], dat[1] - 1, MOV + 1});
-                        check.add(new int[]{dat[0] + 1, dat[1], MOV + 1});
-                        check.add(new int[]{dat[0], dat[1] + 1, MOV + 1});
+                        checkAtt.add(new int[]{dat[0] - 1, dat[1], MOV + 1});
+                        checkAtt.add(new int[]{dat[0], dat[1] - 1, MOV + 1});
+                        checkAtt.add(new int[]{dat[0] + 1, dat[1], MOV + 1});
+                        checkAtt.add(new int[]{dat[0], dat[1] + 1, MOV + 1});
                     }
                     movement[dat[0]][dat[1]] = MOV + 1;
+                    if(minRANGE == 1) {
+                        attList.add(dat);
+                    }
+                    else
+                    {
+                        attList.add(dat);
+                    }
+                }
+                //System.out.println("First IF");
+            }
+        }
+        while(checkAtt.peek() != null)
+        {
+            dat = checkAtt.remove();
+            able = moveable(dat[0], dat[1]);
+            if(able != 0)
+            {
+                movement[dat[0]][dat[1]] = ++dat[2];
+                if(dat[2] >= minRANGE && dat[2] <= MOV + maxRANGE)
+                {
                     attList.add(dat);
                 }
+                //System.out.println(dat[2]);
+                if(dat[2] < MOV + maxRANGE)
+                {
+                        checkAtt.add(new int[]{dat[0] - 1, dat[1], dat[2]});
+                        checkAtt.add(new int[]{dat[0], dat[1] - 1, dat[2]});
+                        checkAtt.add(new int[]{dat[0] + 1, dat[1], dat[2]});
+                        checkAtt.add(new int[]{dat[0], dat[1] + 1, dat[2]});
+                        //System.out.println("Added");
+                }
             }
+        }
+        /*
             else
             {
                 if(able != 0)
@@ -103,19 +150,19 @@ public class Path
                         checkAtt.add(hash(dat));
                     }
                 }
-            }
+            }*/
             /*
-            else if(dat[2] < MOV + RANGE)
+            else if(dat[2] < MOV + maxRANGE)
             {
                 if(able == 1)
                 {
                     movement[dat[0]][dat[1]] = ++dat[2];
                     attList.add(dat);
                     //System.out.println("Labled:" + dat[0] + " & " + dat[1] + " as \t" + dat[2]);
-                    check.add(new int[]{dat[0] - 1, dat[1], dat[2]});
-                    check.add(new int[]{dat[0], dat[1] - 1, dat[2]});
-                    check.add(new int[]{dat[0] + 1, dat[1], dat[2]});
-                    check.add(new int[]{dat[0], dat[1] + 1, dat[2]});
+                    checkAtt.add(new int[]{dat[0] - 1, dat[1], dat[2]});
+                    checkAtt.add(new int[]{dat[0], dat[1] - 1, dat[2]});
+                    checkAtt.add(new int[]{dat[0] + 1, dat[1], dat[2]});
+                    checkAtt.add(new int[]{dat[0], dat[1] + 1, dat[2]});
                 }
                 else if(able == 2)
                 {
@@ -123,19 +170,20 @@ public class Path
                     System.out.println(movement[dat[0]][dat[1]]);
                         movement[dat[0]][dat[1]] = dat[2];
                         attList.add(dat);
-                        check.add(new int[]{dat[0] - 1, dat[1], dat[2]});
-                        check.add(new int[]{dat[0], dat[1] - 1, dat[2]});
-                        check.add(new int[]{dat[0] + 1, dat[1], dat[2]});
-                        check.add(new int[]{dat[0], dat[1] + 1, dat[2]});
+                        checkAtt.add(new int[]{dat[0] - 1, dat[1], dat[2]});
+                        checkAtt.add(new int[]{dat[0], dat[1] - 1, dat[2]});
+                        checkAtt.add(new int[]{dat[0] + 1, dat[1], dat[2]});
+                        checkAtt.add(new int[]{dat[0], dat[1] + 1, dat[2]});
                 }
-            }
-            else if(dat[2] == MOV + RANGE && able == 1)
+            }/*
+            else if(dat[2] == MOV + maxRANGE && able == 1)
             {
-                movement[dat[0]][dat[1]] = MOV + RANGE;
+                movement[dat[0]][dat[1]] = MOV + maxRANGE;
                 attList.add(dat);
             }*/
-        }
-        System.out.println("Pringin");
+            //System.out.println("Second IF");
+        
+        System.out.println("Printing...");
     }
     
     private int hash(int[] i)
@@ -145,7 +193,7 @@ public class Path
     
     private int moveable(int x, int y)
     {
-        if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight && !(Math.abs(x - this.x) + Math.abs(y - this.y) > MOV + RANGE) && movement[x][y] == 0)
+        if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight && !(Math.abs(x - this.x) + Math.abs(y - this.y) > MOV + maxRANGE) && movement[x][y] == 0)
         {
             if(Game.getUnit(x, y) == null)
             {
