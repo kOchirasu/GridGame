@@ -57,12 +57,14 @@ public class Path
         this.minRANGE = pathInfo[3];
         this.maxRANGE = pathInfo[4];
         int dat[], able, dist;
+        int maxwalk = 0;
         pathList.clear();
         attList.clear();
         
         movement = new int[Game.mapWidth][Game.mapHeight];
         Queue<int[]> check = new LinkedList<>();
         Queue<int[]> checkAtt = new LinkedList<>();
+        Queue<int[]> tempList = new LinkedList<>();
         
         movement[x][y] = 0;
         //System.out.println("Labled: " + x + " & " + y + " as \t" + 0);
@@ -76,7 +78,7 @@ public class Path
             able = moveable(dat[0], dat[1]);
             if(dat[2] < MOV)
             {
-                if(able == 1)
+                if(able == 1) //tile is empty
                 {
                     movement[dat[0]][dat[1]] = ++dat[2];
                     pathList.add(dat);
@@ -96,7 +98,7 @@ public class Path
                         checkAtt.add(new int[]{dat[0], dat[1] + 1, dat[2]});
                     }
                 }
-                else if(able == 2)
+                else if(able == 2) //Unit in checked tile
                 {
                     if(maxRANGE > 1)
                     {
@@ -106,16 +108,41 @@ public class Path
                         checkAtt.add(new int[]{dat[0], dat[1] + 1, MOV + 1});
                     }
                     movement[dat[0]][dat[1]] = MOV + 1;
+                    /*if(maxRANGE > 1)
+                    {
+                        dat[2]++;
+                        checkAtt.add(new int[]{dat[0] - 1, dat[1], dat[2]});
+                        checkAtt.add(new int[]{dat[0], dat[1] - 1, dat[2]});
+                        checkAtt.add(new int[]{dat[0] + 1, dat[1], dat[2]});
+                        checkAtt.add(new int[]{dat[0], dat[1] + 1, dat[2]});
+                    }
+                    movement[dat[0]][dat[1]] = dat[2];*/
                     if(minRANGE == 1) {
                         attList.add(dat);
                     }
                     else
                     {
-                        attList.add(dat);
+                        tempList.add(dat);
                     }
                 }
                 //System.out.println("First IF");
             }
+            maxwalk = dat[2] > maxwalk ? dat[2] : maxwalk;
+        }
+        System.out.println("Max walk distance: " + maxwalk);
+        if(maxwalk + 1 >= minRANGE)
+        {
+            while(tempList.peek() != null)
+            {
+                attList.add(tempList.remove());
+            }
+        }
+        if(checkAtt.peek() == null)
+        {
+            checkAtt.add(new int[]{x - 1, y, 0});
+            checkAtt.add(new int[]{x, y - 1, 0});
+            checkAtt.add(new int[]{x + 1, y, 0});
+            checkAtt.add(new int[]{x, y + 1, 0});
         }
         while(checkAtt.peek() != null)
         {
@@ -124,7 +151,7 @@ public class Path
             if(able != 0)
             {
                 movement[dat[0]][dat[1]] = ++dat[2];
-                if(dat[2] >= minRANGE && dat[2] <= MOV + maxRANGE)
+                if(dat[2] > minRANGE && dat[2] <= MOV + maxRANGE)
                 {
                     attList.add(dat);
                 }
@@ -135,7 +162,6 @@ public class Path
                         checkAtt.add(new int[]{dat[0], dat[1] - 1, dat[2]});
                         checkAtt.add(new int[]{dat[0] + 1, dat[1], dat[2]});
                         checkAtt.add(new int[]{dat[0], dat[1] + 1, dat[2]});
-                        //System.out.println("Added");
                 }
             }
         }
@@ -193,19 +219,27 @@ public class Path
     
     private int moveable(int x, int y)
     {
-        if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight && !(Math.abs(x - this.x) + Math.abs(y - this.y) > MOV + maxRANGE) && movement[x][y] == 0)
+        if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight && !(Math.abs(x - this.x) + Math.abs(y - this.y) > MOV + maxRANGE))
         {
-            if(Game.getUnit(x, y) == null)
+            if(movement[x][y] == 0)
             {
-                if(Game.getMap()[x][y] == 1) {
-                    return 1;
+                if(Game.getUnit(x, y) == null)
+                {
+                    if(Game.getMap()[x][y] == 1) {
+                        return 1;
+                    }
+                }
+                else
+                {
+                    if(this.x != x || this.y != y) {
+                        return 2;
+                    }
                 }
             }
             else
             {
-                if(this.x != x || this.y != y) {
-                    return 2;
-                }
+                return 0;
+                //return movement[x][y] + 100;
             }
         }  
         return 0;

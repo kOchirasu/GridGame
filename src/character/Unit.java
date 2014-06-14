@@ -9,7 +9,7 @@ public class Unit
     private int x, y, n0, n1, n2;
     private int dmglen = 0;
     private long timer;
-    private int LVL, EXP, HP, maxHP, MP, maxMP, FTG, MOV, ATK, MATK, DEF, ACC, AVO, CRIT, minRANGE = 1, maxRANGE = 10;
+    private int LVL, EXP, HP, maxHP, MP, maxMP, FTG, MOV, ATK, MATK, DEF, ACC, AVO, CRIT, minRANGE = 1, maxRANGE = 2;
     
     private boolean dead = false;
     private short ClassID;
