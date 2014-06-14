@@ -23,6 +23,7 @@ public class Path
     public Path(Image image)
     {
         this.image = image;
+        movement = new int[Game.mapWidth][Game.mapHeight];
     }
     
     public void render(Graphics g)
@@ -56,17 +57,20 @@ public class Path
         this.MOV = pathInfo[2];
         this.minRANGE = pathInfo[3];
         this.maxRANGE = pathInfo[4];
-        int dat[], able, dist;
-        int maxwalk = 0;
+        int dat[] = new int[]{0, 0, 0}, able;
         pathList.clear();
         attList.clear();
         
-        movement = new int[Game.mapWidth][Game.mapHeight];
+        for(int i = 0; i < Game.mapWidth; i++) {
+            for(int j = 0; j < Game.mapHeight; j++) {
+                movement[i][j] = 0;
+            }
+        }
         Queue<int[]> check = new LinkedList<>();
         Queue<int[]> checkAtt = new LinkedList<>();
-        Queue<int[]> tempList = new LinkedList<>();
+        Queue<int[]> tempQueue = new LinkedList<>();
         
-        movement[x][y] = 0;
+        //movement[x][y] = 0;
         //System.out.println("Labled: " + x + " & " + y + " as \t" + 0);
         check.add(new int[]{x - 1, y, 0});
         check.add(new int[]{x, y - 1, 0});
@@ -108,33 +112,29 @@ public class Path
                         checkAtt.add(new int[]{dat[0], dat[1] + 1, MOV + 1});
                     }
                     movement[dat[0]][dat[1]] = MOV + 1;
-                    /*if(maxRANGE > 1)
-                    {
-                        dat[2]++;
-                        checkAtt.add(new int[]{dat[0] - 1, dat[1], dat[2]});
-                        checkAtt.add(new int[]{dat[0], dat[1] - 1, dat[2]});
-                        checkAtt.add(new int[]{dat[0] + 1, dat[1], dat[2]});
-                        checkAtt.add(new int[]{dat[0], dat[1] + 1, dat[2]});
-                    }
-                    movement[dat[0]][dat[1]] = dat[2];*/
-                    if(minRANGE == 1) {
-                        attList.add(dat);
-                    }
-                    else
-                    {
-                        tempList.add(dat);
-                    }
+                    tempQueue.add(dat);
                 }
-                //System.out.println("First IF");
             }
-            maxwalk = dat[2] > maxwalk ? dat[2] : maxwalk;
+            //maxwalk = dat[2] > maxwalk ? dat[2] : maxwalk;
         }
-        System.out.println("Max walk distance: " + maxwalk);
-        if(maxwalk + 1 >= minRANGE)
+        //System.out.println("Max walk distance: " + dat[2]);
+
+        if(dat[2] < MOV || dat[2] < minRANGE)
         {
-            while(tempList.peek() != null)
+            //System.out.println("hit checking!");
+            while(tempQueue.peek() != null)
             {
-                attList.add(tempList.remove());
+                dat = tempQueue.remove();
+                if(hitable(dat[0], dat[1])) {
+                    attList.add(dat);
+                }
+                //System.out.println(Arrays.toString(dat));
+            }
+        }
+        else
+        {
+            while(tempQueue.peek() != null) {
+                attList.add(tempQueue.remove());
             }
         }
         if(checkAtt.peek() == null)
@@ -151,11 +151,9 @@ public class Path
             if(able != 0)
             {
                 movement[dat[0]][dat[1]] = ++dat[2];
-                if(dat[2] > minRANGE && dat[2] <= MOV + maxRANGE)
-                {
+                if(dat[2] >= minRANGE && dat[2] <= MOV + maxRANGE) {
                     attList.add(dat);
                 }
-                //System.out.println(dat[2]);
                 if(dat[2] < MOV + maxRANGE)
                 {
                         checkAtt.add(new int[]{dat[0] - 1, dat[1], dat[2]});
@@ -165,84 +163,44 @@ public class Path
                 }
             }
         }
-        /*
-            else
-            {
-                if(able != 0)
-                {
-                    if(!checkAtt.contains(hash(dat)))
-                    {
-                        System.out.println(Arrays.toString(dat));
-                        checkAtt.add(hash(dat));
-                    }
-                }
-            }*/
-            /*
-            else if(dat[2] < MOV + maxRANGE)
-            {
-                if(able == 1)
-                {
-                    movement[dat[0]][dat[1]] = ++dat[2];
-                    attList.add(dat);
-                    //System.out.println("Labled:" + dat[0] + " & " + dat[1] + " as \t" + dat[2]);
-                    checkAtt.add(new int[]{dat[0] - 1, dat[1], dat[2]});
-                    checkAtt.add(new int[]{dat[0], dat[1] - 1, dat[2]});
-                    checkAtt.add(new int[]{dat[0] + 1, dat[1], dat[2]});
-                    checkAtt.add(new int[]{dat[0], dat[1] + 1, dat[2]});
-                }
-                else if(able == 2)
-                {
-                    printPaths();
-                    System.out.println(movement[dat[0]][dat[1]]);
-                        movement[dat[0]][dat[1]] = dat[2];
-                        attList.add(dat);
-                        checkAtt.add(new int[]{dat[0] - 1, dat[1], dat[2]});
-                        checkAtt.add(new int[]{dat[0], dat[1] - 1, dat[2]});
-                        checkAtt.add(new int[]{dat[0] + 1, dat[1], dat[2]});
-                        checkAtt.add(new int[]{dat[0], dat[1] + 1, dat[2]});
-                }
-            }/*
-            else if(dat[2] == MOV + maxRANGE && able == 1)
-            {
-                movement[dat[0]][dat[1]] = MOV + maxRANGE;
-                attList.add(dat);
-            }*/
-            //System.out.println("Second IF");
-        
-        System.out.println("Printing...");
     }
-    
-    private int hash(int[] i)
-    {
-        return i[0]*10000+i[1]*100+i[0];
-    }
-    
+
     private int moveable(int x, int y)
     {
-        if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight && !(Math.abs(x - this.x) + Math.abs(y - this.y) > MOV + maxRANGE))
+        if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight && !(Math.abs(x - this.x) + Math.abs(y - this.y) > MOV + maxRANGE) && movement[x][y] == 0)
         {
-            if(movement[x][y] == 0)
+            if(Game.getUnit(x, y) == null)
             {
-                if(Game.getUnit(x, y) == null)
-                {
-                    if(Game.getMap()[x][y] == 1) {
-                        return 1;
-                    }
-                }
-                else
-                {
-                    if(this.x != x || this.y != y) {
-                        return 2;
-                    }
+                if(Game.getMap()[x][y] == 1) {
+                    return 1;
                 }
             }
             else
             {
-                return 0;
-                //return movement[x][y] + 100;
+                if(this.x != x || this.y != y) {
+                    return 2;
+                }
             }
         }  
         return 0;
+    }
+    
+    private boolean hitable(int x, int y)
+    {
+        //System.out.println("Distance between (" + x + ", " + y + ") & (" + this.x + ", " + this.y + ")\t" + (Math.abs(this.x - x) + Math.abs(this.y - y)));
+        if(Math.abs(this.x - x) + Math.abs(this.y - y) >= minRANGE) {
+            //System.out.println("Success");
+            return true;
+        }
+        for(int[] i : pathList)
+        {
+            //System.out.println("Distance between (" + x + ", " + y + ") & (" + i[0] + ", " + i[1] + ")\t" + (Math.abs(i[0] - x) + Math.abs(i[1] - y)));
+            if(Math.abs(i[0] - x) + Math.abs(i[1] - y) >= minRANGE) {
+                //System.out.println("Success");
+                return true;
+            }
+        }
+        return false;
     }
     
     public void printPaths()

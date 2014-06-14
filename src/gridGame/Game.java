@@ -128,11 +128,10 @@ public class Game extends Canvas implements Runnable
         Graphics g = bs.getDrawGraphics();
         //Render Here
         g.drawImage(gui, 0, 0, null);
-        for(Unit u : unitList)
-        {
+        paths.render(g);
+        for(Unit u : unitList) {
             u.render(g);
         }
-        paths.render(g);
         
         g.dispose(); //Clean
         bs.show(); //Shows render
