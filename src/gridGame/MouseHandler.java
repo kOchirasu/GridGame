@@ -65,7 +65,7 @@ public class MouseHandler extends MouseAdapter
             else
             {
                 Game.paths.clearPaths();
-                selected.damage(153);
+                //selected.damage(153);
                 if(pX == x/32 && pY == y/32) //Moused clicked
                 {
                     //selected.move(1);

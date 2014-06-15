@@ -55,6 +55,11 @@ public class Game extends Canvas implements Runnable
         addUnit(0, 3, 0);
         addUnit(5, 3, 0);
         
+        for(int i = 0; i < 16; i++)
+        {
+            addUnit(i, 11, 0);
+        }
+        
         MouseHandler mh = new MouseHandler();
         this.addMouseListener(mh);
         this.addMouseMotionListener(mh);
