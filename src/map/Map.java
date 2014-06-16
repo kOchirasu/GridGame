@@ -64,27 +64,15 @@ public class Map
         } 
     }
     
-    public int[][] getGrid()
-    {
+    public int[][] getGrid() {
         return grid;
     }
     
-    public int getWidth()
-    {
+    public int getWidth() {
         return y;
     }
     
-    public int getHeight()
-    {
+    public int getHeight() {
         return x;
     }
-    
-    /*public static void main(String[] args) throws IOException
-    {
-        Map test = new Map("/map.txt");
-        for(int i = 0; i < test.y; i++)
-        {
-            System.out.println(Arrays.toString(test.grid[i]));
-        }
-    }*/
 }

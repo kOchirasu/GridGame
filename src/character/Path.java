@@ -1,6 +1,6 @@
 package character;
 
-import graphics.Image;
+import graphics.Sprite;
 import gridGame.Game;
 import java.awt.Graphics;
 import java.util.ArrayList;
@@ -16,16 +16,14 @@ public class Path
 {
     private int x, y, MOV, minRANGE, maxRANGE;
     private int[][] movement;
-    private int[][] attackable;
     private ArrayList<int[]> pathList = new ArrayList<>();
     private ArrayList<int[]> attList = new ArrayList<>();
-    private Image image;
+    private Sprite sprite;
     
-    public Path(Image image)
+    public Path(Sprite sprite)
     {
-        this.image = image;
+        this.sprite = sprite;
         movement = new int[Game.mapWidth][Game.mapHeight];
-        attackable = new int[Game.mapWidth][Game.mapHeight];
     }
     
     public void render(Graphics g)
@@ -34,14 +32,14 @@ public class Path
         {
             for(int[] i : pathList)
             {
-                g.drawImage(image.sprite[1][1], i[0] * 32, i[1] * 32, 32, 32, null);
+                g.drawImage(sprite.image[1][1], i[0] * Sprite.spDIM, i[1] * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
             }
         }
         if(attList.size() > 0)
         {
             for(int[] i : attList)
             {
-                g.drawImage(image.sprite[1][0], i[0] * 32, i[1] * 32, 32, 32, null);
+                g.drawImage(sprite.image[1][0], i[0] * Sprite.spDIM, i[1] * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
             }
         }
     }
@@ -66,15 +64,12 @@ public class Path
         for(int i = 0; i < Game.mapWidth; i++) {
             for(int j = 0; j < Game.mapHeight; j++) {
                 movement[i][j] = 0;
-                attackable[i][j] = 0;
             }
         }
         Queue<int[]> check = new LinkedList<>();
         Queue<int[]> checkAtt = new LinkedList<>();
         Queue<int[]> tempQueue = new LinkedList<>();
         
-        //movement[x][y] = 0;
-        //System.out.println("Labled: " + x + " & " + y + " as \t" + 0);
         check.add(new int[]{x - 1, y, 0});
         check.add(new int[]{x, y - 1, 0});
         check.add(new int[]{x + 1, y, 0});
@@ -116,7 +111,7 @@ public class Path
                     }
                     movement[dat[0]][dat[1]] = MOV + 1;
                     tempQueue.add(dat);
-                    System.out.println("Added unit at (" + dat[0] + ", " + dat[1] + ") to tempQueue.");
+                    //System.out.println("Added unit at (" + dat[0] + ", " + dat[1] + ") to tempQueue.");
                 }
             }
         }
@@ -124,7 +119,6 @@ public class Path
         
         if(checkAtt.peek() == null)
         {
-            System.out.println("Empty attack check!");
             checkAtt.add(new int[]{x - 1, y, MOV + 1});
             checkAtt.add(new int[]{x, y - 1, MOV + 1});
             checkAtt.add(new int[]{x + 1, y, MOV + 1});
@@ -137,13 +131,12 @@ public class Path
             if(able > 0)
             {
                 dat[2] = minSur(dat[0], dat[1]) + 1;
-                System.out.println("Min moves: " + dat[2]);
+                //System.out.println("Min moves: " + dat[2]);
                 movement[dat[0]][dat[1]] = dat[2];
                 if(dat[2] == minRANGE - 1) {
                     tempQueue.add(dat);
                 }
                 if(dat[2] >= minRANGE && dat[2] <= MOV + maxRANGE) {
-                    attackable[dat[0]][dat[1]] = 1;
                     attList.add(dat);
                 }
                 if(dat[2] < MOV + maxRANGE)
@@ -158,21 +151,19 @@ public class Path
         
         if(maxwalk < MOV || maxwalk < minRANGE)
         {
-            System.out.println("hit checking!");
+            //System.out.println("hit checking!");
             while(tempQueue.peek() != null)
             {
                 dat = tempQueue.remove();
                 if(hitable(dat[0], dat[1])) {
-                    attackable[dat[0]][dat[1]] = 1;
                     attList.add(dat);
                 }
-                System.out.println(Arrays.toString(dat));
+                //System.out.println(Arrays.toString(dat));
             }
         }
         else
         {
             while(tempQueue.peek() != null) {
-                attackable[dat[0]][dat[1]] = 1;
                 attList.add(tempQueue.remove());
             }
         }
@@ -246,24 +237,6 @@ public class Path
                     System.out.print(movement[j][i] + ",\t");
                 }
                 else if(movement[j][i] == 0) {
-                    System.out.print("■■■■,\t");
-                }
-                else {
-                    System.out.print("0,\t");
-                }
-            }
-            System.out.println("]");
-        }
-        System.out.println("");
-        for(int i = 0; i < Game.mapHeight; i++)
-        {
-            System.out.print("[");
-            for(int j = 0; j < Game.mapWidth; j++)
-            {
-                if(attackable[j][i] > 0) {
-                    System.out.print(attackable[j][i] + ",\t");
-                }
-                else if(attackable[j][i] == 0) {
                     System.out.print("■■■■,\t");
                 }
                 else {

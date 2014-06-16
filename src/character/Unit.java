@@ -1,6 +1,6 @@
 package character;
 
-import graphics.Image;
+import graphics.Sprite;
 import gridGame.Game;
 import java.awt.Graphics;
 
@@ -9,19 +9,21 @@ public class Unit
     private int x, y, n0, n1, n2;
     private int dmglen = 0;
     private long timer;
-    private int LVL, EXP, HP, maxHP, MP, maxMP, FTG, MOV, ATK, MATK, DEF, ACC, AVO, CRIT, minRANGE = 5, maxRANGE = 5;
+    private int LVL, EXP, HP, maxHP, MP, maxMP, FTG, MOV, ATK, MATK, DEF, ACC, AVO, CRIT, minRANGE = 2, maxRANGE = 3;
     
     private boolean dead = false;
     private short ClassID;
-    private Image image;
+    private Sprite sprite;
     
-    public Unit(int x, int y, Image image)
+    public static final int spDIM = Sprite.spDIM;
+    
+    public Unit(int x, int y, Sprite sprite)
     {
         this.x = x;
         this.y = y;
-        this.image = image;
+        this.sprite = sprite;
         ClassID = 0;
-        this.MOV = 0;
+        this.MOV = 6;
     }
     
     public void tick()
@@ -34,39 +36,39 @@ public class Unit
     
     public void render(Graphics g)
     {
-        g.drawImage(image.sprite[0][0], x * 32, y * 32, 32, 32, null);
+        g.drawImage(sprite.image[0][0], x * spDIM, y * spDIM, spDIM, spDIM, null);
         if(dmglen == 1)
         {
-            g.drawImage(image.damage[n0], x * 32 + 11, y * 32 + 5, 10, 14, null);
+            g.drawImage(sprite.damage[n0], x * spDIM + 11, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
         }
         else if(dmglen == 2)
         {
-            g.drawImage(image.damage[n1], x * 32 + 6, y * 32 + 5, 10, 14, null);
-            g.drawImage(image.damage[n0], x * 32 + 16, y * 32 + 5, 10, 14, null);
+            g.drawImage(sprite.damage[n1], x * spDIM + 6, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+            g.drawImage(sprite.damage[n0], x * spDIM + 16, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
         }
         else if(dmglen == 3)
         {
-            g.drawImage(image.damage[n2], x * 32 + 1, y * 32 + 5, 10, 14, null);
-            g.drawImage(image.damage[n1], x * 32 + 11, y * 32 + 5, 10, 14, null);
-            g.drawImage(image.damage[n0], x * 32 + 21, y * 32 + 5, 10, 14, null);
+            g.drawImage(sprite.damage[n2], x * spDIM + 1, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+            g.drawImage(sprite.damage[n1], x * spDIM + 11, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+            g.drawImage(sprite.damage[n0], x * spDIM + 21, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
         }
     }
     
     public boolean move(int x, int y)
     {
-        if(x >= 0 && x < 16 && y >= 0 && y < 12)
+        if(x >= 0 && x < Game.mapWidth && y >= 0 && y < Game.mapHeight)
         {
-            if(Game.getUnit(x, y) == null && Game.getMap()[x][y] == 1)
+            if(Game.getUnit(x, y) == null && Game.getMap()[x][y] == 1 && Math.abs(this.x - x) + Math.abs(this.y - y) <= MOV)
             {
                 Game.moveUnit(this.x, this.y, x, y, this);
                 this.x = x;
                 this.y = y;
-                //System.out.println("Moved to: " + x * 32 + ", " + y * 32);
+                //System.out.println("Moved to: " + x * spDIM + ", " + y * spDIM);
                 System.out.println("Moved to Grid(" + this.x + ", " + this.y + ")");
             }
             else
             {
-                System.out.println("There is already a unit there.");
+                System.out.println("Invalid movement.");
             }
         }
         return false;

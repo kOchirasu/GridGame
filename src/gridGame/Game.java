@@ -2,20 +2,21 @@ package gridGame;
 
 import character.Path;
 import character.Unit;
-import graphics.Image;
-import graphics.ImageLoader;
-import graphics.SpriteSheet;
+import graphics.*;
 import java.awt.Canvas;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
-import map.Map;
-import map.MapLoader;
+import map.*;
 
 public class Game extends Canvas implements Runnable
 {
@@ -27,8 +28,9 @@ public class Game extends Canvas implements Runnable
     public Thread gameThread;
     
     private static Map map;
-    private BufferedImage spriteMain, damageNum, gui;
-    private Image im;
+    private BufferedImage spriteMain, damageNum, cursorMain, gui;
+    private Sprite im;
+    private MouseHandler mh;
     
     private static final Unit[][] unitGrid = new Unit[16][12];
     private final ArrayList<Unit> unitList = new ArrayList<>();
@@ -39,14 +41,16 @@ public class Game extends Canvas implements Runnable
         map = mloader.load("/map.txt");
         mapWidth = map.getWidth();
         mapHeight = map.getHeight();
-        ImageLoader loader = new ImageLoader();
+        SpriteLoader loader = new SpriteLoader();
         gui = loader.load("/gui.png");
         spriteMain = loader.load("/spritesheet.png");
         damageNum = loader.load("/number.png");
-        SpriteSheet ss = new SpriteSheet(spriteMain);
-        SpriteSheet ds = new SpriteSheet(damageNum);
-        im = new Image(ss, ds);
+        cursorMain = loader.load("/cursor.png");
+        im = new Sprite(spriteMain, damageNum, cursorMain);
         paths = new Path(im);
+        
+        Toolkit toolkit = Toolkit.getDefaultToolkit();  
+        setCursor(toolkit.createCustomCursor(im.image[1][7], new Point(0, 0), "Invisible"));
         
         addUnit(1, 0, 0);
         addUnit(1, 1, 0);
@@ -60,7 +64,7 @@ public class Game extends Canvas implements Runnable
             addUnit(i, 11, 0);
         }
         
-        MouseHandler mh = new MouseHandler();
+        mh = new MouseHandler(im);
         this.addMouseListener(mh);
         this.addMouseMotionListener(mh);
     }
@@ -95,7 +99,7 @@ public class Game extends Canvas implements Runnable
     {
         init();
         long time = System.nanoTime();
-        final double maxTick = 20.0;
+        final double maxTick = 60.0;
         double ns = 1000000000 / maxTick;
         double delta = 0;
         
@@ -137,6 +141,7 @@ public class Game extends Canvas implements Runnable
         for(Unit u : unitList) {
             u.render(g);
         }
+        mh.render(g);
         
         g.dispose(); //Clean
         bs.show(); //Shows render
@@ -173,6 +178,7 @@ public class Game extends Canvas implements Runnable
         game.setMinimumSize(new Dimension(WIDTH, HEIGHT));
         
         JFrame frame = new JFrame("Grid Game");
+        
         frame.pack();
         int nW = WIDTH + frame.getWidth() - frame.getContentPane().getWidth() - 10;
         int nH = HEIGHT + frame.getHeight() - frame.getContentPane().getHeight() - 10;
