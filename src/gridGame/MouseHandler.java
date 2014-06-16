@@ -105,7 +105,7 @@ public class MouseHandler extends MouseAdapter
                 {
                     selected.move(cX, cY);
                 }
-                System.out.println("There is a unit here.");
+                //System.out.println("There is a unit here.");
             }
         }
     }

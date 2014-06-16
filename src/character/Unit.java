@@ -9,7 +9,7 @@ public class Unit
     private int x, y, n0, n1, n2;
     private int dmglen = 0;
     private long timer;
-    private int LVL, EXP, HP, maxHP, MP, maxMP, FTG, MOV, ATK, MATK, DEF, ACC, AVO, CRIT, minRANGE = 2, maxRANGE = 3;
+    private int LVL, EXP, HP, maxHP, MP, maxMP, FTG, MOV, ATK, MATK, DEF, ACC, AVO, CRIT, minRANGE = 3, maxRANGE = 3;
     
     private boolean dead = false;
     private short ClassID;
@@ -23,7 +23,7 @@ public class Unit
         this.y = y;
         this.sprite = sprite;
         ClassID = 0;
-        this.MOV = 6;
+        this.MOV = 1;
     }
     
     public void tick()
@@ -58,7 +58,8 @@ public class Unit
     {
         if(x >= 0 && x < Game.mapWidth && y >= 0 && y < Game.mapHeight)
         {
-            if(Game.getUnit(x, y) == null && Game.getMap()[x][y] == 1 && Math.abs(this.x - x) + Math.abs(this.y - y) <= MOV)
+            //if(Game.getUnit(x, y) == null && Game.getMap()[x][y] == 1 && Math.abs(this.x - x) + Math.abs(this.y - y) <= MOV)
+            if(Game.paths.getMove(x, y) <= MOV && MOV != 0)
             {
                 Game.moveUnit(this.x, this.y, x, y, this);
                 this.x = x;

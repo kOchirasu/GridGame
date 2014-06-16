@@ -12,7 +12,7 @@ Make it so that you can walk through allied units
 Can also walk through enemy units but take damage from each unit that you walk over
 
 */
-public class Path 
+public class Path
 {
     private int x, y, MOV, minRANGE, maxRANGE;
     private int[][] movement;
@@ -26,7 +26,7 @@ public class Path
         movement = new int[Game.mapWidth][Game.mapHeight];
     }
     
-    public void render(Graphics g)
+    public synchronized void render(Graphics g)
     {
         if(pathList.size() > 0)
         {
@@ -174,7 +174,7 @@ public class Path
         return Math.max(Math.min(Math.min(getMove(x - 1, y), getMove(x, y - 1)), Math.min(getMove(x + 1, y), getMove(x, y + 1))), 0);
     }
     
-    private int getMove(int x, int y)
+    public int getMove(int x, int y)
     {
         if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight) {
             if(movement[x][y] != 0) {
