@@ -28,9 +28,9 @@ public class Game extends Canvas implements Runnable
     public Thread gameThread;
     
     private static Map map;
+    public static Interface gui;
     private BufferedImage spriteMain, damageNum, cursorMain;
     private Sprite im;
-    private Interface gui;
     private MouseHandler mh;
     
     private static Unit[][] unitGrid;

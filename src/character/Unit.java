@@ -59,7 +59,7 @@ public class Unit
         if(x >= 0 && x < Game.mapWidth && y >= 0 && y < Game.mapHeight)
         {
             //if(Game.getUnit(x, y) == null && Game.getMap()[x][y] == 1 && Math.abs(this.x - x) + Math.abs(this.y - y) <= MOV)
-            if(Game.paths.getMove(x, y) <= MOV && MOV != 0)
+            if(Game.getUnit(x, y) == null && Game.paths.getMove(x, y) <= MOV && MOV != 0)
             {
                 Game.moveUnit(this.x, this.y, x, y, this);
                 this.x = x;

@@ -10,6 +10,7 @@ public class Button
     private String text;
     private Sprite sprite;
     private Font font;
+    public boolean pressed = false, shade = false;
     
     public Button(int x, int y, int w, int h, String text, int iD, Sprite sprite)
     {
@@ -28,10 +29,13 @@ public class Button
         g.drawImage(sprite.image[1][2], x, y, w, h, null);
         g.setFont(font);
         g.drawString(text, x + 40, y + 22);
+        if(shade) {
+            g.drawImage(sprite.image[1][pressed ? 4 : 1], x, y, w, h, null);
+        }
     }
     
     public void click()
     {
-        
+        System.out.println(text + " was clicked.");
     }
 }

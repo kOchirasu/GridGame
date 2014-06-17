@@ -26,7 +26,7 @@ public class Path
         movement = new int[Game.mapWidth][Game.mapHeight];
     }
     
-    public synchronized void render(Graphics g)
+    public void render(Graphics g)
     {
         if(pathList.size() > 0)
         {
@@ -58,6 +58,7 @@ public class Path
         this.minRANGE = pathInfo[3];
         this.maxRANGE = pathInfo[4];
         int dat[] = new int[]{0, 0, 0}, able;
+        int maxMOV = 0;
         pathList.clear();
         attList.clear();
         
@@ -102,20 +103,36 @@ public class Path
                 }
                 else if(able == 2) //Unit in checked tile
                 {
-                    if(MOV >= maxRANGE)
+                    if(maxRANGE > 2)
+                    {
+                        checkAtt.add(new int[]{dat[0] - 1, dat[1], maxMOV + 1});
+                        checkAtt.add(new int[]{dat[0], dat[1] - 1, maxMOV + 1});
+                        checkAtt.add(new int[]{dat[0] + 1, dat[1], maxMOV + 1});
+                        checkAtt.add(new int[]{dat[0], dat[1] + 1, maxMOV + 1});
+                    }
+                    movement[dat[0]][dat[1]] = maxMOV + 1;
+                    /*if(maxRANGE > 2)
                     {
                         checkAtt.add(new int[]{dat[0] - 1, dat[1], MOV + 1});
                         checkAtt.add(new int[]{dat[0], dat[1] - 1, MOV + 1});
                         checkAtt.add(new int[]{dat[0] + 1, dat[1], MOV + 1});
                         checkAtt.add(new int[]{dat[0], dat[1] + 1, MOV + 1});
                     }
-                    movement[dat[0]][dat[1]] = MOV + 1;
+                    movement[dat[0]][dat[1]] = MOV + 1;*/
                     tempQueue.add(dat);
                     //System.out.println("Added unit at (" + dat[0] + ", " + dat[1] + ") to tempQueue.");
                 }
             }
+            maxMOV = dat[2] > maxMOV ? dat[2] : maxMOV;
         }
-        int maxwalk = dat[2];
+        
+        /*System.out.println(maxMOV);
+        if(MOV != 0 && maxMOV == 0)
+        {
+            pathInfo[2] = 0;
+            getPaths(pathInfo);
+            return;
+        }*/
         
         if(checkAtt.peek() == null)
         {
@@ -136,10 +153,13 @@ public class Path
                 if(dat[2] == minRANGE - 1) {
                     tempQueue.add(dat);
                 }
-                if(dat[2] >= minRANGE && dat[2] <= MOV + maxRANGE) {
+                //if(dat[2] >= minRANGE && dat[2] <= MOV + maxRANGE) {
+                if(dat[2] >= minRANGE && dat[2] <= maxMOV + maxRANGE) {
+                    //System.out.println("Unit at (" + dat[0] + ", " + dat[1] + ") is hitable. " + dat[2]);
                     attList.add(dat);
                 }
-                if(dat[2] < MOV + maxRANGE)
+                //if(dat[2] < MOV + maxRANGE)
+                if(dat[2] < maxMOV + maxRANGE)
                 {
                     checkAtt.add(new int[]{dat[0] - 1, dat[1], dat[2]});
                     checkAtt.add(new int[]{dat[0], dat[1] - 1, dat[2]});
@@ -149,13 +169,14 @@ public class Path
             }
         }
         
-        if(maxwalk < MOV || maxwalk < minRANGE)
+        if(maxMOV < MOV || maxMOV < minRANGE)
         {
             //System.out.println("hit checking!");
             while(tempQueue.peek() != null)
             {
                 dat = tempQueue.remove();
                 if(hitable(dat[0], dat[1])) {
+                    //System.out.println("Unit at (" + dat[0] + ", " + dat[1] + ") is hitable.");
                     attList.add(dat);
                 }
                 //System.out.println(Arrays.toString(dat));

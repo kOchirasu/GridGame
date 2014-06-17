@@ -7,8 +7,8 @@ import java.util.ArrayList;
 
 public class Interface
 {
-    private final ArrayList<Button> buttonList;
-    private final ArrayList<Bar> barList;
+    public final ArrayList<Button> buttonList;
+    public final ArrayList<Bar> barList;
     private final BufferedImage bg;
     private Sprite sprite;
     
