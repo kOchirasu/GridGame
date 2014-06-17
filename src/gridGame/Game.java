@@ -1,6 +1,6 @@
 package gridGame;
 
-import character.Path;
+import algorithm.*;
 import character.Unit;
 import graphics.*;
 import gui.Interface;
@@ -24,7 +24,8 @@ public class Game extends Canvas implements Runnable
     public static int mapWidth, mapHeight;
     public static boolean running = false;
     public static Path paths;
-    public static Graphics g;
+    public static Calculator math;
+    private Graphics g;
     public Thread gameThread;
     
     private static Map map;
@@ -56,6 +57,7 @@ public class Game extends Canvas implements Runnable
         im = new Sprite(spriteMain, damageNum, cursorMain);
         gui = new Interface(loader.load("/gui.png"), im);
         paths = new Path(im);
+        math = new Calculator();
         
         //Custom cursor: creates invisible cursor which is redrawn in MouseHandler
         Toolkit toolkit = Toolkit.getDefaultToolkit();  
@@ -77,7 +79,7 @@ public class Game extends Canvas implements Runnable
         //Create Buttons
         for(int i = 0; i < 8; i++)
         {
-            gui.addButton(535, 22 + 46 * i, 149, 34, "Button " + i, i);
+            gui.addButton("Button " + i, i);
         }
         
         //MouseHandler
@@ -113,9 +115,9 @@ public class Game extends Canvas implements Runnable
         }
     }
     
+    @Override
     public void run()
     {
-        //init();
         long time = System.nanoTime();
         final double maxTick = 60.0;
         double ns = 1000000000 / maxTick;

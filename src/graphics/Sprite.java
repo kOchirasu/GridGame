@@ -8,7 +8,7 @@ public class Sprite
     public static final int spDIM = 32, dmwDIM = 10, dmhDIM = 14;
     public BufferedImage[][] image = new BufferedImage[ROWS][COLUMNS];
     public BufferedImage[] damage = new BufferedImage[10];
-    public BufferedImage[][] cursor = new BufferedImage[1][13];
+    public BufferedImage[][] cursor = new BufferedImage[8][13];
     
     public Sprite(BufferedImage ss, BufferedImage ds, BufferedImage cs)
     {
@@ -23,7 +23,7 @@ public class Sprite
         {
             damage[i] = ds.getSubimage(i * dmwDIM, 0, dmwDIM, dmhDIM);
         }
-        for(int i = 0; i < 1; i++)
+        for(int i = 0; i < 8; i++)
         {
             for(int j = 0; j < 13; j++)
             {

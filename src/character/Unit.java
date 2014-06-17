@@ -6,10 +6,10 @@ import java.awt.Graphics;
 
 public class Unit
 {
-    private int x, y, n0, n1, n2;
+    private int x, y, n[] = new int[3];
     private int dmglen = 0;
     private long timer;
-    private int LVL, EXP, HP, maxHP, MP, maxMP, FTG, MOV, ATK, MATK, DEF, ACC, AVO, CRIT, minRANGE = 3, maxRANGE = 3;
+    private int LVL, EXP, HP, maxHP, MP, maxMP, FTG, MOV, ATK, MATK, DEF, ACC, AVO, CRIT, minRANGE, maxRANGE;
     
     private boolean dead = false;
     private short ClassID;
@@ -24,6 +24,8 @@ public class Unit
         this.sprite = sprite;
         ClassID = 0;
         this.MOV = 5;
+        this.minRANGE = 1;
+        this.maxRANGE = 2;
     }
     
     public void tick()
@@ -39,18 +41,18 @@ public class Unit
         g.drawImage(sprite.image[0][0], x * spDIM, y * spDIM, spDIM, spDIM, null);
         if(dmglen == 1)
         {
-            g.drawImage(sprite.damage[n0], x * spDIM + 11, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+            g.drawImage(sprite.damage[n[0]], x * spDIM + 11, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
         }
         else if(dmglen == 2)
         {
-            g.drawImage(sprite.damage[n1], x * spDIM + 6, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
-            g.drawImage(sprite.damage[n0], x * spDIM + 16, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+            g.drawImage(sprite.damage[n[1]], x * spDIM + 6, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+            g.drawImage(sprite.damage[n[1]], x * spDIM + 16, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
         }
         else if(dmglen == 3)
         {
-            g.drawImage(sprite.damage[n2], x * spDIM + 1, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
-            g.drawImage(sprite.damage[n1], x * spDIM + 11, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
-            g.drawImage(sprite.damage[n0], x * spDIM + 21, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+            g.drawImage(sprite.damage[n[2]], x * spDIM + 1, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+            g.drawImage(sprite.damage[n[1]], x * spDIM + 11, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+            g.drawImage(sprite.damage[n[0]], x * spDIM + 21, y * spDIM + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
         }
     }
     
@@ -58,13 +60,11 @@ public class Unit
     {
         if(x >= 0 && x < Game.mapWidth && y >= 0 && y < Game.mapHeight)
         {
-            //if(Game.getUnit(x, y) == null && Game.getMap()[x][y] == 1 && Math.abs(this.x - x) + Math.abs(this.y - y) <= MOV)
-            if(Game.getUnit(x, y) == null && Game.paths.getMove(x, y) <= MOV && MOV != 0)
+            if(Game.paths.getMove(x, y) <= MOV)//Game.getUnit(x, y) == null && Game.paths.getMove(x, y) <= MOV && MOV != 0)
             {
                 Game.moveUnit(this.x, this.y, x, y, this);
                 this.x = x;
                 this.y = y;
-                //System.out.println("Moved to: " + x * spDIM + ", " + y * spDIM);
                 System.out.println("Moved to Grid(" + this.x + ", " + this.y + ")");
             }
             else
@@ -75,28 +75,11 @@ public class Unit
         return false;
     }
     
-    public boolean move(int d)
+    public int attack(Unit enemy)
     {
-        if(d == 0) { //Up
-            move(x, y - 1);
-        }
-        else if(d == 1) { //Right
-            move(x + 1, y);
-        }
-        else if(d == 2) { //Down
-            move(x, y + 1);
-        }
-        else if(d == 3) { //Left
-            move(x - 1, y);
-        }
-        return false;
-    }
-    
-    public int attack(Unit atkd)
-    {
-        int expGain = 1; //EXP Gain Formula
-        int tDmg = ATK - atkd.getDEF(); //Damage Formula
-        atkd.damage(tDmg);
+        int expGain = Game.math.expGain(LVL, enemy.getLVL());
+        int tDmg = Game.math.damage(ATK, enemy.getDEF());
+        enemy.damage(tDmg);
         return expGain;
     }
     
@@ -110,11 +93,11 @@ public class Unit
             dead = true;
         }
         dmglen = dmg < 10 ? 1 : dmg < 100 ? 2 : 3;
-        n0 = dmg % 10;
-        dmg -= n0;
-        n1 = (dmg % 100) / 10;
-        dmg -= n1 * 10;
-        n2 = dmg / 100;
+        n[0] = dmg % 10;
+        dmg -= n[0];
+        n[1] = (dmg % 100) / 10;
+        dmg -= n[1] * 10;
+        n[2] = dmg / 100;
         //System.out.println(n0 + " " + n1 + " " + n2);
         timer = System.currentTimeMillis();
     }

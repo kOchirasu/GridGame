@@ -1,9 +1,10 @@
-package character;
+package algorithm;
 
 import graphics.Sprite;
 import gridGame.Game;
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 /*
@@ -25,7 +26,7 @@ public class Path
     private ArrayList<int[]> pathList = new ArrayList<>();
     private ArrayList<int[]> attList = new ArrayList<>();
     private Sprite sprite;
-    
+            
     public Path(Sprite sprite)
     {
         this.sprite = sprite;
@@ -38,17 +39,17 @@ public class Path
         //Renders path (blue) tiles
         if(pathList.size() > 0)
         {
-            for(int[] i : pathList)
+            for(int i = 0; i < pathList.size(); i++)
             {
-                g.drawImage(sprite.image[1][1], i[0] * Sprite.spDIM, i[1] * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
+                g.drawImage(sprite.image[1][1], pathList.get(i)[0] * Sprite.spDIM, pathList.get(i)[1] * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
             }
         }
         //Renders attack (red) tiles
         if(attList.size() > 0)
         {
-            for(int[] i : attList)
+            for(int i = 0; i < attList.size(); i++)
             {
-                g.drawImage(sprite.image[1][0], i[0] * Sprite.spDIM, i[1] * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
+                g.drawImage(sprite.image[1][0], attList.get(i)[0] * Sprite.spDIM, attList.get(i)[1] * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
             }
         }
     }
@@ -106,7 +107,7 @@ public class Path
         }
         
     //Loops through all possible movement tiles and adds all possible attack tiles
-        movement[x][y] = -1; //Sets unit location to -1 to prevent use
+        movement[x][y] = 99; //Sets unit location to 99 to prevent use
         
         //Check from starting tile
         for(int i = -pathInfo[4]; i <= pathInfo[4]; i++) {
@@ -117,7 +118,7 @@ public class Path
                     if(Math.abs(i) + Math.abs(j) >= pathInfo[3]) {
                         if(movement[nX][nY] == 0) {
                             attList.add(new int[]{nX, nY});
-                            movement[nX][nY] = -1;
+                            movement[nX][nY] = 99;
                         }
                     }
                 }
@@ -134,7 +135,7 @@ public class Path
                         if(Math.abs(i) + Math.abs(j) >= pathInfo[3]) {
                             if(movement[nX][nY] == 0) {
                                 attList.add(new int[]{nX, nY});
-                                movement[nX][nY] = -1;
+                                movement[nX][nY] = 99;
                             }
                         }
                     }

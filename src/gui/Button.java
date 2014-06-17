@@ -34,8 +34,9 @@ public class Button
         }
     }
     
-    public void click()
+    public int click()
     {
         System.out.println(text + " was clicked.");
+        return Integer.parseInt(text.substring(7, 8));
     }
 }

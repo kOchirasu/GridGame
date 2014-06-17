@@ -42,38 +42,7 @@ public class MouseHandler extends MouseAdapter
             selected = Game.getUnit(pX, pY);
             if(selected != null)
             {
-                /*//Find paths
-                //System.out.println("Getting Paths Method 1...");
-                long startTime1 = System.nanoTime();
-                Game.paths.getPaths(selected.pathInfo());
-                long totalTime1 = System.nanoTime() - startTime1;
-                //Game.paths.printPaths();
-                
-                System.out.println("It took " + (totalTime1) + " nanoseconds to find paths.");
-                
-                //System.out.println("Getting Paths Method 2...");
-                long startTime2 = System.nanoTime();
-                Game.paths.getPathsOld(selected.pathInfo());
-                long totalTime2 = System.nanoTime() - startTime2;
-                //Game.paths.printPaths();
-                
-                System.out.println("It took " + (totalTime2) + " nanoseconds to find paths.");
-                
-                long diff = Math.abs(totalTime1 - totalTime2);
-                
-                if(totalTime1 < totalTime2)
-                {
-                    System.out.println("Method 1 was faster by " + diff);
-                    win1++;
-                    time2 += diff;
-                }
-                else
-                {
-                    System.out.println("Method 2 was faster by " + diff);
-                    win2++;
-                    time1 += diff;
-                }*/
-                
+                //Find Paths
                 Game.paths.getPaths(selected.pathInfo());
                 //Game.paths.printPaths();
 
@@ -91,7 +60,7 @@ public class MouseHandler extends MouseAdapter
         mY = e.getY();
         cX = mX / Sprite.spDIM;
         cY = mY / Sprite.spDIM;
-        
+
         Game.gui.update(mX, mY, false);
     }
     
@@ -114,13 +83,13 @@ public class MouseHandler extends MouseAdapter
                 //selected.damage(153);
                 if(pX == cX && pY == cY) //Moused clicked
                 {
-                    //selected.move(1);
+                    
                 }
                 else
                 {
                     selected.move(cX, cY);
                 }
-                //System.out.println("There is a unit here.");
+                System.out.println("");
             }
         }
         Game.gui.update(e.getX(), e.getY(), false);
