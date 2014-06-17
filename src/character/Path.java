@@ -4,7 +4,6 @@ import graphics.Sprite;
 import gridGame.Game;
 import java.awt.Graphics;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 /*
@@ -12,9 +11,16 @@ Make it so that you can walk through allied units
 Can also walk through enemy units but take damage from each unit that you walk over
 
 */
+
+/* Potential approach note
+Normal walk path searching, easy already done.
+Get a list of all of the edges
+label all of the tiles that are maxRANGE away from edges
+run hitable on all remaining tiles between walk path and maxRANGE.
+*/
 public class Path
 {
-    private int x, y, MOV, minRANGE, maxRANGE;
+    private int x, y;
     private int[][] movement;
     private ArrayList<int[]> pathList = new ArrayList<>();
     private ArrayList<int[]> attList = new ArrayList<>();
@@ -26,8 +32,10 @@ public class Path
         movement = new int[Game.mapWidth][Game.mapHeight];
     }
     
+    //Renders movement and attack tiles
     public void render(Graphics g)
     {
+        //Renders path (blue) tiles
         if(pathList.size() > 0)
         {
             for(int[] i : pathList)
@@ -35,6 +43,7 @@ public class Path
                 g.drawImage(sprite.image[1][1], i[0] * Sprite.spDIM, i[1] * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
             }
         }
+        //Renders attack (red) tiles
         if(attList.size() > 0)
         {
             for(int[] i : attList)
@@ -44,157 +53,110 @@ public class Path
         }
     }
     
+    //Clears movement and attack tiles
     public void clearPaths()
     {
         pathList.clear();
         attList.clear();
     }
     
+    //Calculates movement and attack tiles
     public void getPaths(int[] pathInfo)
     {
+    //Initialize 
         this.x = pathInfo[0];
         this.y = pathInfo[1];
-        this.MOV = pathInfo[2];
-        this.minRANGE = pathInfo[3];
-        this.maxRANGE = pathInfo[4];
-        int dat[] = new int[]{0, 0, 0}, able;
-        int maxMOV = 0;
+        
+        int dat[], nX, nY;
+        Queue<int[]> check = new LinkedList<>();
+        
+    //Reset everything
         pathList.clear();
         attList.clear();
-        
         for(int i = 0; i < Game.mapWidth; i++) {
             for(int j = 0; j < Game.mapHeight; j++) {
                 movement[i][j] = 0;
             }
         }
-        Queue<int[]> check = new LinkedList<>();
-        Queue<int[]> checkAtt = new LinkedList<>();
-        Queue<int[]> tempQueue = new LinkedList<>();
         
+    //Finds all possible movement tiles
+        //Initial add of four surrounding tiles
         check.add(new int[]{x - 1, y, 0});
         check.add(new int[]{x, y - 1, 0});
         check.add(new int[]{x + 1, y, 0});
         check.add(new int[]{x, y + 1, 0});
+        
+        //while queue still has tiles to check
         while(check.peek() != null)
         {
             dat = check.remove();
-            able = moveable(dat[0], dat[1]);
-            if(dat[2] < MOV)
+            if(dat[2] < pathInfo[2])
             {
-                if(able == 1) //tile is empty
+                if(moveable(dat[0], dat[1])) //Adds to path if unit can move to tile
                 {
                     movement[dat[0]][dat[1]] = ++dat[2];
+                    //Adds four surrounding tiles of previously added tile
+                    check.add(new int[]{dat[0] - 1, dat[1], dat[2]});
+                    check.add(new int[]{dat[0], dat[1] - 1, dat[2]});
+                    check.add(new int[]{dat[0] + 1, dat[1], dat[2]});
+                    check.add(new int[]{dat[0], dat[1] + 1, dat[2]});
                     pathList.add(dat);
-                    //System.out.println("Labled:" + dat[0] + " & " + dat[1] + " as \t" + dat[2]);
-                    if(dat[2] < MOV)
-                    {
-                        check.add(new int[]{dat[0] - 1, dat[1], dat[2]});
-                        check.add(new int[]{dat[0], dat[1] - 1, dat[2]});
-                        check.add(new int[]{dat[0] + 1, dat[1], dat[2]});
-                        check.add(new int[]{dat[0], dat[1] + 1, dat[2]});
-                    }
-                    else
-                    {
-                        checkAtt.add(new int[]{dat[0] - 1, dat[1], dat[2]});
-                        checkAtt.add(new int[]{dat[0], dat[1] - 1, dat[2]});
-                        checkAtt.add(new int[]{dat[0] + 1, dat[1], dat[2]});
-                        checkAtt.add(new int[]{dat[0], dat[1] + 1, dat[2]});
-                    }
-                }
-                else if(able == 2) //Unit in checked tile
-                {
-                    if(maxRANGE > 2)
-                    {
-                        checkAtt.add(new int[]{dat[0] - 1, dat[1], maxMOV + 1});
-                        checkAtt.add(new int[]{dat[0], dat[1] - 1, maxMOV + 1});
-                        checkAtt.add(new int[]{dat[0] + 1, dat[1], maxMOV + 1});
-                        checkAtt.add(new int[]{dat[0], dat[1] + 1, maxMOV + 1});
-                    }
-                    movement[dat[0]][dat[1]] = maxMOV + 1;
-                    /*if(maxRANGE > 2)
-                    {
-                        checkAtt.add(new int[]{dat[0] - 1, dat[1], MOV + 1});
-                        checkAtt.add(new int[]{dat[0], dat[1] - 1, MOV + 1});
-                        checkAtt.add(new int[]{dat[0] + 1, dat[1], MOV + 1});
-                        checkAtt.add(new int[]{dat[0], dat[1] + 1, MOV + 1});
-                    }
-                    movement[dat[0]][dat[1]] = MOV + 1;*/
-                    tempQueue.add(dat);
-                    //System.out.println("Added unit at (" + dat[0] + ", " + dat[1] + ") to tempQueue.");
-                }
-            }
-            maxMOV = dat[2] > maxMOV ? dat[2] : maxMOV;
-        }
-        
-        /*System.out.println(maxMOV);
-        if(MOV != 0 && maxMOV == 0)
-        {
-            pathInfo[2] = 0;
-            getPaths(pathInfo);
-            return;
-        }*/
-        
-        if(checkAtt.peek() == null)
-        {
-            checkAtt.add(new int[]{x - 1, y, MOV + 1});
-            checkAtt.add(new int[]{x, y - 1, MOV + 1});
-            checkAtt.add(new int[]{x + 1, y, MOV + 1});
-            checkAtt.add(new int[]{x, y + 1, MOV + 1});
-        }
-        while(checkAtt.peek() != null)
-        {
-            dat = checkAtt.remove();
-            able = moveable(dat[0], dat[1]);
-            if(able > 0)
-            {
-                dat[2] = minSur(dat[0], dat[1]) + 1;
-                //System.out.println("Min moves: " + dat[2]);
-                movement[dat[0]][dat[1]] = dat[2];
-                if(dat[2] == minRANGE - 1) {
-                    tempQueue.add(dat);
-                }
-                //if(dat[2] >= minRANGE && dat[2] <= MOV + maxRANGE) {
-                if(dat[2] >= minRANGE && dat[2] <= maxMOV + maxRANGE) {
-                    //System.out.println("Unit at (" + dat[0] + ", " + dat[1] + ") is hitable. " + dat[2]);
-                    attList.add(dat);
-                }
-                //if(dat[2] < MOV + maxRANGE)
-                if(dat[2] < maxMOV + maxRANGE)
-                {
-                    checkAtt.add(new int[]{dat[0] - 1, dat[1], dat[2]});
-                    checkAtt.add(new int[]{dat[0], dat[1] - 1, dat[2]});
-                    checkAtt.add(new int[]{dat[0] + 1, dat[1], dat[2]});
-                    checkAtt.add(new int[]{dat[0], dat[1] + 1, dat[2]});
                 }
             }
         }
         
-        if(maxMOV < MOV || maxMOV < minRANGE)
-        {
-            //System.out.println("hit checking!");
-            while(tempQueue.peek() != null)
-            {
-                dat = tempQueue.remove();
-                if(hitable(dat[0], dat[1])) {
-                    //System.out.println("Unit at (" + dat[0] + ", " + dat[1] + ") is hitable.");
-                    attList.add(dat);
+    //Loops through all possible movement tiles and adds all possible attack tiles
+        movement[x][y] = -1; //Sets unit location to -1 to prevent use
+        
+        //Check from starting tile
+        for(int i = -pathInfo[4]; i <= pathInfo[4]; i++) {
+            for(int j = Math.abs(i) - pathInfo[4]; j <= pathInfo[4] - Math.abs(i); j++) {
+                nX = x + i;
+                nY = y + j;
+                if(nX >= 0 && nX < Game.mapWidth && nY >= 0 && nY < Game.mapHeight) {
+                    if(Math.abs(i) + Math.abs(j) >= pathInfo[3]) {
+                        if(movement[nX][nY] == 0) {
+                            attList.add(new int[]{nX, nY});
+                            movement[nX][nY] = -1;
+                        }
+                    }
                 }
-                //System.out.println(Arrays.toString(dat));
             }
         }
-        else
-        {
-            while(tempQueue.peek() != null) {
-                attList.add(tempQueue.remove());
+        
+        //Check using all possible movement tiles
+        for(int[] k : pathList) {
+            for(int i = -pathInfo[4]; i <= pathInfo[4]; i++) {
+                for(int j = Math.abs(i) - pathInfo[4]; j <= pathInfo[4] - Math.abs(i); j++) {
+                    nX = k[0] + i;
+                    nY = k[1] + j;
+                    if(nX >= 0 && nX < Game.mapWidth && nY >= 0 && nY < Game.mapHeight) {
+                        if(Math.abs(i) + Math.abs(j) >= pathInfo[3]) {
+                            if(movement[nX][nY] == 0) {
+                                attList.add(new int[]{nX, nY});
+                                movement[nX][nY] = -1;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
     
-    private int minSur(int x, int y)
+    //Checks if a tile can be moved to
+    private boolean moveable(int x, int y)
     {
-        return Math.max(Math.min(Math.min(getMove(x - 1, y), getMove(x, y - 1)), Math.min(getMove(x + 1, y), getMove(x, y + 1))), 0);
+        if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight) //If within board
+        {
+            if(Game.getUnit(x, y) == null && movement[x][y] == 0 && Game.getMap()[x][y] == 1) //If tile is open
+            {
+                return true;
+            }
+        }  
+        return false;
     }
     
+    //Gets a specified index of the movement array
     public int getMove(int x, int y)
     {
         if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight) {
@@ -204,49 +166,8 @@ public class Path
         }
         return 2147483647;
     }
-
-    private int moveable(int x, int y)
-    {
-        if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight)
-        {
-            if(!(Math.abs(x - this.x) + Math.abs(y - this.y) > MOV + maxRANGE) && movement[x][y] == 0)
-            {
-                if(Game.getUnit(x, y) == null)
-                {
-                    if(Game.getMap()[x][y] == 1) {
-                        return 1;
-                    }
-                }
-                else
-                {
-                    if(this.x != x || this.y != y) {
-                        return 2;
-                    }
-                }
-            }
-            return 0;
-        }  
-        return -1;
-    }
     
-    private boolean hitable(int x, int y)
-    {
-        //System.out.println("Distance between (" + x + ", " + y + ") & (" + this.x + ", " + this.y + ")\t" + (Math.abs(this.x - x) + Math.abs(this.y - y)));
-        if(Math.abs(this.x - x) + Math.abs(this.y - y) >= minRANGE) {
-            //System.out.println("Success");
-            return true;
-        }
-        for(int[] i : pathList)
-        {
-            //System.out.println("Distance between (" + x + ", " + y + ") & (" + i[0] + ", " + i[1] + ")\t" + (Math.abs(i[0] - x) + Math.abs(i[1] - y)));
-            if(Math.abs(i[0] - x) + Math.abs(i[1] - y) >= minRANGE) {
-                //System.out.println("Success");
-                return true;
-            }
-        }
-        return false;
-    }
-    
+    //Prints out the movement array
     public void printPaths()
     {
         for(int i = 0; i < Game.mapHeight; i++)

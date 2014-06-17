@@ -81,7 +81,7 @@ public class Game extends Canvas implements Runnable
         }
         
         //MouseHandler
-        mh = new MouseHandler(im);
+        mh = new MouseHandler();
         this.addMouseListener(mh);
         this.addMouseMotionListener(mh);
     }
@@ -159,7 +159,7 @@ public class Game extends Canvas implements Runnable
         for(Unit u : unitList) {
             u.render(g);
         }
-        mh.render(g);
+        gui.render2(g);
         
         g.dispose(); //Clean
         bs.show(); //Shows render

@@ -23,7 +23,7 @@ public class Unit
         this.y = y;
         this.sprite = sprite;
         ClassID = 0;
-        this.MOV = 1;
+        this.MOV = 5;
     }
     
     public void tick()

@@ -2,36 +2,20 @@ package gridGame;
 
 import character.Unit;
 import graphics.Sprite;
-import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 
 public class MouseHandler extends MouseAdapter
 {
-    private int pX, pY, cX, cY, mX, mY, bID = -1, bIDt;
-    private boolean found = false, pressed = false;
-    private Sprite sprite;
+    private int pX, pY, cX, cY, mX, mY;
+    private boolean found = false;
     private Unit selected;
     
-    public MouseHandler(Sprite sprite)
+    public MouseHandler()
     {
-        this.sprite = sprite;
         cX = Game.mapWidth;
         cY = Game.mapWidth;
-    }
-    
-    public void render(Graphics g)
-    {
-        if(cX < Game.mapWidth && cY < Game.mapHeight) {
-            g.drawImage(sprite.image[2][1], cX * Sprite.spDIM, cY * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
-        }
-        if(bID != -1) {
-            g.drawImage(sprite.cursor[0][1], mX, mY, 32, 32, null);
-        }
-        else {
-            g.drawImage(sprite.cursor[0][0], mX, mY, 32, 32, null);
-        }
     }
 
     @Override
@@ -40,11 +24,9 @@ public class MouseHandler extends MouseAdapter
         int x = e.getX(), y = e.getY();
         pX = x/Sprite.spDIM;
         pY = y/Sprite.spDIM;
-        //System.out.println(bID);
+        
         found = false;
-        if(bID != -1) {
-            Game.gui.buttonList.get(bID).pressed = true;
-        }
+        Game.gui.update(x, y, true);
     }
     
     @Override
@@ -54,29 +36,51 @@ public class MouseHandler extends MouseAdapter
         mY = e.getY();
         cX = mX / Sprite.spDIM;
         cY = mY / Sprite.spDIM;
-        //bID = (mY >= 22 && mX >= 535 && mX <= 681 && (mY - 22) % 46 <= 34) ? (mY - 22) / 46 : -1;
+        
         if(!found && pX < Game.mapWidth && pY < Game.mapHeight)
         {  
             selected = Game.getUnit(pX, pY);
             if(selected != null)
             {
-                //Find paths
-                /*System.out.println("Getting Paths...");
-                long startTime = System.nanoTime();
+                /*//Find paths
+                //System.out.println("Getting Paths Method 1...");
+                long startTime1 = System.nanoTime();
                 Game.paths.getPaths(selected.pathInfo());
-                long halfTime = System.nanoTime();
-                Game.paths.printPaths();
-                long finalTime = System.nanoTime();
+                long totalTime1 = System.nanoTime() - startTime1;
+                //Game.paths.printPaths();
                 
-                System.out.println("It took " + (halfTime - startTime) + " nanoseconds to find paths.");
-                System.out.println("It took " + (finalTime - halfTime) + " nanoseconds to print paths.");
-                System.out.println("Total time elapsed: " + (finalTime - startTime) + " nanoseconds");*/
+                System.out.println("It took " + (totalTime1) + " nanoseconds to find paths.");
+                
+                //System.out.println("Getting Paths Method 2...");
+                long startTime2 = System.nanoTime();
+                Game.paths.getPathsOld(selected.pathInfo());
+                long totalTime2 = System.nanoTime() - startTime2;
+                //Game.paths.printPaths();
+                
+                System.out.println("It took " + (totalTime2) + " nanoseconds to find paths.");
+                
+                long diff = Math.abs(totalTime1 - totalTime2);
+                
+                if(totalTime1 < totalTime2)
+                {
+                    System.out.println("Method 1 was faster by " + diff);
+                    win1++;
+                    time2 += diff;
+                }
+                else
+                {
+                    System.out.println("Method 2 was faster by " + diff);
+                    win2++;
+                    time1 += diff;
+                }*/
+                
                 Game.paths.getPaths(selected.pathInfo());
-                Game.paths.printPaths();
+                //Game.paths.printPaths();
 
                 found = true;
             }
         }
+        Game.gui.update(mX, mY);
     }
     
     @Override
@@ -88,20 +92,7 @@ public class MouseHandler extends MouseAdapter
         cX = mX / Sprite.spDIM;
         cY = mY / Sprite.spDIM;
         
-        //Button calculations
-        bIDt = bID;
-        bID = (mY >= 22 && mY <= 390 && mX >= 535 && mX <= 681 && (mY - 22) % 46 <= 34) ? (mY - 22) / 46 : -1;
-        if(bID != bIDt)
-        {
-            if(bIDt != -1) {
-                Game.gui.buttonList.get(bIDt).shade = false;
-            }
-            if(bID != -1) {
-                Game.gui.buttonList.get(bID).shade = true;
-            }
-        }
-        //System.out.println("X: " + cX + "Y: " + cY);
-        //g.drawImage(im.sprite[1][3], tempX * Sprite.spDIM, tempY * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
+        Game.gui.update(mX, mY, false);
     }
     
     @Override
@@ -132,27 +123,6 @@ public class MouseHandler extends MouseAdapter
                 //System.out.println("There is a unit here.");
             }
         }
-        
-        //Button calculations
-        if(bID != -1) {
-            Game.gui.buttonList.get(bID).pressed = false;
-        }
-        bIDt = bID;
-        bID = (e.getY() >= 22 && e.getY() <= 390 && e.getX() >= 535 && e.getX() <= 681 && (e.getY() - 22) % 46 <= 34) ? (e.getY() - 22) / 46 : -1;
-        if(bID != bIDt)
-        {
-            if(bIDt != -1) {
-                Game.gui.buttonList.get(bIDt).shade = false;
-            }
-            if(bID != -1) {
-                Game.gui.buttonList.get(bID).shade = true;
-            }
-        }
-        else
-        {
-            if(bID != -1) {
-                Game.gui.buttonList.get(bID).click();
-            }
-        }
+        Game.gui.update(e.getX(), e.getY(), false);
     }
 }
