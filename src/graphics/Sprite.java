@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 
 public class Sprite 
 {
-    private final int ROWS = 3, COLUMNS = 8;
+    private final int ROWS = 2, COLUMNS = 10;
     public static final int spDIM = 32, dmwDIM = 10, dmhDIM = 14;
     public BufferedImage[][] image = new BufferedImage[ROWS][COLUMNS];
     public BufferedImage[] damage = new BufferedImage[10];

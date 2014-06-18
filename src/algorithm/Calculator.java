@@ -12,7 +12,7 @@ public class Calculator
         return 0;
     }
     
-    public int damage(int uAtk, int eDef)
+    public int dmgAmt(int uAtk, int eDef)
     {
         return uAtk - eDef;
     }

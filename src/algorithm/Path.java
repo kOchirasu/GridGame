@@ -4,6 +4,7 @@ import graphics.Sprite;
 import gridGame.Game;
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -21,10 +22,11 @@ run hitable on all remaining tiles between walk path and maxRANGE.
 */
 public class Path
 {
-    private int x, y;
+    private int x, y, MOV, TEAM;
     private int[][] movement;
     private ArrayList<int[]> pathList = new ArrayList<>();
     private ArrayList<int[]> attList = new ArrayList<>();
+    private ArrayList<int[]> walkList = new ArrayList<>();
     private Sprite sprite;
             
     public Path(Sprite sprite)
@@ -52,6 +54,22 @@ public class Path
                 g.drawImage(sprite.image[1][0], attList.get(i)[0] * Sprite.spDIM, attList.get(i)[1] * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
             }
         }
+        //Renders walking path
+        if(walkList.size() > 0)
+        {
+            for(int i = 1; i < walkList.size(); i++)
+            {
+                g.drawImage(sprite.image[1][2], walkList.get(i)[0] * Sprite.spDIM, walkList.get(i)[1] * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
+                if(i < 10)
+                {
+                    g.drawString("" + i, walkList.get(i)[0] * Sprite.spDIM + 12, walkList.get(i)[1] * Sprite.spDIM + 23);
+                }
+                else
+                {
+                    g.drawString("" + i, walkList.get(i)[0] * Sprite.spDIM + 6, walkList.get(i)[1] * Sprite.spDIM + 23);
+                }
+            }
+        }
     }
     
     //Clears movement and attack tiles
@@ -59,21 +77,23 @@ public class Path
     {
         pathList.clear();
         attList.clear();
+        walkList.clear();
     }
     
     //Calculates movement and attack tiles
-    public void getPaths(int[] pathInfo)
+    public void findPath(int[] pathInfo)
     {
     //Initialize 
         this.x = pathInfo[0];
         this.y = pathInfo[1];
+        this.MOV = pathInfo[2];
+        this.TEAM = pathInfo[5];
         
         int dat[], nX, nY;
         Queue<int[]> check = new LinkedList<>();
         
     //Reset everything
-        pathList.clear();
-        attList.clear();
+        clearPaths();
         for(int i = 0; i < Game.mapWidth; i++) {
             for(int j = 0; j < Game.mapHeight; j++) {
                 movement[i][j] = 0;
@@ -91,7 +111,7 @@ public class Path
         while(check.peek() != null)
         {
             dat = check.remove();
-            if(dat[2] < pathInfo[2])
+            if(dat[2] < MOV)
             {
                 if(moveable(dat[0], dat[1])) //Adds to path if unit can move to tile
                 {
@@ -142,6 +162,9 @@ public class Path
                 }
             }
         }
+        
+        //System.out.println("Added: (" + x + ", " + y + ")");
+        walkList.add(new int[]{x, y});
     }
     
     //Checks if a tile can be moved to
@@ -149,7 +172,7 @@ public class Path
     {
         if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight) //If within board
         {
-            if(Game.getUnit(x, y) == null && movement[x][y] == 0 && Game.getMap()[x][y] == 1) //If tile is open
+            if((Game.getUnit(x, y) == null || Game.getUnit(x, y).getTEAM() == TEAM) && movement[x][y] == 0 && Game.getMap()[x][y] == 1) //If tile is open
             {
                 return true;
             }
@@ -157,7 +180,89 @@ public class Path
         return false;
     }
     
-    //Gets a specified index of the movement array
+    public void addPath(int x, int y)
+    {
+        if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight)
+        {
+            if(movement[x][y] < 1 || movement[x][y] == 99)
+            {
+                //System.out.println("Invalid case: 1\t not a valid movement tile");
+                repath(x, y);
+            }
+            else if(walkList.size() > 1 && walkList.get(walkList.size() -  2)[0] == x && walkList.get(walkList.size() -  2)[1] == y)
+            {
+                //System.out.println("Invalid case: 2\t removed last move");
+                walkList.remove(walkList.size() -  1);
+            }
+            else if(walkList.size() > MOV)
+            {
+                //System.out.println("Invalid case: 3\t walkList.size() = " + walkList.size() + " > MOV = " + MOV);
+                repath(x, y);
+            }
+            else if(Math.abs(x - walkList.get(walkList.size() - 1)[0]) + Math.abs(y - walkList.get(walkList.size() - 1)[1]) != 1)
+            {
+                //System.out.println("Invalid case: 4\t distance > 1");
+                repath(x, y);
+            }
+            else
+            {
+                for(int i = 0; i < walkList.size() - 2; i++)
+                {
+                    if(walkList.get(i)[0] == x && walkList.get(i)[1] == y)
+                    {
+                        //System.out.println("Invalid case: 5\t duplicate list entries");
+                        repath(x, y);
+                        return;
+                    }
+                }
+                //System.out.println("Added: (" + x + ", " + y + ")");
+                walkList.add(new int[]{x, y});
+            }
+        }
+        else
+        {
+            walkList.clear();
+            walkList.add(new int[]{this.x, this.y});
+        }
+    }
+    
+    public ArrayList<int[]> getWalk()
+    {
+        return walkList;
+    }
+    
+    private void repath(int x, int y)
+    {
+        walkList.clear();
+        //System.out.println("walkList CLEARED");
+        //System.out.println("Added: (" + this.x + ", " + this.y + ")");
+        walkList.add(new int[]{this.x, this.y});
+        int cur = movement[x][y];
+        if(cur > 0 && cur != 99)
+        {
+            //System.out.println("cur:" + cur + "\tx: " + x + ", y: " + y);
+            
+            for(int i = cur - 1; i >= 0; i--)
+            {
+                //System.out.println("Added: (" + x + ", " + y + ")");
+                walkList.add(1, new int[]{x, y});
+                if(x > 0 && movement[x - 1][y] == i) {
+                    x--;  
+                }
+                else if(y > 0 && movement[x][y - 1] == i) {
+                    y--;
+                }
+                else if(x < Game.mapWidth - 1 && movement[x + 1][y] == i) {
+                    x++;
+                }
+                else if(y < Game.mapHeight - 1 && movement[x][y + 1] == i) {
+                    y++;
+                }
+            }
+        }
+    }
+    
+    //Returns a specified index of the movement array
     public int getMove(int x, int y)
     {
         if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight) {

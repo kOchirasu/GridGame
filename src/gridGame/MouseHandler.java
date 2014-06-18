@@ -4,13 +4,24 @@ import character.Unit;
 import graphics.Sprite;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 
 public class MouseHandler extends MouseAdapter
 {
+    /* Private Variables
+    pX, pY   - The selected units x and y grid coordinates
+    cX, cY   - The current mouse x and y grid coordinates
+    mX, mY   - The mouse x and y coordinates
+    found    - True when the walk path has been found
+    pathed   - True when the movement path has been found
+    selected - Unit that is currently selected (Unit at [pX][pY])
+    walkList - List of tiles that the unit will walk on
+    */
     private int pX, pY, cX, cY, mX, mY;
-    private boolean found = false;
+    private boolean found = false, pathed = false;
     private Unit selected;
+    private ArrayList<int[]> walkList;
     
     public MouseHandler()
     {
@@ -34,18 +45,28 @@ public class MouseHandler extends MouseAdapter
     {
         mX = e.getX();
         mY = e.getY();
+        if(mX / Sprite.spDIM != cX || mY /Sprite.spDIM != cY) {
+            pathed = false;
+        }
         cX = mX / Sprite.spDIM;
         cY = mY / Sprite.spDIM;
-        
-        if(!found && pX < Game.mapWidth && pY < Game.mapHeight)
+
+        if(found)
+        {
+            if(!pathed)
+            {
+                Game.paths.addPath(cX, cY);
+                pathed = true;
+            }
+        }
+        else
         {  
             selected = Game.getUnit(pX, pY);
-            if(selected != null)
+            if(selected != null && !selected.moving)
             {
                 //Find Paths
-                Game.paths.getPaths(selected.pathInfo());
+                Game.paths.findPath(selected.pathInfo());
                 //Game.paths.printPaths();
-
                 found = true;
             }
         }
@@ -53,8 +74,7 @@ public class MouseHandler extends MouseAdapter
     }
     
     @Override
-    
-    public void mouseMoved(MouseEvent e)
+    public void mouseMoved(MouseEvent e) //Always positive coordinates
     {
         mX = e.getX();
         mY = e.getY();
@@ -67,30 +87,14 @@ public class MouseHandler extends MouseAdapter
     @Override
     public void mouseReleased(MouseEvent e) 
     {
-        if(cX < Game.mapWidth && cY < Game.mapHeight && pX < Game.mapWidth && pY < Game.mapHeight)
+        //System.out.print("X: " + cX + ", Y: " + cY + "\t");
+        selected = Game.getUnit(pX, pY);
+        if(selected != null && !selected.moving)
         {
-            //System.out.println("X: " + cX + ", Y: " + cY + "\t (" + x + ", " + y + ")");
-            System.out.print("X: " + cX + ", Y: " + cY + "\t");
-            selected = Game.getUnit(pX, pY);
-            
-            if(selected == null)
-            {
-                System.out.println("There is no unit here.");
-            }
-            else
-            {
-                Game.paths.clearPaths();
-                //selected.damage(153);
-                if(pX == cX && pY == cY) //Moused clicked
-                {
-                    
-                }
-                else
-                {
-                    selected.move(cX, cY);
-                }
-                System.out.println("");
-            }
+            walkList = new ArrayList<>(Game.paths.getWalk());
+            Game.paths.clearPaths();
+            //selected.damage(153);
+            selected.move(cX, cY, walkList);
         }
         Game.gui.update(e.getX(), e.getY(), false);
     }

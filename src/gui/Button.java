@@ -39,4 +39,14 @@ public class Button
         System.out.println(text + " was clicked.");
         return Integer.parseInt(text.substring(7, 8));
     }
+    
+    public void changeText(String text)
+    {
+        this.text = text;
+    }
+    
+    public void changeID(int iD)
+    {
+        this.iD = iD;
+    }
 }

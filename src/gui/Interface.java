@@ -40,7 +40,7 @@ public class Interface
     public void render2(Graphics g)
     {
         if(cX < Game.mapWidth && cY < Game.mapHeight) {
-            g.drawImage(sprite.image[2][1], cX * Sprite.spDIM, cY * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
+            g.drawImage(sprite.image[1][8], cX * Sprite.spDIM, cY * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
         }
         if(bID != -1) {
             g.drawImage(sprite.cursor[mouse][1], x, y, 32, 32, null);
