@@ -93,7 +93,7 @@ public class MouseHandler extends MouseAdapter
         {
             walkList = new ArrayList<>(Game.paths.getWalk());
             Game.paths.clearPaths();
-            //selected.damage(153);
+            selected.damage(153);
             selected.move(cX, cY, walkList);
         }
         Game.gui.update(e.getX(), e.getY(), false);

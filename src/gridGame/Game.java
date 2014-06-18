@@ -4,6 +4,8 @@ import algorithm.*;
 import character.Unit;
 import graphics.*;
 import gui.Interface;
+import item.Item;
+import item.ItemLoader;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -72,6 +74,10 @@ public class Game extends Canvas implements Runnable
         gui = new Interface(loader.load("/gui.png"), im);
         paths = new Path(im);
         math = new Calculator();
+        
+        ItemLoader lookup = new ItemLoader("jdbc:derby://localhost:1527/Item", "gridgame", "maplestory");
+        Item it = new Item(lookup, 100002);
+        System.out.println(it.toString());
         
         //Custom cursor: creates invisible cursor which is redrawn in MouseHandler
         Toolkit toolkit = Toolkit.getDefaultToolkit();  

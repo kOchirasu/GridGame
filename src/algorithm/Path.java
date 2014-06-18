@@ -4,8 +4,6 @@ import graphics.Sprite;
 import gridGame.Game;
 import java.awt.Graphics;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 /*
@@ -22,7 +20,7 @@ run hitable on all remaining tiles between walk path and maxRANGE.
 */
 public class Path
 {
-    private int x, y, MOV, TEAM;
+    private int x, y, mov, team;
     private int[][] movement;
     private ArrayList<int[]> pathList = new ArrayList<>();
     private ArrayList<int[]> attList = new ArrayList<>();
@@ -86,8 +84,8 @@ public class Path
     //Initialize 
         this.x = pathInfo[0];
         this.y = pathInfo[1];
-        this.MOV = pathInfo[2];
-        this.TEAM = pathInfo[5];
+        this.mov = pathInfo[2];
+        this.team = pathInfo[5];
         
         int dat[], nX, nY;
         Queue<int[]> check = new LinkedList<>();
@@ -111,7 +109,7 @@ public class Path
         while(check.peek() != null)
         {
             dat = check.remove();
-            if(dat[2] < MOV)
+            if(dat[2] < mov)
             {
                 if(moveable(dat[0], dat[1])) //Adds to path if unit can move to tile
                 {
@@ -172,7 +170,7 @@ public class Path
     {
         if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight) //If within board
         {
-            if((Game.getUnit(x, y) == null || Game.getUnit(x, y).getTEAM() == TEAM) && movement[x][y] == 0 && Game.getMap()[x][y] == 1) //If tile is open
+            if((Game.getUnit(x, y) == null || Game.getUnit(x, y).getTEAM() == team) && movement[x][y] == 0 && Game.getMap()[x][y] == 1) //If tile is open
             {
                 return true;
             }
@@ -194,9 +192,9 @@ public class Path
                 //System.out.println("Invalid case: 2\t removed last move");
                 walkList.remove(walkList.size() -  1);
             }
-            else if(walkList.size() > MOV)
+            else if(walkList.size() > mov)
             {
-                //System.out.println("Invalid case: 3\t walkList.size() = " + walkList.size() + " > MOV = " + MOV);
+                //System.out.println("Invalid case: 3\t walkList.size() = " + walkList.size() + " > mov = " + mov);
                 repath(x, y);
             }
             else if(Math.abs(x - walkList.get(walkList.size() - 1)[0]) + Math.abs(y - walkList.get(walkList.size() - 1)[1]) != 1)

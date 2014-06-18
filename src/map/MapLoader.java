@@ -7,8 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MapLoader 
 {
@@ -26,11 +24,11 @@ public class MapLoader
         }
         catch (FileNotFoundException ex) 
         {
-            Logger.getLogger(MapLoader.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex.getMessage());
         }
         catch (IOException | URISyntaxException ex) 
         {
-            Logger.getLogger(MapLoader.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex.getMessage());
         }
         return null;
     }

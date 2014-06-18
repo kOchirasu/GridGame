@@ -11,7 +11,7 @@ public class Unit
     private int walkTick, dmgTick;
     private int dmglen = 0;
     private long timer;
-    private int LVL, EXP, HP, maxHP, MP, maxMP, FTG, MOV, ATK, MATK, DEF, ACC, AVO, CRIT, minRANGE, maxRANGE, TEAM;
+    private int lv, exp, hp, maxHP, mp, maxMP, ftg, mov, atk, mAtk, def, acc, avoid, crit, minRange, maxRange, team;
     
     private boolean dead = false, moved = false;
     private short ClassID;
@@ -29,10 +29,10 @@ public class Unit
         this.dY = y * spDIM;
         this.sprite = sprite;
         ClassID = 0;
-        this.MOV = MOV != -1 ? MOV : 5;
-        this.minRANGE = minRANGE != -1 ? minRANGE : 1;
-        this.maxRANGE = maxRANGE != -1 ? maxRANGE : 2;
-        this.TEAM = TEAM;
+        this.mov = MOV != -1 ? MOV : 5;
+        this.minRange = minRANGE != -1 ? minRANGE : 1;
+        this.maxRange = maxRANGE != -1 ? maxRANGE : 2;
+        this.team = TEAM;
     }
     
     public void tick()
@@ -84,7 +84,7 @@ public class Unit
     
     public void render(Graphics g)
     {
-        g.drawImage(sprite.image[0][TEAM], dX + xOff, dY + yOff, spDIM, spDIM, null);
+        g.drawImage(sprite.image[0][team], dX + xOff, dY + yOff, spDIM, spDIM, null);
         //g.drawImage(sprite.image[0][0], dX, dY, spDIM, spDIM, null);
         if(dmglen == 1)
         {
@@ -107,7 +107,7 @@ public class Unit
     {
         if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight)
         {
-            if(Game.paths.getMove(x, y) <= MOV && Game.getUnit(x, y) == null)// && Game.paths.getMove(x, y) <= MOV && MOV != 0)
+            if(Game.paths.getMove(x, y) <= mov && Game.getUnit(x, y) == null)// && Game.paths.getMove(x, y) <= mov && mov != 0)
             {
                 Game.moveUnit(this.x, this.y, x, y, this);
                 this.walkList = walkList;
@@ -150,8 +150,8 @@ public class Unit
     
     public int attack(Unit enemy)
     {
-        int expGain = Game.math.expGain(LVL, enemy.getLVL());
-        int tDmg = Game.math.dmgAmt(ATK, enemy.getDEF());
+        int expGain = Game.math.expGain(lv, enemy.getLV());
+        int tDmg = Game.math.dmgAmt(atk, enemy.getDEF());
         enemy.damage(tDmg);
         return expGain;
     }
@@ -159,8 +159,8 @@ public class Unit
     public void damage(int dmg)
     {
         dmg = dmg > 999 ? 999 : dmg;
-        HP -= dmg;
-        if(HP <= 0)
+        hp -= dmg;
+        if(hp <= 0)
         {
             //Kill unit
             dead = true;
@@ -176,7 +176,7 @@ public class Unit
     }
     
     public int[] pathInfo() {
-        return new int[]{x, y, MOV, minRANGE, maxRANGE, TEAM};
+        return new int[]{x, y, mov, minRange, maxRange, team};
     }
     public int getX() {
         return x;
@@ -184,55 +184,55 @@ public class Unit
     public int getY() {
         return y;
     }
-    public int getLVL() {
-        return LVL;
+    public int getLV() {
+        return lv;
     }
     public int getEXP() {
-        return EXP;
+        return exp;
     }
     public int getHP() {
-        return HP;
+        return hp;
     }
     public int getMaxHP() {
         return maxHP;
     }
     public int getMP() {
-        return MP;
+        return mp;
     }
     public int getMaxMP() {
         return maxMP;
     }
     public int getFTG() {
-        return FTG;
+        return ftg;
     }
     public int getMOV() {
-        return MOV;
+        return mov;
     }
     public int getATK() {
-        return ATK;
+        return atk;
     }
     public int getMATK() {
-        return MATK;
+        return mAtk;
     }
     public int getDEF() {
-        return DEF;
+        return def;
     }
     public int getACC() {
-        return ACC;
+        return acc;
     }
     public int getAVO() {
-        return AVO;
+        return avoid;
     }
     public int getCRIT() {
-        return CRIT;
+        return crit;
     }
     public int getMinRANGE() {
-        return minRANGE;
+        return minRange;
     }
     public int getMaxRANGE() {
-        return maxRANGE;
+        return maxRange;
     }
     public int getTEAM() {
-        return TEAM;
+        return team;
     }
 }
