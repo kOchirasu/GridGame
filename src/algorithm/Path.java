@@ -1,7 +1,9 @@
 package algorithm;
 
-import graphics.Sprite;
 import gridGame.Game;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -20,54 +22,70 @@ run hitable on all remaining tiles between walk path and maxRANGE.
 */
 public class Path
 {
-    private int x, y, mov, team;
+    /*
+    
+    */
+    private int x, y, mov, team, tick, anim;
     private int[][] movement;
     private ArrayList<int[]> pathList = new ArrayList<>();
     private ArrayList<int[]> attList = new ArrayList<>();
     private ArrayList<int[]> walkList = new ArrayList<>();
-    private Sprite sprite;
+    private Color pathColor, attColor, walkColor;
+    private Font font;
             
-    public Path(Sprite sprite)
+    public Path()
     {
-        this.sprite = sprite;
         movement = new int[Game.mapWidth][Game.mapHeight];
+        pathColor = new Color(0, 100, 255, 128);
+        attColor = new Color(255, 0, 0, 128);
+        walkColor = new Color(0, 255, 144, 128);
+        font = new Font("Arial", Font.PLAIN, 15);;
+    }
+    
+    public void tick()
+    {
+        tick++;
+        if(tick == 40)
+        {
+            anim ^= 1;
+            tick = 0;
+        }
     }
     
     //Renders movement and attack tiles
     public void render(Graphics g)
     {
         //Renders path (blue) tiles
-        if(pathList.size() > 0)
+        g.setColor(pathColor);
+        for(int i = 0; i < pathList.size(); i++)
         {
-            for(int i = 0; i < pathList.size(); i++)
-            {
-                g.drawImage(sprite.image[1][1], pathList.get(i)[0] * Sprite.spDIM, pathList.get(i)[1] * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
-            }
+            //g.drawImage(sprite.image[1][8], pathList.get(i)[0] * Game.TILESIZE, pathList.get(i)[1] * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE, null);
+            //g.drawImage(sprite.image[1][1], Game.MAPOFFX + pathList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + pathList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim, null);
+            g.fillRect(Game.MAPOFFX + pathList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + pathList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim);
         }
         //Renders attack (red) tiles
-        if(attList.size() > 0)
+        g.setColor(attColor);
+        for(int i = 0; i < attList.size(); i++)
         {
-            for(int i = 0; i < attList.size(); i++)
-            {
-                g.drawImage(sprite.image[1][0], attList.get(i)[0] * Sprite.spDIM, attList.get(i)[1] * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
-            }
+            //g.drawImage(sprite.image[1][8], attList.get(i)[0] * Game.TILESIZE, attList.get(i)[1] * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE, null);
+            //g.drawImage(sprite.image[1][0], Game.MAPOFFX + attList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + attList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim, null);
+            g.fillRect(Game.MAPOFFX + attList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + attList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim);
         }
         //Renders walking path
-        if(walkList.size() > 0)
+        g.setColor(walkColor);
+        for(int i = 1; i < walkList.size(); i++)
         {
-            for(int i = 1; i < walkList.size(); i++)
-            {
-                g.drawImage(sprite.image[1][2], walkList.get(i)[0] * Sprite.spDIM, walkList.get(i)[1] * Sprite.spDIM, Sprite.spDIM, Sprite.spDIM, null);
-                if(i < 10)
-                {
-                    g.drawString("" + i, walkList.get(i)[0] * Sprite.spDIM + 12, walkList.get(i)[1] * Sprite.spDIM + 23);
-                }
-                else
-                {
-                    g.drawString("" + i, walkList.get(i)[0] * Sprite.spDIM + 6, walkList.get(i)[1] * Sprite.spDIM + 23);
-                }
-            }
+            //g.drawImage(sprite.image[1][2], Game.MAPOFFX + walkList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + walkList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim, null);
+            g.fillRect(Game.MAPOFFX + walkList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + walkList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim);
         }
+        g.setColor(Color.BLACK);
+        g.setFont(font);
+        FontMetrics fm = g.getFontMetrics(font); 
+        for(int i = 1; i < walkList.size(); i++)
+        {
+            g.drawString("" + i, (int) (Game.MAPOFFX + walkList.get(i)[0] * Game.TILESIZE + Game.TILESIZE/2 - fm.getStringBounds("" + i, g).getWidth()/2), (int) (Game.MAPOFFY + walkList.get(i)[1] * Game.TILESIZE + Game.TILESIZE/2 + fm.getStringBounds("" + i, g).getHeight()/4));
+        }
+        
     }
     
     //Clears movement and attack tiles
@@ -128,12 +146,25 @@ public class Path
         movement[x][y] = 99; //Sets unit location to 99 to prevent use
         
         //Check from starting tile
-        for(int i = -pathInfo[4]; i <= pathInfo[4]; i++) {
-            for(int j = Math.abs(i) - pathInfo[4]; j <= pathInfo[4] - Math.abs(i); j++) {
+        addAttack(x, y, pathInfo[3], pathInfo[4]);
+        //Check using all possible movement tiles
+        for(int[] k : pathList) {
+            addAttack(k[0], k[1], pathInfo[3], pathInfo[4]);
+        }
+        
+        walkList.add(new int[]{x, y});
+    }
+    
+    //Adds all attackable tiles from specified x, y for specified range
+    private void addAttack(int x, int y, int minRange, int maxRange)
+    {
+        int nX, nY;
+        for(int i = -maxRange; i <= maxRange; i++) {
+            for(int j = Math.abs(i) - maxRange; j <= maxRange - Math.abs(i); j++) {
                 nX = x + i;
                 nY = y + j;
                 if(nX >= 0 && nX < Game.mapWidth && nY >= 0 && nY < Game.mapHeight) {
-                    if(Math.abs(i) + Math.abs(j) >= pathInfo[3]) {
+                    if(Math.abs(i) + Math.abs(j) >= minRange) {
                         if(movement[nX][nY] == 0) {
                             attList.add(new int[]{nX, nY});
                             movement[nX][nY] = 99;
@@ -142,27 +173,6 @@ public class Path
                 }
             }
         }
-        
-        //Check using all possible movement tiles
-        for(int[] k : pathList) {
-            for(int i = -pathInfo[4]; i <= pathInfo[4]; i++) {
-                for(int j = Math.abs(i) - pathInfo[4]; j <= pathInfo[4] - Math.abs(i); j++) {
-                    nX = k[0] + i;
-                    nY = k[1] + j;
-                    if(nX >= 0 && nX < Game.mapWidth && nY >= 0 && nY < Game.mapHeight) {
-                        if(Math.abs(i) + Math.abs(j) >= pathInfo[3]) {
-                            if(movement[nX][nY] == 0) {
-                                attList.add(new int[]{nX, nY});
-                                movement[nX][nY] = 99;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        //System.out.println("Added: (" + x + ", " + y + ")");
-        walkList.add(new int[]{x, y});
     }
     
     //Checks if a tile can be moved to
@@ -178,6 +188,7 @@ public class Path
         return false;
     }
     
+    //Add tile to user selected walk path
     public void addPath(int x, int y)
     {
         if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight)
@@ -224,11 +235,12 @@ public class Path
         }
     }
     
-    public ArrayList<int[]> getWalk()
-    {
+    //Returns walk path
+    public ArrayList<int[]> getWalk() {
         return walkList;
     }
     
+    //Automatically calculated walk path
     private void repath(int x, int y)
     {
         walkList.clear();

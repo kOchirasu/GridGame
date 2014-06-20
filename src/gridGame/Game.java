@@ -25,20 +25,26 @@ public class Game extends Canvas implements Runnable
     private static final long serialVersionUID = 1L; //I dont even know what this is
     /* Public Variables
     WIDTH, HEIGHT       - Width and Height of the game window
+    MAPOFFX, MAPOFFY    - Map x, y offsets so that it doesnt need to start in top left corner
+    TILESIZE            - Dimensions of a tile (Square)
     mapWidth, mapHeight - dimensions of map grid
+    gameSpeed           - fps of game (1 = 30fps, 2 = 60fps)
     running             - True while the game is running
     paths               - Pathfinding class
     math                - Calculating class
     gui                 - Game interface class
     gameThread          - Game thread
+    lookup              - Item database
     */
     public static final int WIDTH = 700, HEIGHT = 575;
+    public static final int MAPOFFX = 9, MAPOFFY = 9, TILESIZE = 32;
     public static int mapWidth, mapHeight, gameSpeed = 2;
     public static boolean running = false;
     public static Path paths;
     public static Calculator math;
     public static Interface gui;
     public Thread gameThread;
+    public static ItemLoader lookup;
     
     /* Private Variables
     map                 - Map class, contains map data
@@ -51,37 +57,39 @@ public class Game extends Canvas implements Runnable
     private Sprite im;
     private MouseHandler mh;
     private static Unit[][] unitGrid;
-    private ArrayList<Unit> unitList;
+    private static ArrayList<Unit> unitList;
     
+    //Initializes the game
     public void init()
-    {   
+    {           
+        //Sprites
+        SpriteLoader loader = new SpriteLoader();
+        BufferedImage spriteGrid = loader.load("/sprite.png");
+        BufferedImage damageGrid = loader.load("/damage.png");
+        BufferedImage cursorGrid = loader.load("/cursor.png");
+        BufferedImage tileGrid = loader.load("/tile.png");
+        im = new Sprite(spriteGrid, damageGrid, cursorGrid, tileGrid);
+        
         //Map Data
         MapLoader mloader = new MapLoader();
-        map = mloader.load("/map.txt");
+        map = mloader.load("/map.txt", im);
         mapWidth = map.getWidth();
         mapHeight = map.getHeight();
+        //map.printMap();
         
         //Unit Data
         unitList = new ArrayList<>();
         unitGrid = new Unit[mapWidth][mapHeight];
         
-        //Sprites
-        SpriteLoader loader = new SpriteLoader();
-        BufferedImage spriteMain = loader.load("/spritesheet.png");
-        BufferedImage dmgNum = loader.load("/number.png");
-        BufferedImage cursorMain = loader.load("/cursor.png");
-        im = new Sprite(spriteMain, dmgNum, cursorMain);
+        //Mot initializtion
         gui = new Interface(loader.load("/gui.png"), im);
-        paths = new Path(im);
+        paths = new Path();
         math = new Calculator();
+        lookup = new ItemLoader("jdbc:derby://localhost:1527/Item", "gridgame", "maplestory");
         
-        ItemLoader lookup = new ItemLoader("jdbc:derby://localhost:1527/Item", "gridgame", "maplestory");
-        Item it = new Item(lookup, 100002);
-        System.out.println(it.toString());
-        
-        //Custom cursor: creates invisible cursor which is redrawn in MouseHandler
+        //Custom cursor: creates invisible cursor which is redrawn in Interface
         Toolkit toolkit = Toolkit.getDefaultToolkit();  
-        setCursor(toolkit.createCustomCursor(im.image[1][9], new Point(0, 0), "Invisible"));
+        setCursor(toolkit.createCustomCursor(im.unit[1][9], new Point(0, 0), "Invisible"));
         
         //Create Units
         addUnit(1, 0, 0, -1, -1, -1, 0);
@@ -96,18 +104,24 @@ public class Game extends Canvas implements Runnable
             addUnit(i, 11, 0, 50, 1, 1, 1);
         }
         
-        //Create Buttons
-        for(int i = 0; i < 8; i++)
-        {
-            gui.addButton("Button " + i, i);
-        }
-        
         //MouseHandler
         mh = new MouseHandler();
         this.addMouseListener(mh);
         this.addMouseMotionListener(mh);
+        
+        //Create Buttons
+        for(int i = 0; i < 7; i++)
+        {
+            gui.addButton("Button " + i, i);
+        }
+        gui.addButton("Reset Moves", 7);
+        
+        gui.addButton(544, 14, 140, 16, "up", 9);
+        gui.addButton(544, 378, 140, 16, "down", 10);
+        //gui.addButton(50, 425, 500, 125, "random button", 11);
     }
     
+    //Starts the game
     public synchronized void start() //Use synchronized when starting thread
     {
         init();
@@ -119,6 +133,7 @@ public class Game extends Canvas implements Runnable
         }
     }
     
+    //Stops the game
     public synchronized void stop() //Use synchronized when stopping thread
     {
         if(running)
@@ -135,6 +150,7 @@ public class Game extends Canvas implements Runnable
         }
     }
     
+    //Loops while game is running
     @Override
     public void run()
     {
@@ -157,15 +173,18 @@ public class Game extends Canvas implements Runnable
         stop();
     }
     
+    //Updates the game
     public void tick()
     {
         for(Unit u : unitList) 
         {
             u.tick();
         }
+        paths.tick();
         render();
     }
     
+    //Renders everything
     public void render()
     {
         BufferStrategy bs = this.getBufferStrategy();
@@ -177,19 +196,31 @@ public class Game extends Canvas implements Runnable
         Graphics g = bs.getDrawGraphics();
         //Render Here
         gui.render(g);
+        map.render(g);
         paths.render(g);
+        gui.render2(g);
         for(Unit u : unitList) {
             u.render(g);
         }
-        gui.render2(g);
+        gui.render3(g);
         
         g.dispose(); //Clean
         bs.show(); //Shows render
     }
     
+    //Ends turn, resets all units' "moved" parameter
+    public static void endTurn()
+    {
+        for(Unit u : unitList) 
+        {
+            u.reset();
+        }
+    }
+    
+    //Add a unit to the map
     public void addUnit(int x, int y, int type, int mov, int minRg, int maxRg, int team)
     {
-        if(getUnit(x, y) == null && x >= 0 && y >= 0 && x < mapWidth && y < mapHeight)
+        if(x >= 0 && y >= 0 && x < mapWidth && y < mapHeight && getUnit(x, y) == null)
         {
             Unit temp = new Unit(x, y, im, mov, minRg, maxRg, team);
             unitGrid[x][y] = temp;
@@ -201,6 +232,7 @@ public class Game extends Canvas implements Runnable
         }
     }
     
+    //Gets the unit at specified x, y
     public static Unit getUnit(int x, int y)
     {
         if(x >= 0 && y >= 0 && x < mapWidth && y < mapHeight)
@@ -210,17 +242,20 @@ public class Game extends Canvas implements Runnable
         return null;
     }
     
-    public static void moveUnit(int oX, int oY, int nX, int nY, Unit u)
+    //Moves a unit to specified x, y from current x, y
+    public static void moveUnit(int x, int y, Unit u)
     {
-        unitGrid[oX][oY] = null;
-        unitGrid[nX][nY] = u;
+        unitGrid[u.getX()][u.getY()] = null;
+        unitGrid[x][y] = u;
     }
     
+    //Returns map grid
     public static int[][] getMap()
     {
         return map.getGrid();
     }
-
+    
+    //Main function, sets up game window
     public static void main(String[] args) 
     {
         Game game = new Game();
@@ -238,6 +273,7 @@ public class Game extends Canvas implements Runnable
         frame.setResizable(false);
         frame.add(game);
         frame.setVisible(true);
+        
         game.start();
     }
 }

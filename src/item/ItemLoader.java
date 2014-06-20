@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+//http://www.homeandlearn.co.uk/java/databases_and_java_forms.html
+//Very untested, but at least reading from the database works
 public class ItemLoader
 {
     ResultSet rs;
@@ -38,5 +40,38 @@ public class ItemLoader
             System.out.println(ex.getMessage());
         }
         return null;
+    }
+    
+    private boolean editEntry()
+    {
+        try {
+            rs.updateRow();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return false;
+    }
+    
+    private boolean newEntry()
+    {
+        try {
+            rs.moveToInsertRow();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return false;
+    }
+    
+    private boolean deleteEntry()
+    {
+        try {
+            rs.deleteRow();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return false;
     }
 }

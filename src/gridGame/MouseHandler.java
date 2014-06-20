@@ -1,7 +1,6 @@
 package gridGame;
 
 import character.Unit;
-import graphics.Sprite;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -19,37 +18,40 @@ public class MouseHandler extends MouseAdapter
     walkList - List of tiles that the unit will walk on
     */
     private int pX, pY, cX, cY, mX, mY;
-    private boolean found = false, pathed = false;
+    private boolean found, pathed;
     private Unit selected;
     private ArrayList<int[]> walkList;
     
+    //Initializes the selected grid to one that does not exist
     public MouseHandler()
     {
         cX = Game.mapWidth;
         cY = Game.mapWidth;
     }
 
+    //Updates the mouse coordinates, and interface
     @Override
     public void mousePressed(MouseEvent e) 
     {
         int x = e.getX(), y = e.getY();
-        pX = x/Sprite.spDIM;
-        pY = y/Sprite.spDIM;
+        pX = (x - Game.MAPOFFX) / Game.TILESIZE;
+        pY = (y - Game.MAPOFFY) / Game.TILESIZE;
         
         found = false;
         Game.gui.update(x, y, true);
     }
     
+    //Updates the mouse coordinates, and interface.  Also does pathfinding
     @Override
     public void mouseDragged(MouseEvent e)
     {
         mX = e.getX();
         mY = e.getY();
-        if(mX / Sprite.spDIM != cX || mY /Sprite.spDIM != cY) {
+        if((mX - Game.MAPOFFX) / Game.TILESIZE != cX || (mY - Game.MAPOFFY) / Game.TILESIZE != cY) {
             pathed = false;
         }
-        cX = mX / Sprite.spDIM;
-        cY = mY / Sprite.spDIM;
+        cX = (mX - Game.MAPOFFX) / Game.TILESIZE;
+        cY = (mY - Game.MAPOFFY) / Game.TILESIZE;
 
         if(found)
         {
@@ -62,7 +64,7 @@ public class MouseHandler extends MouseAdapter
         else
         {  
             selected = Game.getUnit(pX, pY);
-            if(selected != null && !selected.moving)
+            if(selected != null && !selected.moving && !selected.hasMoved())
             {
                 //Find Paths
                 Game.paths.findPath(selected.pathInfo());
@@ -73,17 +75,20 @@ public class MouseHandler extends MouseAdapter
         Game.gui.update(mX, mY);
     }
     
+    //Updates the mouse coordinates, and interface
     @Override
-    public void mouseMoved(MouseEvent e) //Always positive coordinates
+    public void mouseMoved(MouseEvent e)
     {
         mX = e.getX();
         mY = e.getY();
-        cX = mX / Sprite.spDIM;
-        cY = mY / Sprite.spDIM;
+        //Might have to floor these if there are future problems
+        cX = (mX - Game.MAPOFFX) / Game.TILESIZE;
+        cY = (mY - Game.MAPOFFY) / Game.TILESIZE;
 
         Game.gui.update(mX, mY, false);
     }
     
+    //Updates the interface, and also moves unit if applicable
     @Override
     public void mouseReleased(MouseEvent e) 
     {
@@ -91,11 +96,30 @@ public class MouseHandler extends MouseAdapter
         selected = Game.getUnit(pX, pY);
         if(selected != null && !selected.moving)
         {
-            walkList = new ArrayList<>(Game.paths.getWalk());
-            Game.paths.clearPaths();
-            selected.damage(153);
-            selected.move(cX, cY, walkList);
+            if(!selected.hasMoved())
+            {
+                walkList = new ArrayList<>(Game.paths.getWalk());
+                Game.paths.clearPaths();
+                selected.move(cX, cY, walkList);
+            }
+            //selected.damage(77);
         }
+        Game.gui.update(selected);
         Game.gui.update(e.getX(), e.getY(), false);
+    }
+    
+    //Hides mouse if you move out of the window
+    @Override
+    public void mouseExited(MouseEvent e)
+    {
+        Game.gui.update(false);
+        Game.gui.update(0, 0, false);
+    }
+    
+    //Brings mouse back
+    @Override
+    public void mouseEntered(MouseEvent e)
+    {
+        Game.gui.update(true);
     }
 }

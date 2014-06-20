@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
+//Simple class, pass it path of image, returns the image
 public class SpriteLoader 
 {
     public BufferedImage load(String path)

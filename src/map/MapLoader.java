@@ -1,5 +1,6 @@
 package map;
 
+import graphics.Sprite;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,14 +14,14 @@ public class MapLoader
     private FileInputStream inputStream;
     
     //Takes in path to a map, returns a Map object
-    public Map load(String path)
+    public Map load(String path, Sprite sprite)
     {
         try 
         {
             inputStream = new FileInputStream(new File(getClass().getResource(path).toURI())); //Some crap to read file
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             
-            return new Map(br);
+            return new Map(br, sprite);
         }
         catch (FileNotFoundException ex) 
         {
