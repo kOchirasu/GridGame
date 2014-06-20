@@ -158,12 +158,13 @@ public class Path
     //Adds all attackable tiles from specified x, y for specified range
     private void addAttack(int x, int y, int minRange, int maxRange)
     {
-        int nX, nY;
+        int nX, nY, count = 0;
         for(int i = -maxRange; i <= maxRange; i++) {
             for(int j = Math.abs(i) - maxRange; j <= maxRange - Math.abs(i); j++) {
                 nX = x + i;
                 nY = y + j;
                 if(nX >= 0 && nX < Game.mapWidth && nY >= 0 && nY < Game.mapHeight) {
+                    count++;
                     if(Math.abs(i) + Math.abs(j) >= minRange) {
                         if(movement[nX][nY] == 0) {
                             attList.add(new int[]{nX, nY});
@@ -173,6 +174,7 @@ public class Path
                 }
             }
         }
+        System.out.println(count);
     }
     
     //Checks if a tile can be moved to

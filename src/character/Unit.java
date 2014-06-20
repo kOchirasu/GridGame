@@ -200,7 +200,7 @@ public class Unit
     //Shows attackable tiles for the unit
     public boolean showAttack()
     {
-        if(moved && !done)
+        if(!done)
         {
             Game.paths.findPath(new int[]{x, y, 0, minRange, maxRange, team});
             return true;

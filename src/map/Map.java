@@ -69,7 +69,22 @@ public class Map
                         g.drawImage(sprite.tile[3][0], Game.MAPOFFX + j * Game.TILESIZE, Game.MAPOFFY + i * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE, null);
                         break;
                     case 2:
-                        g.drawImage(sprite.tile[3][1], Game.MAPOFFX + j * Game.TILESIZE, Game.MAPOFFY + i * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE, null);
+                        g.drawImage(sprite.tile[3][2], Game.MAPOFFX + j * Game.TILESIZE, Game.MAPOFFY + i * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE, null);
+                        break;
+                    case 3:
+                        g.drawImage(sprite.tile[3][3], Game.MAPOFFX + j * Game.TILESIZE, Game.MAPOFFY + i * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE, null);
+                        break;
+                    case 4:
+                        g.drawImage(sprite.tile[3][4], Game.MAPOFFX + j * Game.TILESIZE, Game.MAPOFFY + i * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE, null);
+                        break;
+                    case 5:
+                        g.drawImage(sprite.tile[3][5], Game.MAPOFFX + j * Game.TILESIZE, Game.MAPOFFY + i * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE, null);
+                        break;
+                    case 8:
+                        g.drawImage(sprite.tile[3][8], Game.MAPOFFX + j * Game.TILESIZE, Game.MAPOFFY + i * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE, null);
+                        break;
+                    case 9:
+                        g.drawImage(sprite.tile[3][9], Game.MAPOFFX + j * Game.TILESIZE, Game.MAPOFFY + i * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE, null);
                         break;
                     default:
                         g.drawImage(sprite.tile[2][4], Game.MAPOFFX + j * Game.TILESIZE, Game.MAPOFFY + i * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE, null);

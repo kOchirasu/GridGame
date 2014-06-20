@@ -4,7 +4,6 @@ import algorithm.*;
 import character.Unit;
 import graphics.*;
 import gui.Interface;
-import item.Item;
 import item.ItemLoader;
 import java.awt.Canvas;
 import java.awt.Dimension;
@@ -14,7 +13,6 @@ import java.awt.Toolkit;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
@@ -122,8 +120,8 @@ public class Game extends Canvas implements Runnable
         gui.addButton("Reset Moves", 7);
         
         
-        gui.addButton(544, 14, 140, 16, "up", 9);
-        gui.addButton(544, 378, 140, 16, "down", 10);
+        gui.addButton(544, 14, 140, 16, "Up", 9);
+        gui.addButton(544, 378, 140, 16, "Down", 10);
         //gui.addButton(50, 425, 500, 125, "random button", 11);
     }
     
