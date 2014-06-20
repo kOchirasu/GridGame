@@ -10,6 +10,7 @@ public class Unit
 {
     /* Private Variables
     x, y                - Unit x, y grid coordinates
+    pX, pY              - Unit previous x, y grid coordinates
     dX, dY              - Unit x, y coordinates where unit is displayed
     n[]                 - Damage values to display
     xOff, yOff          - Offsets to simulate movement
@@ -24,12 +25,12 @@ public class Unit
     walkList            - List of tiles that the unit will walk through to get to its destination
     sprite              - Array of sprites
     */
-    private int x, y, dX, dY, n[] = new int[3], xOff, yOff, count, dmgLen;
+    private int x, y, pX, pY, dX, dY, n[] = new int[3], xOff, yOff, count, dmgLen;
     private int lv, exp, hp, maxHP, mp, maxMP, ftg, mov, atk, mAtk, def, acc, avoid, crit, minRange, maxRange, team;
     private int walkTick, dmgTick;
     private Inventory inventory;
-    private boolean dead, moved;
-    private short ClassID;
+    private boolean dead, moved, done;
+    private short classID;
     private ArrayList<int[]> walkList = new ArrayList<>();
     private Sprite sprite;
     
@@ -38,6 +39,12 @@ public class Unit
     */
     public boolean moving;
     
+    public Unit(short classID)
+    {
+        this.x = -1000;
+        this.y = -1000;
+        this.classID = classID;
+    }
     public Unit(int x, int y, Sprite sprite, int MOV, int minRANGE, int maxRANGE, int TEAM)
     {
         this.x = x;
@@ -50,7 +57,15 @@ public class Unit
         this.maxRange = maxRANGE != -1 ? maxRANGE : 2; //Defaults to 2
         this.team = TEAM;
         this.inventory = new Inventory(5);
-        ClassID = 0;
+        classID = 0;
+        
+        
+        this.maxHP = 50;
+        this.hp = 40;
+        this.maxMP = 20;
+        this.mp = 15;
+        this.atk = 10;
+        this.def = 5;
     }
     
     //Tick, updates the unit.  Used for animation timing
@@ -73,8 +88,8 @@ public class Unit
             {
                 walkList.clear();
                 moving = false;
-                count = 0;
                 moved = true;
+                count = 0;
                 //System.out.println("Finished moving");
             }
             else
@@ -103,7 +118,7 @@ public class Unit
     //Renders unit and damage on unit
     public void render(Graphics g)
     {
-        if(moved){
+        if(done){
             g.drawImage(sprite.unit[0][9], Game.MAPOFFX + dX + xOff, Game.MAPOFFY + dY + yOff, Game.TILESIZE, Game.TILESIZE, null);
         }
         else{
@@ -127,9 +142,21 @@ public class Unit
         }
     }
     
+    //Finishes unit's turn, no more changes
+    public void done()
+    {
+        if(!moving)
+        {
+            Game.paths.clearPaths();
+            done = true;
+            moved = true;
+        }
+    }
+    
     //Resets the units move
     public void reset()
     {
+        done = false;
         moved = false;
     }
     
@@ -140,14 +167,43 @@ public class Unit
         {
             if(Game.paths.getMove(x, y) <= mov && Game.getUnit(x, y) == null)// && Game.paths.getMove(x, y) <= mov && mov != 0)
             {
+                pX = this.x;
+                pY = this.y;
                 Game.moveUnit(x, y, this);
                 this.walkList = walkList;
-                //moveAni(walkList);
                 this.x = x;
                 this.y = y;
                 //System.out.println("Moved to Grid(" + this.x + ", " + this.y + ")");
                 return true;
             }
+        }
+        return false;
+    }
+    
+    //Cancels the units move
+    public boolean cancelMove()
+    {
+        Game.paths.clearPaths();
+        if(moved && !done)
+        {
+            Game.moveUnit(pX, pY, this);
+            dX = pX * Game.TILESIZE;
+            dY = pY * Game.TILESIZE;
+            this.x = pX;
+            this.y = pY;
+            moved = false;
+            return true;
+        }
+        return false;
+    }
+    
+    //Shows attackable tiles for the unit
+    public boolean showAttack()
+    {
+        if(moved && !done)
+        {
+            Game.paths.findPath(new int[]{x, y, 0, minRange, maxRange, team});
+            return true;
         }
         return false;
     }
@@ -192,6 +248,12 @@ public class Unit
     }
     public int getY() {
         return y;
+    }
+    public int getpX() {
+        return pX;
+    }
+    public int getpY() {
+        return pY;
     }
     public int getLV() {
         return lv;
@@ -243,5 +305,8 @@ public class Unit
     }
     public int getTEAM() {
         return team;
+    }
+    public short getClassID() {
+        return classID;
     }
 }

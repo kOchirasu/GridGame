@@ -1,5 +1,6 @@
 package gui;
 
+import character.Unit;
 import gridGame.Game;
 import java.awt.Color;
 import java.awt.Font;
@@ -8,23 +9,27 @@ import java.awt.Graphics;
 
 public class Button
 {
-    /*
-    x, y        - x, y, coordinates of button
-    w, h        - Width and height of button
-    iD          - Button iD for identifying button
-    text        - Text on button
-    font        - Font of text on button
-    buttonColor - Color of button
-    hoverColor  - Color of button when hovered
-    shadeColor  - Color of button when pressed
-    pressed     - True while button is being pressed
-    shade       - True if button is shaded
-    disabled    - True if button is disabled, not implemented yet
+    /* Private Variables
+    x, y            - x, y, coordinates of button
+    w, h            - Width and height of button
+    iD              - Button iD for identifying button
+    text            - Text on button
+    font            - Font of text on button
+    buttonColor     - Color of button
+    hoverColor      - Color of button when hovered
+    shadeColor      - Color of button when pressed
+    disabledColor   - Color of button when disabled
     */
     private int x, y, w, h, iD;
     private String text;
     private Font font;
-    private Color buttonColor, hoverColor, shadeColor;
+    private Color buttonColor, hoverColor, shadeColor, disabledColor;
+    
+    /* Public Variables
+    pressed         - True while button is being pressed
+    shade           - True if button is shaded
+    disabled        - True if button is disabled
+    */
     public boolean pressed, shade, disabled;
     
     public Button(int x, int y, int w, int h, String text, int iD, Font font, Color hoverColor, Color shadeColor, Color buttonColor)
@@ -39,6 +44,7 @@ public class Button
         this.hoverColor = hoverColor;
         this.shadeColor = shadeColor;
         this.buttonColor = buttonColor;
+        disabledColor = new Color(75, 75, 75, 175);
     }
     
     public Button(int x, int y, int w, int h, String text, int iD)
@@ -53,6 +59,7 @@ public class Button
         hoverColor = new Color(255, 255, 255, 128);
         shadeColor = new Color(0, 0, 0, 128);
         buttonColor = new Color(0, 255, 0, 128);
+        disabledColor = new Color(75, 75, 75, 175);
     }
     
     //Renders the button, button text, and any shading
@@ -60,9 +67,14 @@ public class Button
     {
         g.setColor(buttonColor);
         g.fillRect(x, y, w, h);
-        if(shade) {
+        if(disabled) {
+            g.setColor(disabledColor);
+            g.fillRect(x, y, w, h);
+        }
+        else if(shade) {
             g.setColor(pressed ? shadeColor : hoverColor);
             g.fillRect(x, y, w, h);
+
         }
         g.setColor(Color.BLACK);
         g.setFont(font);
@@ -71,18 +83,34 @@ public class Button
     }
     
     //All button functions go here
-    public int click()
+    public int click(Unit selected)
     {
         if(!disabled)
         {
             switch(iD)
             {
-                case 0: case 1: case 2: case 3: case 4: case 5: case 6:
-                    System.out.println(text + " was clicked.");
+                case 0: 
+                    if(selected.showAttack()){
+                        System.out.println("Attack button was clicked");
+                    }
+                    else{
+                        System.out.println("Hasn't moved yet.");
+                    }
+                    break;
+                case 1: case 2: case 3: case 4:
+                    System.out.println(text + " was clicked. Not yet implemented.");
+                    break;
+                case 5:
+                    selected.cancelMove();
+                    System.out.println("Cancel button was clicked");
+                    break;
+                case 6:
+                    selected.done();
+                    System.out.println("Wait button was clicked");
                     break;
                 case 7:
+                    Game.newTurn();
                     System.out.println("Moves were reset");
-                    Game.endTurn();
                     break;
                 default:
                     System.out.println(text + " was clicked. Not a main button.");

@@ -46,6 +46,8 @@ public class Game extends Canvas implements Runnable
     public Thread gameThread;
     public static ItemLoader lookup;
     
+    public static Unit theUnit = new Unit((short)-1); //Dummy unit used for keeping units selected, bad fix but w/e
+    
     /* Private Variables
     map                 - Map class, contains map data
     im                  - Contains all pictures
@@ -110,11 +112,15 @@ public class Game extends Canvas implements Runnable
         this.addMouseMotionListener(mh);
         
         //Create Buttons
-        for(int i = 0; i < 7; i++)
-        {
-            gui.addButton("Button " + i, i);
-        }
+        gui.addButton("Attack", 0);
+        gui.addButton("Nothing", 1);
+        gui.addButton("Trade", 2);
+        gui.addButton("Inventory", 3);
+        gui.addButton("Skill", 4);
+        gui.addButton("Cancel", 5);
+        gui.addButton("Done", 6);
         gui.addButton("Reset Moves", 7);
+        
         
         gui.addButton(544, 14, 140, 16, "up", 9);
         gui.addButton(544, 378, 140, 16, "down", 10);
@@ -209,7 +215,7 @@ public class Game extends Canvas implements Runnable
     }
     
     //Ends turn, resets all units' "moved" parameter
-    public static void endTurn()
+    public static void newTurn()
     {
         for(Unit u : unitList) 
         {
@@ -239,7 +245,8 @@ public class Game extends Canvas implements Runnable
         {
             return unitGrid[x][y];
         }
-        return null;
+        //return null;
+        return theUnit;
     }
     
     //Moves a unit to specified x, y from current x, y

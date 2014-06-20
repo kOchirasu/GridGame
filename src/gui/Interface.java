@@ -11,12 +11,27 @@ import java.util.ArrayList;
 
 public class Interface
 {
+    /*
+    x, y            - x, y mouse coordinates
+    cX, cY          - x, y grid coordinates
+    mouse           - Color of mouse cursor (see cursor.png)
+    buttonList      - List of buttons in interface
+    barList         - List of bars in interface
+    bg              - Background image
+    line1,2,3,4,5   - Unit stat information
+    lastSelected    - Last selected unit (will not be null after first unit selected
+    selected        - Currently selected unit (will be null if no unit is actively selected)
+    sprite          - Image array to render from
+    selectColor     - Color of the highlight over selected grid
+    oBt, nBt        - Old button, New button used for detection
+    inWindow        - True while mouse cursor is in the window
+    */
     private int x, y, cX, cY, mouse;
     private final ArrayList<Button> buttonList;
     private final ArrayList<Bar> barList;
     private final BufferedImage bg;
     private String line1, line2, line3, line4, line5;
-    private Unit selected;
+    private Unit lastSelected, selected;
     private Sprite sprite;
     private Color selectColor;
     private Button oBt, nBt;
@@ -127,12 +142,12 @@ public class Interface
         update(x, y);
         
         oBt = nBt;
-        nBt = bID(x, y);
+        nBt = clicked(x, y);
         if(oBt != null || nBt != null)    
         {
             if(oBt == nBt && oBt.pressed == true) {
                 //Dumb stuff
-                mouse = nBt.click();
+                mouse = nBt.click(lastSelected);
                 mouse = mouse < 0 || mouse > 7 ? 0 : mouse;
                 
                 nBt.pressed = false;
@@ -156,13 +171,14 @@ public class Interface
     public void update(Unit selected)
     {
         this.selected = selected;
-        if(selected!= null)
+        if(selected != null)
         {
             line1 = "Team: " + selected.getTEAM() + "     Coordinates: (" + selected.getX() + ", " + selected.getY() + ")     " + (selected.hasMoved() ? "[Can't Move]" : "[Can Move]");
             line2 = "HP: " + selected.getHP() +  "/" + selected.getMaxHP() + "     MP: " + selected.getMP() +  "/" + selected.getMaxMP() + "     LV: " + selected.getLV() + "     EXP: " + selected.getEXP() + "/" + 100;
             line3 = "Fatigue: " + selected.getFTG() + "     Movement: " + selected.getMOV() + "     Range: " + selected.getMinRANGE() + "~" + selected.getMaxRANGE();
             line4 = "Attack: " + selected.getATK() + "     Magic Attack: " + selected.getMATK() + "     Defense: " + selected.getDEF();
             line5 = "Accuracy: " + selected.getACC() + "     Avoid: " + selected.getAVO() + "     Critical: " + selected.getCRIT() + "%";
+            lastSelected = selected;
         }
     }
     
@@ -173,7 +189,7 @@ public class Interface
     }
     
     //Loops through button list and finds which button the mouse clicked on
-    private Button bID(int x, int y)
+    private Button clicked(int x, int y)
     {
         for(int i = 0; i < buttonList.size(); i++)
         {

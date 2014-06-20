@@ -64,13 +64,16 @@ public class MouseHandler extends MouseAdapter
         else
         {  
             selected = Game.getUnit(pX, pY);
-            if(selected != null && !selected.moving && !selected.hasMoved())
+            if(selected != null && !selected.moving && !selected.hasMoved() && selected.getClassID() != -1)
             {
                 //Find Paths
                 Game.paths.findPath(selected.pathInfo());
                 //Game.paths.printPaths();
                 found = true;
             }
+        }
+        if(selected == null || selected.getClassID() != -1) {
+            Game.gui.update(selected);
         }
         Game.gui.update(mX, mY);
     }
@@ -94,7 +97,7 @@ public class MouseHandler extends MouseAdapter
     {
         //System.out.print("X: " + cX + ", Y: " + cY + "\t");
         selected = Game.getUnit(pX, pY);
-        if(selected != null && !selected.moving)
+        if(selected != null && !selected.moving && selected.getClassID() != -1)
         {
             if(!selected.hasMoved())
             {
@@ -104,7 +107,9 @@ public class MouseHandler extends MouseAdapter
             }
             //selected.damage(77);
         }
-        Game.gui.update(selected);
+        if(selected == null || selected.getClassID() != -1) {
+            Game.gui.update(selected);
+        }
         Game.gui.update(e.getX(), e.getY(), false);
     }
     
