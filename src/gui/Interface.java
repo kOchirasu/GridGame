@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 public class Interface
 {
+    public final int BCOUNT = 8; // Button count
     /*
     x, y            - x, y mouse coordinates
     cX, cY          - x, y grid coordinates
@@ -19,23 +20,25 @@ public class Interface
     barList         - List of bars in interface
     bg              - Background image
     line1,2,3,4,5   - Unit stat information
-    lastSelected    - Last selected unit (will not be null after first unit selected
-    selected        - Currently selected unit (will be null if no unit is actively selected)
+    cSelect        - Currently cSelect unit (will be null if no unit is actively cSelect)
     sprite          - Image array to render from
-    selectColor     - Color of the highlight over selected grid
+    selectColor     - Color of the highlight over cSelect grid
     oBt, nBt        - Old button, New button used for detection
     inWindow        - True while mouse cursor is in the window
+    lockSelect      - Prevents interface from updating cSelect unit.  True when a unit has moved but 
+                      has not finished its actions.
     */
     private int x, y, cX, cY, mouse;
     private final ArrayList<Button> buttonList;
     private final ArrayList<Bar> barList;
     private final BufferedImage bg;
-    private String line1, line2, line3, line4, line5;
-    private Unit lastSelected, selected;
+    private Button[] buttonArray = new Button[BCOUNT];
+    private String line1 = "", line2 = "", line3 = "", line4 = "", line5 = "";
+    private Unit cSelect;
     private Sprite sprite;
     private Color selectColor;
     private Button oBt, nBt;
-    private boolean inWindow = true;
+    private boolean inWindow = true, lockSelect;
     
     public Interface(BufferedImage bg, Sprite sprite)
     {
@@ -46,6 +49,11 @@ public class Interface
         buttonList = new ArrayList<>();
         barList = new ArrayList<>();
         selectColor = new Color(255, 255, 255, 128);
+        for(int i = 0; i < BCOUNT; i++)
+        {
+            buttonArray[i] = addButton("", i, i);
+            buttonArray[i].disabled = true;
+        }
     }
     
     //First render for buttons and bars
@@ -58,13 +66,17 @@ public class Interface
         {
             buttonList.get(i).render(g);
         }
+        /*for(int i = 0; i < BCOUNT; i++)
+        {
+            buttonArray[i].render(g);
+        }*/
         //Renders all bars
         for(int i = 0; i < barList.size(); i++)
         {
             barList.get(i).render(g);
         }
-        //Displays selected unit's info
-        if(selected != null)
+        //Displays cSelect unit's info
+        if(cSelect != null)
         {
             g.setFont(new Font("Arial", Font.PLAIN, 12));
             g.drawString(line1, 400, 430);
@@ -79,10 +91,10 @@ public class Interface
     //Renders Square below unit
     public void render2(Graphics g)
     {
-        if(selected != null)
+        if(cSelect != null)
         {
             g.setColor(Color.BLUE);
-            g.fillRect(Game.MAPOFFX + selected.getX() * Game.TILESIZE, Game.MAPOFFY + selected.getY() * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE);
+            g.fillRect(Game.MAPOFFX + cSelect.getX() * Game.TILESIZE, Game.MAPOFFY + cSelect.getY() * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE);
         }
     }
     
@@ -108,10 +120,22 @@ public class Interface
         }
     }
     
-    //Creates a new button and adds it to the button ArrayList
-    public Button addButton(String text, int iD)
+    public void setButton(String text, int iD, int loc, boolean disabled)
     {
-        return addButton(544, 41 + 42 * iD, 140, 32, text, iD);
+        buttonArray[loc].set(text, iD, disabled);
+    }
+    
+    public void hideButtons()
+    {
+        for(int i = 0; i < BCOUNT; i++) {
+            setButton("", i, i, true);
+        }
+    }
+    
+    //Creates a new button and adds it to the button ArrayList
+    public Button addButton(String text, int iD, int loc)
+    {
+        return addButton(544, 41 + 42 * loc, 140, 32, text, iD);
     }
     
     public Button addButton(int x, int y, int w, int h, String text, int iD)
@@ -147,7 +171,7 @@ public class Interface
         {
             if(oBt == nBt && oBt.pressed == true) {
                 //Dumb stuff
-                mouse = nBt.click(lastSelected);
+                mouse = nBt.click(cSelect);
                 mouse = mouse < 0 || mouse > 7 ? 0 : mouse;
                 
                 nBt.pressed = false;
@@ -170,16 +194,45 @@ public class Interface
     //Updates unit info display, small bug with hasMoved not changing but too lazy to fix
     public void update(Unit selected)
     {
-        this.selected = selected;
-        if(selected != null)
+        if(selected == null || selected.getClassID() >= 0)
         {
-            line1 = "Team: " + selected.getTEAM() + "     Coordinates: (" + selected.getX() + ", " + selected.getY() + ")     " + (selected.hasMoved() ? "[Can't Move]" : "[Can Move]");
-            line2 = "HP: " + selected.getHP() +  "/" + selected.getMaxHP() + "     MP: " + selected.getMP() +  "/" + selected.getMaxMP() + "     LV: " + selected.getLV() + "     EXP: " + selected.getEXP() + "/" + 100;
-            line3 = "Fatigue: " + selected.getFTG() + "     Movement: " + selected.getMOV() + "     Range: " + selected.getMinRANGE() + "~" + selected.getMaxRANGE();
-            line4 = "Attack: " + selected.getATK() + "     Magic Attack: " + selected.getMATK() + "     Defense: " + selected.getDEF();
-            line5 = "Accuracy: " + selected.getACC() + "     Avoid: " + selected.getAVO() + "     Critical: " + selected.getCRIT() + "%";
-            lastSelected = selected;
+            //lock select after unit moves
+            //unlock select if move canceled or unit done
+            lockSelect = cSelect != null && (cSelect.hasMoved() || cSelect.moving) && !cSelect.isDone();
+            if(lockSelect)
+            {
+                if(cSelect.isAttacking())
+                {
+                    if(!cSelect.attack(selected)) {
+                        System.out.println("Invalid target");
+                    }
+                }
+                else
+                {
+                    //not attacking
+                }
+            }
+            else
+            {
+                if(selected != null)
+                {
+                    cSelect = selected;
+                    cSelect.listButtons(true);
+                    //display info
+                    line1 = "Team: " + cSelect.getTEAM() + "     Coordinates: (" + cSelect.getX() + ", " + cSelect.getY() + ")     " + (cSelect.hasMoved() ? "[Can't Move]" : "[Can Move]");
+                    line2 = "HP: " + cSelect.getHP() +  "/" + cSelect.getMaxHP() + "     MP: " + cSelect.getMP() +  "/" + cSelect.getMaxMP() + "     LV: " + cSelect.getLV() + "     EXP: " + cSelect.getEXP() + "/" + 100;
+                    line3 = "Fatigue: " + cSelect.getFTG() + "     Movement: " + cSelect.getMOV() + "     Range: " + cSelect.getMinRANGE() + "~" + cSelect.getMaxRANGE();
+                    line4 = "Attack: " + cSelect.getATK() + "     Magic Attack: " + cSelect.getMATK() + "     Defense: " + cSelect.getDEF();
+                    line5 = "Accuracy: " + cSelect.getACC() + "     Avoid: " + cSelect.getAVO() + "     Critical: " + cSelect.getCRIT() + "%";
+                }
+            }
         }
+    }
+    
+    public boolean canSelect(Unit selected)
+    {
+        lockSelect = cSelect != null && (cSelect.hasMoved() || cSelect.moving) && !cSelect.isDone();
+        return !lockSelect && selected != null && !selected.moving && !selected.hasMoved() && selected.getClassID() != -1;
     }
     
     //Determines whether or not mouse is in the window

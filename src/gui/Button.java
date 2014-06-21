@@ -90,12 +90,7 @@ public class Button
             switch(iD)
             {
                 case 0: 
-                    if(selected.showAttack()){
-                        System.out.println("Attack button was clicked");
-                    }
-                    else{
-                        System.out.println("Hasn't moved yet.");
-                    }
+                    selected.showAttack();
                     break;
                 case 1: case 2: case 3: case 4:
                     System.out.println(text + " was clicked. Not yet implemented.");
@@ -106,7 +101,7 @@ public class Button
                     break;
                 case 6:
                     selected.done();
-                    System.out.println("Wait button was clicked");
+                    System.out.println("Wait button was clicked for unit on (" + selected.getX() + ", " + selected.getY() + ")");
                     break;
                 case 7:
                     Game.newTurn();
@@ -132,8 +127,20 @@ public class Button
     }
     
     //Allows the text of the button to be changed
-    public void setText(String text) {
+    public void set(String text) {
         this.text = text;
+    }
+    
+    //Allows the ID of the button to be changed
+    public void set(int iD) {
+        this.iD = iD;
+    }
+    
+    public void set(String text, int iD, boolean disabled)
+    {
+        this.text = text;
+        this.iD = iD;
+        this.disabled = disabled;
     }
     
     //Allows the dimensions and location of the button to be changed
@@ -145,8 +152,5 @@ public class Button
         this.h = h;
     }
     
-    //Allows the ID of the button to be changed
-    public void changeID(int iD) {
-        this.iD = iD;
-    }
+    
 }

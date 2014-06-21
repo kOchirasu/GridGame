@@ -5,6 +5,8 @@ import gridGame.Game;
 import item.Inventory;
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeMap;
 
 public class Unit
 {
@@ -29,9 +31,10 @@ public class Unit
     private int lv, exp, hp, maxHP, mp, maxMP, ftg, mov, atk, mAtk, def, acc, avoid, crit, minRange, maxRange, team;
     private int walkTick, dmgTick;
     private Inventory inventory;
-    private boolean dead, moved, done;
+    private boolean dead, moved, done, attacking;
     private short classID;
     private ArrayList<int[]> walkList = new ArrayList<>();
+    private TreeMap<Integer, String> btList = new TreeMap<>();;
     private Sprite sprite;
     
     /* Public Variables
@@ -39,16 +42,22 @@ public class Unit
     */
     public boolean moving;
     
+    //Dummy unit
     public Unit(short classID)
     {
         this.x = -1000;
         this.y = -1000;
+        this.pX = x;
+        this.pY = y;
         this.classID = classID;
     }
+    
     public Unit(int x, int y, Sprite sprite, int MOV, int minRANGE, int maxRANGE, int TEAM)
     {
         this.x = x;
         this.y = y;
+        this.pX = x;
+        this.pY = y;
         this.dX = x * Game.TILESIZE;
         this.dY = y * Game.TILESIZE;
         this.sprite = sprite;
@@ -64,8 +73,16 @@ public class Unit
         this.hp = 40;
         this.maxMP = 20;
         this.mp = 15;
-        this.atk = 10;
+        this.atk = 20;
         this.def = 5;
+        
+        btList.put(0, "Attack " + x);
+        btList.put(5, "Cancel " + y);
+        btList.put(6, "Done " + dX);
+        if(TEAM == 1)
+        {
+            btList.put(7, "Reset Moves " + dY);
+        }
     }
     
     //Tick, updates the unit.  Used for animation timing
@@ -87,6 +104,7 @@ public class Unit
             if(count >= walkList.size())
             {
                 walkList.clear();
+                listButtons(true);
                 moving = false;
                 moved = true;
                 count = 0;
@@ -110,6 +128,7 @@ public class Unit
         }
         else if(walkList.size() > 1)
         {
+            listButtons(false);
             moving = true;
             //System.out.println("Started moving");
         }
@@ -118,8 +137,11 @@ public class Unit
     //Renders unit and damage on unit
     public void render(Graphics g)
     {
-        if(done){
-            g.drawImage(sprite.unit[0][9], Game.MAPOFFX + dX + xOff, Game.MAPOFFY + dY + yOff, Game.TILESIZE, Game.TILESIZE, null);
+        if(dead) {
+            g.drawImage(sprite.unit[0][8], Game.MAPOFFX + dX + xOff, Game.MAPOFFY + dY + yOff, Game.TILESIZE, Game.TILESIZE, null);
+        }
+        else if(done){
+            g.drawImage(sprite.unit[0][7], Game.MAPOFFX + dX + xOff, Game.MAPOFFY + dY + yOff, Game.TILESIZE, Game.TILESIZE, null);
         }
         else{
             g.drawImage(sprite.unit[0][team], Game.MAPOFFX + dX + xOff, Game.MAPOFFY + dY + yOff, Game.TILESIZE, Game.TILESIZE, null);
@@ -132,7 +154,7 @@ public class Unit
                 break;
             case 2:
                 g.drawImage(sprite.damage[n[1]], Game.MAPOFFX + dX + xOff + 6, Game.MAPOFFY + dY + yOff + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
-                g.drawImage(sprite.damage[n[1]], Game.MAPOFFX + dX + xOff + 16, Game.MAPOFFY + dY + yOff + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+                g.drawImage(sprite.damage[n[0]], Game.MAPOFFX + dX + xOff + 16, Game.MAPOFFY + dY + yOff + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
                 break;
             case 3:
                 g.drawImage(sprite.damage[n[2]], Game.MAPOFFX + dX + xOff + 1, Game.MAPOFFY + dY + yOff + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
@@ -142,12 +164,27 @@ public class Unit
         }
     }
     
+    public void listButtons(boolean enable)
+    {
+        int i = 0;
+        for(Integer j : btList.keySet())
+        {
+            Game.gui.setButton(btList.get(j), j, i, !enable || done);
+            i++;
+        }
+        for(; i < Game.gui.BCOUNT; i++)
+        {
+            Game.gui.setButton("", i, i, true);
+        }
+    }
+    
     //Finishes unit's turn, no more changes
     public void done()
     {
         if(!moving)
         {
             Game.paths.clearPaths();
+            listButtons(false);
             done = true;
             moved = true;
         }
@@ -156,8 +193,11 @@ public class Unit
     //Resets the units move
     public void reset()
     {
-        done = false;
-        moved = false;
+        if(!dead)
+        {
+            done = false;
+            moved = false;
+        }
     }
     
     //Moves the unit to x, y through each tile in the walkList array
@@ -191,6 +231,7 @@ public class Unit
             dY = pY * Game.TILESIZE;
             this.x = pX;
             this.y = pY;
+            attacking = false;
             moved = false;
             return true;
         }
@@ -203,18 +244,42 @@ public class Unit
         if(!done)
         {
             Game.paths.findPath(new int[]{x, y, 0, minRange, maxRange, team});
+            moved = true;
+            attacking = true;
             return true;
         }
         return false;
     }
     
-    //Attacks enemy unit, didn't even use this ever
-    public int attack(Unit enemy)
+    //Attacks enemy unit
+    public boolean attack(Unit enemy)
     {
-        int expGain = Game.math.expGain(lv, enemy.getLV());
-        int tDmg = Game.math.dmgAmt(atk, enemy.getDEF());
-        enemy.damage(tDmg);
-        return expGain;
+        if(attacking && enemy != null && this != enemy && inRange(enemy) && team != enemy.getTEAM())
+        {
+            int expGain = Game.math.expGain(lv, enemy.getLV());
+            int tDmg = Game.math.dmgAmt(atk, enemy.getDEF());
+            enemy.damage(tDmg);
+            attacking = false;
+            done();
+            //addExp(expGain);
+            return true;
+        }
+        return false;
+    }
+    
+    //Returns whether or not the unit is in range
+    private boolean inRange(Unit unit)
+    {
+        int dist = Math.abs(unit.getX() - x) + Math.abs(unit.getY() - y);
+        return dist >= minRange && dist <= maxRange;
+    }
+    
+    //Kills the unit, called when unit's HP is <= 0
+    private void kill() {
+        hp = 0;
+        dead = true;
+        moved = true;
+        done = true;
     }
     
     //Displays damage in the unit
@@ -222,10 +287,8 @@ public class Unit
     {
         dmg = dmg > 999 ? 999 : dmg;
         hp -= dmg;
-        if(hp <= 0)
-        {
-            //Kill unit
-            dead = true;
+        if(hp <= 0){
+            kill();
         }
         dmgLen = dmg < 10 ? 1 : dmg < 100 ? 2 : 3;
         n[0] = dmg % 10;
@@ -233,12 +296,18 @@ public class Unit
         n[1] = (dmg % 100) / 10;
         dmg -= n[1] * 10;
         n[2] = dmg / 100;
-        //System.out.println(n0 + " " + n1 + " " + n2);
+        //System.out.println(n[2] + " " + n[1] + " " + n[0]);
     }
     
     //Lots of 'get' functions because no public variables
     public boolean hasMoved() {
         return moved;
+    }
+    public boolean isAttacking() {
+        return attacking;
+    }
+    public boolean isDone() {
+        return done;
     }
     public int[] pathInfo() {
         return new int[]{x, y, mov, minRange, maxRange, team};

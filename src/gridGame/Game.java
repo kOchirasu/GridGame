@@ -110,14 +110,14 @@ public class Game extends Canvas implements Runnable
         this.addMouseMotionListener(mh);
         
         //Create Buttons
-        gui.addButton("Attack", 0);
-        gui.addButton("Nothing", 1);
-        gui.addButton("Trade", 2);
-        gui.addButton("Inventory", 3);
-        gui.addButton("Skill", 4);
-        gui.addButton("Cancel", 5);
-        gui.addButton("Done", 6);
-        gui.addButton("Reset Moves", 7);
+        /*gui.addButton("Attack", 0, 0);
+        gui.addButton("Nothing", 1, 1);
+        gui.addButton("Trade", 2, 2);
+        gui.addButton("Inventory", 3, 3);
+        gui.addButton("Skill", 4, 4);
+        gui.addButton("Cancel", 5, 5);
+        gui.addButton("Done", 6, 6);
+        gui.addButton("Reset Moves", 7, 7);*/
         
         
         gui.addButton(544, 14, 140, 16, "Up", 9);

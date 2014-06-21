@@ -52,7 +52,7 @@ public class MouseHandler extends MouseAdapter
         }
         cX = (mX - Game.MAPOFFX) / Game.TILESIZE;
         cY = (mY - Game.MAPOFFY) / Game.TILESIZE;
-
+        
         if(found)
         {
             if(!pathed)
@@ -64,7 +64,8 @@ public class MouseHandler extends MouseAdapter
         else
         {  
             selected = Game.getUnit(pX, pY);
-            if(selected != null && !selected.moving && !selected.hasMoved() && selected.getClassID() != -1)
+            //if(selected != null && !selected.moving && !selected.hasMoved() && selected.getClassID() != -1)
+            if(Game.gui.canSelect(selected))
             {
                 //Find Paths
                 Game.paths.findPath(selected.pathInfo());
@@ -72,9 +73,7 @@ public class MouseHandler extends MouseAdapter
                 found = true;
             }
         }
-        if(selected == null || selected.getClassID() != -1) {
-            Game.gui.update(selected);
-        }
+        Game.gui.update(selected);
         Game.gui.update(mX, mY);
     }
     
@@ -97,19 +96,14 @@ public class MouseHandler extends MouseAdapter
     {
         //System.out.print("X: " + cX + ", Y: " + cY + "\t");
         selected = Game.getUnit(pX, pY);
-        if(selected != null && !selected.moving && selected.getClassID() != -1)
+        if(Game.gui.canSelect(selected))
         {
-            if(!selected.hasMoved())
-            {
-                walkList = new ArrayList<>(Game.paths.getWalk());
-                Game.paths.clearPaths();
-                selected.move(cX, cY, walkList);
-            }
+            walkList = new ArrayList<>(Game.paths.getWalk());
+            Game.paths.clearPaths();
+            selected.move(cX, cY, walkList);
             //selected.damage(77);
         }
-        if(selected == null || selected.getClassID() != -1) {
-            Game.gui.update(selected);
-        }
+        Game.gui.update(selected);
         Game.gui.update(e.getX(), e.getY(), false);
     }
     

@@ -9,21 +9,25 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 /*
-Make it so that you can walk through allied units
+Make it so that you can walk through allied units (done)
 Can also walk through enemy units but take damage from each unit that you walk over
-
-*/
-
-/* Potential approach note
-Normal walk path searching, easy already done.
-Get a list of all of the edges
-label all of the tiles that are maxRANGE away from edges
-run hitable on all remaining tiles between walk path and maxRANGE.
 */
 public class Path
 {
     /*
-    
+    x, y            - x, y, grid coordinates of unit
+    mov             - Movement range of unit
+    team            - Team of unit
+    tick            - Tick counter for animation
+    anim            - Offset to shrink and grow tiles
+    movenent        - movement array (0 = can't move, 99 = attackable/starting tile, else = moves needed to get to tile)
+    pathList        - List of tiles unit can potentially walk to
+    attList         - List of tiles unit can potentially attack
+    walkList        - List of tiles unit will go through to get to destination
+    pathColor       - Color of path tiles
+    attColor        - Color of attack tiles
+    walkColor       - Color of walk tiles
+    font            - Font of number on tiles
     */
     private int x, y, mov, team, tick, anim;
     private int[][] movement;
@@ -42,6 +46,7 @@ public class Path
         font = new Font("Arial", Font.PLAIN, 15);;
     }
     
+    //Flashes path and attack grids
     public void tick()
     {
         tick++;
@@ -59,23 +64,18 @@ public class Path
         g.setColor(pathColor);
         for(int i = 0; i < pathList.size(); i++)
         {
-            //g.drawImage(sprite.image[1][8], pathList.get(i)[0] * Game.TILESIZE, pathList.get(i)[1] * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE, null);
-            //g.drawImage(sprite.image[1][1], Game.MAPOFFX + pathList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + pathList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim, null);
             g.fillRect(Game.MAPOFFX + pathList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + pathList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim);
         }
         //Renders attack (red) tiles
         g.setColor(attColor);
         for(int i = 0; i < attList.size(); i++)
         {
-            //g.drawImage(sprite.image[1][8], attList.get(i)[0] * Game.TILESIZE, attList.get(i)[1] * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE, null);
-            //g.drawImage(sprite.image[1][0], Game.MAPOFFX + attList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + attList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim, null);
             g.fillRect(Game.MAPOFFX + attList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + attList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim);
         }
         //Renders walking path
         g.setColor(walkColor);
         for(int i = 1; i < walkList.size(); i++)
         {
-            //g.drawImage(sprite.image[1][2], Game.MAPOFFX + walkList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + walkList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim, null);
             g.fillRect(Game.MAPOFFX + walkList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + walkList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim);
         }
         g.setColor(Color.BLACK);
@@ -105,7 +105,7 @@ public class Path
         this.mov = pathInfo[2];
         this.team = pathInfo[5];
         
-        int dat[], nX, nY;
+        int dat[];
         Queue<int[]> check = new LinkedList<>();
         
     //Reset everything
@@ -158,13 +158,12 @@ public class Path
     //Adds all attackable tiles from specified x, y for specified range
     private void addAttack(int x, int y, int minRange, int maxRange)
     {
-        int nX, nY, count = 0;
+        int nX, nY;
         for(int i = -maxRange; i <= maxRange; i++) {
             for(int j = Math.abs(i) - maxRange; j <= maxRange - Math.abs(i); j++) {
                 nX = x + i;
                 nY = y + j;
                 if(nX >= 0 && nX < Game.mapWidth && nY >= 0 && nY < Game.mapHeight) {
-                    count++;
                     if(Math.abs(i) + Math.abs(j) >= minRange) {
                         if(movement[nX][nY] == 0) {
                             attList.add(new int[]{nX, nY});
@@ -174,7 +173,6 @@ public class Path
                 }
             }
         }
-        System.out.println(count);
     }
     
     //Checks if a tile can be moved to
