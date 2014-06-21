@@ -45,19 +45,15 @@ public class Unit
     //Dummy unit
     public Unit(short classID)
     {
-        this.x = -1000;
-        this.y = -1000;
-        this.pX = x;
-        this.pY = y;
+        this.x = this.pX = -1000;
+        this.y = this.pY = -1000;
         this.classID = classID;
     }
     
     public Unit(int x, int y, Sprite sprite, int MOV, int minRANGE, int maxRANGE, int TEAM)
     {
-        this.x = x;
-        this.y = y;
-        this.pX = x;
-        this.pY = y;
+        this.x = this.pX = x;
+        this.y = this.pY = y;
         this.dX = x * Game.TILESIZE;
         this.dY = y * Game.TILESIZE;
         this.sprite = sprite;
@@ -254,7 +250,7 @@ public class Unit
     //Attacks enemy unit
     public boolean attack(Unit enemy)
     {
-        if(attacking && enemy != null && this != enemy && inRange(enemy) && team != enemy.getTEAM())
+        if(enemy != null && enemy.getHP() > 0 && this != enemy && inRange(enemy) && team != enemy.getTEAM() && attacking)
         {
             int expGain = Game.math.expGain(lv, enemy.getLV());
             int tDmg = Game.math.dmgAmt(atk, enemy.getDEF());
@@ -265,21 +261,6 @@ public class Unit
             return true;
         }
         return false;
-    }
-    
-    //Returns whether or not the unit is in range
-    private boolean inRange(Unit unit)
-    {
-        int dist = Math.abs(unit.getX() - x) + Math.abs(unit.getY() - y);
-        return dist >= minRange && dist <= maxRange;
-    }
-    
-    //Kills the unit, called when unit's HP is <= 0
-    private void kill() {
-        hp = 0;
-        dead = true;
-        moved = true;
-        done = true;
     }
     
     //Displays damage in the unit
@@ -377,5 +358,20 @@ public class Unit
     }
     public short getClassID() {
         return classID;
+    }
+    
+    //Kills the unit, called when unit's HP is <= 0
+    private void kill() {
+        hp = 0;
+        dead = true;
+        moved = true;
+        done = true;
+    }
+    
+    //Returns whether or not the unit is in range
+    private boolean inRange(Unit unit)
+    {
+        int dist = Math.abs(unit.getX() - x) + Math.abs(unit.getY() - y);
+        return dist >= minRange && dist <= maxRange;
     }
 }

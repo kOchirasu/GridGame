@@ -108,12 +108,19 @@ public class Button
                     System.out.println("Moves were reset");
                     break;
                 default:
-                    System.out.println(text + " was clicked. Not a main button.");
+                    System.out.println(text + " was clicked. Not a working button.");
                     break;
             }
+            pressed = false;
             return iD;
         }
         return -1;
+    }
+    
+    //Updates the shade and pressed states of the button
+    public void update(boolean shade, boolean pressed) {
+        this.shade = shade;
+        this.pressed = pressed;
     }
     
     //Returns the x, y of the 4 corners of the button

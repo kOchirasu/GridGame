@@ -33,7 +33,7 @@ public class Interface
     private final ArrayList<Bar> barList;
     private final BufferedImage bg;
     private Button[] buttonArray = new Button[BCOUNT];
-    private String line1 = "", line2 = "", line3 = "", line4 = "", line5 = "";
+    private String line1, line2, line3, line4, line5;
     private Unit cSelect;
     private Sprite sprite;
     private Color selectColor;
@@ -49,6 +49,7 @@ public class Interface
         buttonList = new ArrayList<>();
         barList = new ArrayList<>();
         selectColor = new Color(255, 255, 255, 128);
+        line1 = line2 = line3 = line4 = line5 = "";
         for(int i = 0; i < BCOUNT; i++)
         {
             buttonArray[i] = addButton("", i, i);
@@ -66,10 +67,10 @@ public class Interface
         {
             buttonList.get(i).render(g);
         }
-        /*for(int i = 0; i < BCOUNT; i++)
+        for(int i = 0; i < BCOUNT; i++)
         {
             buttonArray[i].render(g);
-        }*/
+        }
         //Renders all bars
         for(int i = 0; i < barList.size(); i++)
         {
@@ -132,12 +133,16 @@ public class Interface
         }
     }
     
-    //Creates a new button and adds it to the button ArrayList
+    //Creates one of the 8 buttons on the right of gui
     public Button addButton(String text, int iD, int loc)
     {
-        return addButton(544, 41 + 42 * loc, 140, 32, text, iD);
+        if(loc >= 0 && loc < BCOUNT) {
+            return new Button(544, 41 + 42 * loc, 140, 32, text, iD);
+        }
+        return null;
     }
     
+    //Creates a new button and adds it to the button ArrayList
     public Button addButton(int x, int y, int w, int h, String text, int iD)
     {
         Button bt = new Button(x, y, w, h, text, iD);
@@ -170,22 +175,14 @@ public class Interface
         if(oBt != null || nBt != null)    
         {
             if(oBt == nBt && oBt.pressed == true) {
-                //Dumb stuff
-                mouse = nBt.click(cSelect);
-                mouse = mouse < 0 || mouse > 7 ? 0 : mouse;
-                
-                nBt.pressed = false;
+                nBt.click(cSelect);
             }
             else {
                 if(oBt != null) {
-                    oBt.shade = false;
-                    oBt.pressed = false;
+                    oBt.update(false, false);
                 }
                 if(nBt != null) {
-                    nBt.shade = true;
-                    if(click){
-                        nBt.pressed = true;
-                    }
+                    nBt.update(true, click);
                 }
             }
         }
@@ -242,11 +239,23 @@ public class Interface
     }
     
     //Loops through button list and finds which button the mouse clicked on
+    //Could implement with binary search if button coordinates are in order.
     private Button clicked(int x, int y)
     {
+        int[] dat;
+        for(int i = 0; i < BCOUNT; i++)
+        {
+            dat = buttonArray[i].getArea();
+            if(dat[2] <= y && dat[3] >= y && dat[0] <= x && dat[1] >= x)
+            {
+                return buttonArray[i];
+            }
+        }
         for(int i = 0; i < buttonList.size(); i++)
         {
-            if(buttonList.get(i).getArea()[2] <= y && buttonList.get(i).getArea()[3] >= y && buttonList.get(i).getArea()[0] <= x && buttonList.get(i).getArea()[1] >= x)
+            //if(buttonList.get(i).getArea()[2] <= y && buttonList.get(i).getArea()[3] >= y && buttonList.get(i).getArea()[0] <= x && buttonList.get(i).getArea()[1] >= x)
+            dat = buttonArray[i].getArea();
+            if(dat[2] <= y && dat[3] >= y && dat[0] <= x && dat[1] >= x)
             {
                 return buttonList.get(i);
             }
