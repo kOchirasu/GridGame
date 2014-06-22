@@ -122,3 +122,6 @@ public class MouseHandler extends MouseAdapter
         Game.gui.update(true);
     }
 }
+
+//Select unit when mouse is pressed
+//show paths when mouse pressed for short duration instead of dragged
