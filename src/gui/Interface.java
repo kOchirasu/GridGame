@@ -1,6 +1,6 @@
 package gui;
 
-import character.Unit;
+import block.Unit;
 import graphics.Sprite;
 import gridGame.Game;
 import java.awt.Color;
@@ -221,6 +221,11 @@ public class Interface
                     line3 = "Fatigue: " + cSelect.getFTG() + "     Movement: " + cSelect.getMOV() + "     Range: " + cSelect.getMinRANGE() + "~" + cSelect.getMaxRANGE();
                     line4 = "Attack: " + cSelect.getATK() + "     Magic Attack: " + cSelect.getMATK() + "     Defense: " + cSelect.getDEF();
                     line5 = "Accuracy: " + cSelect.getACC() + "     Avoid: " + cSelect.getAVO() + "     Critical: " + cSelect.getCRIT() + "%";
+                }
+                else
+                {
+                    hideButtons();
+                    cSelect = null;
                 }
             }
         }

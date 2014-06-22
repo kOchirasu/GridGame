@@ -149,7 +149,9 @@ public class Path
         addAttack(x, y, pathInfo[3], pathInfo[4]);
         //Check using all possible movement tiles
         for(int[] k : pathList) {
-            addAttack(k[0], k[1], pathInfo[3], pathInfo[4]);
+            if(Game.getUnit(k[0], k[1]) == null) {
+                addAttack(k[0], k[1], pathInfo[3], pathInfo[4]);
+            }
         }
         
         walkList.add(new int[]{x, y});

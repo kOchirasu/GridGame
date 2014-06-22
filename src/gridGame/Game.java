@@ -1,7 +1,7 @@
 package gridGame;
 
 import algorithm.*;
-import character.Unit;
+import block.Unit;
 import graphics.*;
 import gui.Interface;
 import item.ItemLoader;
@@ -29,7 +29,6 @@ public class Game extends Canvas implements Runnable
     gameSpeed           - fps of game (1 = 30fps, 2 = 60fps)
     running             - True while the game is running
     paths               - Pathfinding class
-    math                - Calculating class
     gui                 - Game interface class
     gameThread          - Game thread
     lookup              - Item database
@@ -39,7 +38,6 @@ public class Game extends Canvas implements Runnable
     public static int mapWidth, mapHeight, gameSpeed = 2;
     public static boolean running = false;
     public static Path paths;
-    public static Calculator math;
     public static Interface gui;
     public Thread gameThread;
     public static ItemLoader lookup;
@@ -84,7 +82,6 @@ public class Game extends Canvas implements Runnable
         //Mot initializtion
         gui = new Interface(loader.load("/gui.png"), im);
         paths = new Path();
-        math = new Calculator();
         lookup = new ItemLoader("jdbc:derby://localhost:1527/Item", "gridgame", "maplestory");
         
         //Custom cursor: creates invisible cursor which is redrawn in Interface

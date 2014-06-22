@@ -1,6 +1,6 @@
 package gridGame;
 
-import character.Unit;
+import block.Unit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -50,8 +50,8 @@ public class MouseHandler extends MouseAdapter
         if((mX - Game.MAPOFFX) / Game.TILESIZE != cX || (mY - Game.MAPOFFY) / Game.TILESIZE != cY) {
             pathed = false;
         }
-        cX = (mX - Game.MAPOFFX) / Game.TILESIZE;
-        cY = (mY - Game.MAPOFFY) / Game.TILESIZE;
+        cX = (int)Math.floor((mX - Game.MAPOFFX) / (double)Game.TILESIZE);
+        cY = (int)Math.floor((mY - Game.MAPOFFY) / (double)Game.TILESIZE);
         
         if(found)
         {

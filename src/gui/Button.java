@@ -1,6 +1,6 @@
 package gui;
 
-import character.Unit;
+import block.Unit;
 import gridGame.Game;
 import java.awt.Color;
 import java.awt.Font;

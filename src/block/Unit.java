@@ -1,5 +1,6 @@
-package character;
+package block;
 
+import algorithm.Calculator;
 import graphics.Sprite;
 import gridGame.Game;
 import item.Inventory;
@@ -64,12 +65,11 @@ public class Unit
         this.inventory = new Inventory(5);
         classID = 0;
         
-        
         this.maxHP = 50;
         this.hp = 40;
         this.maxMP = 20;
         this.mp = 15;
-        this.atk = 20;
+        this.atk = 45-25*team;
         this.def = 5;
         
         btList.put(0, "Attack " + x);
@@ -250,10 +250,11 @@ public class Unit
     //Attacks enemy unit
     public boolean attack(Unit enemy)
     {
-        if(enemy != null && enemy.getHP() > 0 && this != enemy && inRange(enemy) && team != enemy.getTEAM() && attacking)
+        //this != enemy: this cannot be enemy if different teams, should be redundant check
+        if(enemy != null && enemy.getHP() > 0 && team != enemy.getTEAM() && inRange(enemy) && attacking)
         {
-            int expGain = Game.math.expGain(lv, enemy.getLV());
-            int tDmg = Game.math.dmgAmt(atk, enemy.getDEF());
+            int expGain = Calculator.expGain(lv, enemy.getLV());
+            int tDmg = Calculator.dmgAmt(atk, enemy.getDEF());
             enemy.damage(tDmg);
             attacking = false;
             done();
