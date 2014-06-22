@@ -49,7 +49,6 @@ x64/
 build/
 [Bb]in/
 [Oo]bj/
-nbproject/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -151,7 +150,6 @@ ClientBin/
 *.[Pp]ublish.xml
 *.pfx
 *.publishsettings
-Database/
 
 # RIA/Silverlight projects
 Generated_Code/
