@@ -4,6 +4,7 @@ import algorithm.*;
 import block.Unit;
 import graphics.*;
 import gui.Interface;
+import item.Item;
 import item.ItemLoader;
 import java.awt.Canvas;
 import java.awt.Dimension;
@@ -84,6 +85,8 @@ public class Game extends Canvas implements Runnable
         paths = new Path();
         lookup = new ItemLoader("jdbc:derby://localhost:1527/Item", "gridgame", "maplestory");
         
+        Item test = new Item(lookup, 100001);
+         System.out.println(test.toString());
         //Custom cursor: creates invisible cursor which is redrawn in Interface
         Toolkit toolkit = Toolkit.getDefaultToolkit();  
         setCursor(toolkit.createCustomCursor(im.unit[1][9], new Point(0, 0), "Invisible"));

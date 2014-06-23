@@ -361,6 +361,10 @@ public class Unit
         return classID;
     }
     
+    public Inventory getInventory(){
+        return inventory;
+    }
+    
     //Kills the unit, called when unit's HP is <= 0
     private void kill() {
         hp = 0;

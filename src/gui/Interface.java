@@ -94,6 +94,8 @@ public class Interface
     {
         if(cSelect != null)
         {
+            cSelect.getInventory().render(g);
+            cSelect.getInventory().render2(g);
             g.setColor(Color.BLUE);
             g.fillRect(Game.MAPOFFX + cSelect.getX() * Game.TILESIZE, Game.MAPOFFY + cSelect.getY() * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE);
         }
