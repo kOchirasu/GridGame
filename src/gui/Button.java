@@ -7,7 +7,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 
-public class Button
+public class Button implements guiObj
 {
     /* Private Variables
     x, y            - x, y, coordinates of button
@@ -59,7 +59,13 @@ public class Button
         hoverColor = new Color(255, 255, 255, 128);
         shadeColor = new Color(0, 0, 0, 128);
         buttonColor = new Color(0, 255, 0, 128);
+        //buttonColor = new Color(255, 200, 0, 128);
         disabledColor = new Color(75, 75, 75, 175);
+    }
+    
+    public void tick()
+    {
+        
     }
     
     //Renders the button, button text, and any shading
@@ -124,7 +130,7 @@ public class Button
     }
     
     //Returns the x, y of the 4 corners of the button
-    public int[] getArea() {
+    public int[] area() {
         return new int[]{x, x + w, y, y + h};
     }
     
@@ -158,6 +164,4 @@ public class Button
         this.w = w;
         this.h = h;
     }
-    
-    
 }

@@ -65,6 +65,7 @@ public class Unit
         this.inventory = new Inventory(5);
         classID = 0;
         
+        this.exp = 15;
         this.maxHP = 50;
         this.hp = 40;
         this.maxMP = 20;
@@ -160,7 +161,12 @@ public class Unit
         }
     }
     
-    public void listButtons(boolean enable)
+    public void select()
+    {
+        listButtons(true);
+    }
+    
+    private void listButtons(boolean enable)
     {
         int i = 0;
         for(Integer j : btList.keySet())
@@ -258,6 +264,7 @@ public class Unit
             enemy.damage(tDmg);
             attacking = false;
             done();
+            exp += expGain;
             //addExp(expGain);
             return true;
         }
@@ -309,8 +316,8 @@ public class Unit
     public int getLV() {
         return lv;
     }
-    public int getEXP() {
-        return exp;
+    public float getEXP() {
+        return exp / 100.0f;
     }
     public int getHP() {
         return hp;
@@ -318,11 +325,17 @@ public class Unit
     public int getMaxHP() {
         return maxHP;
     }
+    public float getHPRatio() {
+        return hp / (float) maxHP;
+    }
     public int getMP() {
         return mp;
     }
     public int getMaxMP() {
         return maxMP;
+    }
+    public float getMPRatio() {
+        return mp / (float) maxMP;
     }
     public int getFTG() {
         return ftg;
@@ -360,10 +373,15 @@ public class Unit
     public short getClassID() {
         return classID;
     }
+    public Inventory getInventory() {
+        return inventory;
+    }
     
     //Kills the unit, called when unit's HP is <= 0
     private void kill() {
         hp = 0;
+        mp = 0;
+        exp = 0;
         dead = true;
         moved = true;
         done = true;

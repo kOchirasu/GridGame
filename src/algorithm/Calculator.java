@@ -5,7 +5,7 @@ public final class Calculator
     //Exp formula
     public static int expGain(int uLevel, int eLevel)
     {
-        return 0;
+        return 20;
     }
     
     //Damage formula

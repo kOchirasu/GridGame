@@ -4,7 +4,9 @@ import gridGame.Game;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -29,6 +31,7 @@ public class Path
     walkColor       - Color of walk tiles
     font            - Font of number on tiles
     */
+    private final int sOffsetA = (int) ((Game.TILESIZE / 2) * (3 / 8.0f)), sOffsetB = Game.TILESIZE / 2 - sOffsetA;
     private int x, y, mov, team, tick, anim;
     private int[][] movement;
     private ArrayList<int[]> pathList = new ArrayList<>();
@@ -40,19 +43,21 @@ public class Path
     public Path()
     {
         movement = new int[Game.mapWidth][Game.mapHeight];
-        pathColor = new Color(0, 100, 255, 128);
+        pathColor = new Color(0, 75, 255, 128);
         attColor = new Color(255, 0, 0, 128);
         walkColor = new Color(0, 255, 144, 128);
-        font = new Font("Arial", Font.PLAIN, 15);;
+        font = new Font("Arial", Font.PLAIN, 15);
     }
     
     //Flashes path and attack grids
     public void tick()
     {
         tick++;
-        if(tick == 40)
-        {
-            anim ^= 1;
+        if(tick == 30) {
+            anim = sOffsetA;
+        }
+        else if(tick == 60) {
+            anim = 0;
             tick = 0;
         }
     }
@@ -60,23 +65,32 @@ public class Path
     //Renders movement and attack tiles
     public void render(Graphics g)
     {
+        Graphics2D g2 = (Graphics2D) g;
+        Color shine = new Color(225, 225, 225, 150);
+        int x, y;
         //Renders path (blue) tiles
-        g.setColor(pathColor);
         for(int i = 0; i < pathList.size(); i++)
         {
-            g.fillRect(Game.MAPOFFX + pathList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + pathList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim);
+            x = Game.MAPOFFX + pathList.get(i)[0] * Game.TILESIZE + 1;
+            y = Game.MAPOFFY + pathList.get(i)[1] * Game.TILESIZE + 1;
+            GradientPaint gp = new GradientPaint(x + Game.TILESIZE + anim + sOffsetB, y - anim - sOffsetB, shine, x, y + Game.TILESIZE, pathColor, true);
+            g2.setPaint(gp);
+            g2.fillRect(x, y, Game.TILESIZE - 1, Game.TILESIZE - 1);
         }
         //Renders attack (red) tiles
-        g.setColor(attColor);
         for(int i = 0; i < attList.size(); i++)
         {
-            g.fillRect(Game.MAPOFFX + attList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + attList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim);
+            x = Game.MAPOFFX + attList.get(i)[0] * Game.TILESIZE + 1;
+            y = Game.MAPOFFY + attList.get(i)[1] * Game.TILESIZE + 1;
+            GradientPaint gp = new GradientPaint(x + Game.TILESIZE + anim + sOffsetB, y - anim - sOffsetB, shine, x, y + Game.TILESIZE, attColor, true);
+            g2.setPaint(gp);
+            g2.fillRect(x, y, Game.TILESIZE - 1, Game.TILESIZE - 1);
         }
         //Renders walking path
         g.setColor(walkColor);
         for(int i = 1; i < walkList.size(); i++)
         {
-            g.fillRect(Game.MAPOFFX + walkList.get(i)[0] * Game.TILESIZE + anim, Game.MAPOFFY + walkList.get(i)[1] * Game.TILESIZE + anim, Game.TILESIZE - 2 * anim, Game.TILESIZE - 2 * anim);
+            g.fillRect(Game.MAPOFFX + walkList.get(i)[0] * Game.TILESIZE + 1, Game.MAPOFFY + walkList.get(i)[1] * Game.TILESIZE + 1, Game.TILESIZE - 1, Game.TILESIZE - 1);
         }
         g.setColor(Color.BLACK);
         g.setFont(font);

@@ -7,6 +7,7 @@ import gui.Interface;
 import item.Item;
 import item.ItemLoader;
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -85,8 +86,8 @@ public class Game extends Canvas implements Runnable
         paths = new Path();
         lookup = new ItemLoader("jdbc:derby://localhost:1527/Item", "gridgame", "maplestory");
         
-        Item test = new Item(lookup, 100001);
-        System.out.println(test.toString());
+        //Item test = new Item(lookup, 100001);
+        //System.out.println(test.toString());
         
         //Custom cursor: creates invisible cursor which is redrawn in Interface
         Toolkit toolkit = Toolkit.getDefaultToolkit();  
@@ -123,6 +124,10 @@ public class Game extends Canvas implements Runnable
         
         gui.addButton(544, 14, 140, 16, "Up", 9);
         gui.addButton(544, 378, 140, 16, "Down", 10);
+        
+        gui.addBar(10, 412, 250, 10, 0, new Color(200, 0, 0, 255));
+        gui.addBar(10, 430, 250, 10, 1, new Color(0, 75, 255, 255));
+        gui.addBar(10, 448, 250, 10, 2, new Color(255, 225, 0, 255));
         //gui.addButton(50, 425, 500, 125, "random button", 11);
     }
     
@@ -181,11 +186,12 @@ public class Game extends Canvas implements Runnable
     //Updates the game
     public void tick()
     {
+        gui.tick();
+        paths.tick();
         for(Unit u : unitList) 
         {
             u.tick();
         }
-        paths.tick();
         render();
     }
     

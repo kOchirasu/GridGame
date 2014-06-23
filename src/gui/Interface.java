@@ -34,11 +34,13 @@ public class Interface
     private final BufferedImage bg;
     private Button[] buttonArray = new Button[BCOUNT];
     private String line1, line2, line3, line4, line5;
+    private float hpBar;
     private Unit cSelect;
     private Sprite sprite;
     private Color selectColor;
     private Button oBt, nBt;
     private boolean inWindow = true, lockSelect;
+    private Window window;
     
     public Interface(BufferedImage bg, Sprite sprite)
     {
@@ -54,6 +56,16 @@ public class Interface
         {
             buttonArray[i] = addButton("", i, i);
             buttonArray[i].disabled = true;
+        }
+        
+        //window = new Window(125, 75, 450, 300);
+    }
+    
+    public void tick()
+    {
+        for(int i = 0; i < barList.size(); i++)
+        {
+            barList.get(i).tick();
         }
     }
     
@@ -79,6 +91,7 @@ public class Interface
         //Displays cSelect unit's info
         if(cSelect != null)
         {
+            g.setColor(Color.BLACK);
             g.setFont(new Font("Arial", Font.PLAIN, 12));
             g.drawString(line1, 400, 430);
             g.drawString(line2, 400, 450);
@@ -102,11 +115,16 @@ public class Interface
     //Second render for mouse pointer and grid highlights
     public void render3(Graphics g)
     {
-        //Highlights the grid that the mouse is hovering over
-        if(cX >= 0 && cY >= 0 && cX < Game.mapWidth && cY < Game.mapHeight) {
+        if(window != null)
+        {
+            window.render(g);
+        }
+        else if(cX >= 0 && cY >= 0 && cX < Game.mapWidth && cY < Game.mapHeight) //Highlights the grid that the mouse is hovering over
+        {
             g.setColor(selectColor);
             g.fillRect(Game.MAPOFFX + cX * Game.TILESIZE, Game.MAPOFFY + cY * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE);
         }
+        
         //Renders mouse pointer
         if(inWindow)
         {
@@ -151,9 +169,9 @@ public class Interface
     }
     
     //Creates a new bar and adds it to the bar ArrayList
-    public void addBar()
+    public void addBar(int x, int y, int w, int h, int iD, Color barColorF)
     {
-        barList.add(new Bar(0, 0, 0, 0, 0)); //Unfinished
+        barList.add(new Bar(x, y, w, h, iD, barColorF)); //Unfinished
     }
     
     //Updates mouse location
@@ -170,19 +188,22 @@ public class Interface
     {
         update(x, y);
         
-        oBt = nBt;
-        nBt = clicked(x, y);
-        if(oBt != null || nBt != null)    
+        if(window == null)
         {
-            if(oBt == nBt && oBt.pressed == true) {
-                nBt.click(cSelect);
-            }
-            else {
-                if(oBt != null) {
-                    oBt.update(false, false);
+            oBt = nBt;
+            nBt = clicked(x, y);
+            if(oBt != null || nBt != null)    
+            {
+                if(oBt == nBt && oBt.pressed == true) {
+                    nBt.click(cSelect);
                 }
-                if(nBt != null) {
-                    nBt.update(true, click);
+                else {
+                    if(oBt != null) {
+                        oBt.update(false, false);
+                    }
+                    if(nBt != null) {
+                        nBt.update(true, click);
+                    }
                 }
             }
         }
@@ -191,7 +212,7 @@ public class Interface
     //Updates unit info display, small bug with hasMoved not changing but too lazy to fix
     public void update(Unit selected)
     {
-        if(selected == null || selected.getClassID() >= 0)
+        if((selected == null || selected.getClassID() >= 0) && window == null)
         {
             //lock select after unit moves
             //unlock select if move canceled or unit done
@@ -208,19 +229,15 @@ public class Interface
                 {
                     //not attacking
                 }
+                unitUpdate(cSelect);
             }
             else
             {
                 if(selected != null)
                 {
                     cSelect = selected;
-                    cSelect.listButtons(true);
-                    //display info
-                    line1 = "Team: " + cSelect.getTEAM() + "     Coordinates: (" + cSelect.getX() + ", " + cSelect.getY() + ")     " + (cSelect.hasMoved() ? "[Can't Move]" : "[Can Move]");
-                    line2 = "HP: " + cSelect.getHP() +  "/" + cSelect.getMaxHP() + "     MP: " + cSelect.getMP() +  "/" + cSelect.getMaxMP() + "     LV: " + cSelect.getLV() + "     EXP: " + cSelect.getEXP() + "/" + 100;
-                    line3 = "Fatigue: " + cSelect.getFTG() + "     Movement: " + cSelect.getMOV() + "     Range: " + cSelect.getMinRANGE() + "~" + cSelect.getMaxRANGE();
-                    line4 = "Attack: " + cSelect.getATK() + "     Magic Attack: " + cSelect.getMATK() + "     Defense: " + cSelect.getDEF();
-                    line5 = "Accuracy: " + cSelect.getACC() + "     Avoid: " + cSelect.getAVO() + "     Critical: " + cSelect.getCRIT() + "%";
+                    cSelect.select();
+                    unitUpdate(cSelect);
                 }
                 else
                 {
@@ -231,10 +248,23 @@ public class Interface
         }
     }
     
+    private void unitUpdate(Unit unit)
+    {
+        //display info
+        line1 = "Team: " + unit.getTEAM() + "     Coordinates: (" + unit.getX() + ", " + unit.getY() + ")     " + (unit.hasMoved() ? "[Can't Move]" : "[Can Move]");
+        line2 = "HP: " + unit.getHP() +  "/" + unit.getMaxHP() + "     MP: " + unit.getMP() +  "/" + unit.getMaxMP() + "     LV: " + unit.getLV() + "     EXP: " + (int) (unit.getEXP() * 100) + "%";
+        line3 = "Fatigue: " + unit.getFTG() + "     Movement: " + unit.getMOV() + "     Range: " + unit.getMinRANGE() + "~" + unit.getMaxRANGE();
+        line4 = "Attack: " + unit.getATK() + "     Magic Attack: " + unit.getMATK() + "     Defense: " + unit.getDEF();
+        line5 = "Accuracy: " + unit.getACC() + "     Avoid: " + unit.getAVO() + "     Critical: " + unit.getCRIT() + "%";
+        change(unit.getHPRatio(), 0);
+        change(unit.getMPRatio(), 1);
+        change(unit.getEXP(), 2);
+    }
+    
     public boolean canSelect(Unit selected)
     {
         lockSelect = cSelect != null && (cSelect.hasMoved() || cSelect.moving) && !cSelect.isDone();
-        return !lockSelect && selected != null && !selected.moving && !selected.hasMoved() && selected.getClassID() != -1;
+        return !lockSelect && selected != null && !selected.moving && !selected.hasMoved() && selected.getClassID() != -1 && window == null;
     }
     
     //Determines whether or not mouse is in the window
@@ -250,7 +280,7 @@ public class Interface
         int[] dat;
         for(int i = 0; i < BCOUNT; i++)
         {
-            dat = buttonArray[i].getArea();
+            dat = buttonArray[i].area();
             if(dat[2] <= y && dat[3] >= y && dat[0] <= x && dat[1] >= x)
             {
                 return buttonArray[i];
@@ -258,13 +288,20 @@ public class Interface
         }
         for(int i = 0; i < buttonList.size(); i++)
         {
-            //if(buttonList.get(i).getArea()[2] <= y && buttonList.get(i).getArea()[3] >= y && buttonList.get(i).getArea()[0] <= x && buttonList.get(i).getArea()[1] >= x)
-            dat = buttonArray[i].getArea();
+            //if(buttonList.get(i).area()[2] <= y && buttonList.get(i).area()[3] >= y && buttonList.get(i).area()[0] <= x && buttonList.get(i).area()[1] >= x)
+            dat = buttonList.get(i).area();
             if(dat[2] <= y && dat[3] >= y && dat[0] <= x && dat[1] >= x)
             {
                 return buttonList.get(i);
             }
         }
         return null;
+    }
+    
+    
+    //need to change iD to actual id not index
+    public void change(float value, int iD)
+    {
+        barList.get(iD).set(value);
     }
 }
