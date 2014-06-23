@@ -34,7 +34,6 @@ public class Interface
     private final BufferedImage bg;
     private Button[] buttonArray = new Button[BCOUNT];
     private String line1, line2, line3, line4, line5;
-    private float hpBar;
     private Unit cSelect;
     private Sprite sprite;
     private Color selectColor;
@@ -107,6 +106,8 @@ public class Interface
     {
         if(cSelect != null)
         {
+            cSelect.getInventory().render(g);
+            cSelect.getInventory().render2(g);
             g.setColor(Color.BLUE);
             g.fillRect(Game.MAPOFFX + cSelect.getX() * Game.TILESIZE, Game.MAPOFFY + cSelect.getY() * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE);
         }
@@ -233,16 +234,15 @@ public class Interface
             }
             else
             {
-                if(selected != null)
+                cSelect = selected;
+                if(cSelect != null)
                 {
-                    cSelect = selected;
                     cSelect.select();
                     unitUpdate(cSelect);
                 }
                 else
                 {
                     hideButtons();
-                    cSelect = null;
                 }
             }
         }
@@ -256,9 +256,10 @@ public class Interface
         line3 = "Fatigue: " + unit.getFTG() + "     Movement: " + unit.getMOV() + "     Range: " + unit.getMinRANGE() + "~" + unit.getMaxRANGE();
         line4 = "Attack: " + unit.getATK() + "     Magic Attack: " + unit.getMATK() + "     Defense: " + unit.getDEF();
         line5 = "Accuracy: " + unit.getACC() + "     Avoid: " + unit.getAVO() + "     Critical: " + unit.getCRIT() + "%";
-        change(unit.getHPRatio(), 0);
-        change(unit.getMPRatio(), 1);
-        change(unit.getEXP(), 2);
+        //need to make this ID based instead of index based
+        barList.get(0).set(unit.getHPRatio());
+        barList.get(1).set(unit.getMPRatio());
+        barList.get(2).set(unit.getEXP());
     }
     
     public boolean canSelect(Unit selected)
@@ -296,12 +297,5 @@ public class Interface
             }
         }
         return null;
-    }
-    
-    
-    //need to change iD to actual id not index
-    public void change(float value, int iD)
-    {
-        barList.get(iD).set(value);
     }
 }

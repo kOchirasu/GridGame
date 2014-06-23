@@ -1,6 +1,8 @@
 package item;
 
 import gridGame.Game;
+import java.awt.Color;
+import java.awt.Graphics;
 
 //Untested, but should work logically
 public class Inventory
@@ -10,6 +12,7 @@ public class Inventory
     count       - Current number of items in inventory
     itemList    - Array of items in inventory
     */
+    int x, y, w, h;
     int size, count;
     Item[] itemList;
     
@@ -17,6 +20,37 @@ public class Inventory
     {
         this.size = size;
         itemList = new Item[size];
+        x = 50;
+        y = 470;
+        w = 166;
+        h = 38;
+    }
+    
+    public void render(Graphics g)
+    {
+        //draw inventory here
+        g.drawRect(x, y, w, h);
+        for(int i = 0; i < 5; i++) {
+            g.drawRect(x + 3 + Game.TILESIZE * i, y + 3, Game.TILESIZE, Game.TILESIZE);
+        }
+       //Draw acutal inventory
+    }    
+    
+    public void render2(Graphics g)
+    {
+        //Draw all items
+        g.setColor(Color.BLUE);
+        for(int i = 0; i < 5; i++) {
+            g.drawRect(x + 3 + Game.TILESIZE * i, y + 3, 10, 10);
+        }
+        for(int i = 0; i < itemList.length; i++)
+        {
+            if(itemList[i] != null)
+            {
+                //g.fillRect(10,10,160,32);
+                //draw all spritesn in locations here
+            }   
+        }
     }
     
     //Adds an item to inventory (by ID) if it is not full
