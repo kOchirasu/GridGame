@@ -25,7 +25,8 @@ public class Inventory
         w = 166;
         h = 38;
         int n = 100001 + (int)(Math.floor(Math.random() * 7));
-        //System.out.println(n);
+        addItem(n);
+        n = 110001 + (int)(Math.floor(Math.random() * 7));
         addItem(n);
     }
     
@@ -46,10 +47,15 @@ public class Inventory
         for(int i = 0; i < 5; i++) {
             g.drawRect(x + 3 + Game.TILESIZE * i, y + 3, 10, 10);
         }
-        for(int i = 0; i < count; i++)
+        /*for(int i = 0; i < count; i++)
         {
             //draw all spritesn in locations here   
             itemList[i].render(x + 3 + Game.TILESIZE * i, y + 3, g);
+        }*/
+        for(int i = 0; i < size; i++) //Change back to count later if you want to beable to not move to null
+        {   
+            if(itemList[i] != null)
+                itemList[i].render(x + 3 + Game.TILESIZE * i, y + 3, g);
         }
     }
     
@@ -92,10 +98,26 @@ public class Inventory
     //Removes item at specified index if it exists
     public Item getItem(int index)
     {
-        if(index < size)
-        {
+        if(index < size) {
             return itemList[index];
         }
         return null;
+    }
+    
+    public void slotRequest(int s1, int s2)
+    {
+        if(s1 >= 0 && s2 >= 0)
+        {
+            Item temp = itemList[s1];
+            itemList[s1] = itemList[s2];
+            itemList[s2] = temp;
+        }
+    }
+    
+    public int getX() {
+        return x;    
+    }
+    public int getY() {
+        return y;
     }
 }

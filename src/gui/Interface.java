@@ -27,8 +27,9 @@ public class Interface
     inWindow        - True while mouse cursor is in the window
     lockSelect      - Prevents interface from updating cSelect unit.  True when a unit has moved but 
                       has not finished its actions.
+    slot            - Used for inventory slot number
     */
-    private int x, y, cX, cY, mouse;
+    private int x, y, cX, cY, mouse, slot;
     private final ArrayList<Button> buttonList;
     private final ArrayList<Bar> barList;
     private final BufferedImage bg;
@@ -56,6 +57,7 @@ public class Interface
             buttonArray[i] = addButton("", i, i);
             buttonArray[i].disabled = true;
         }
+        slot = -1;
         
         //window = new Window(125, 75, 450, 300);
     }
@@ -191,6 +193,17 @@ public class Interface
         
         if(window == null)
         {
+            //do shit here
+            if(cSelect != null && click == true) {
+                slot = whichSlot(x);
+            }
+            
+            if(cSelect != null && click == false && slot != -1)
+            {
+                cSelect.getInventory().slotRequest(slot, whichSlot(x));
+                slot = -1;
+            }
+            
             oBt = nBt;
             nBt = clicked(x, y);
             if(oBt != null || nBt != null)    
@@ -208,6 +221,17 @@ public class Interface
                 }
             }
         }
+    }
+    
+    public int whichSlot(int x)
+    {
+        for(int i = 0; i < 5; i++)
+        {
+            if(x >= cSelect.getInventory().getX() + 3 + Game.TILESIZE * i && x <= cSelect.getInventory().getX() + 3 + Game.TILESIZE + Game.TILESIZE * i && y >= cSelect.getInventory().getY() + 3 && y<= cSelect.getInventory().getY() + 3 + Game.TILESIZE) {
+                return i;
+            }
+        }
+        return -1;
     }
     
     //Updates unit info display, small bug with hasMoved not changing but too lazy to fix
