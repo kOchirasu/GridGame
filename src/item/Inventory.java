@@ -12,9 +12,9 @@ public class Inventory
     count       - Current number of items in inventory
     itemList    - Array of items in inventory
     */
-    private int x, y, w, h;
-    private int size, count;
-    private Item[] itemList;
+    int x, y, w, h;
+    int size, count;
+    Item[] itemList;
     
     public Inventory(int size)
     {
@@ -22,13 +22,11 @@ public class Inventory
         itemList = new Item[size];
         x = 50;
         y = 470;
-        w = 176;
-        h = 40;
-        int n = 100001 + (int)(Math.floor(Math.random() * 8));
+        w = 166;
+        h = 38;
+        int n = 100001 + (int)(Math.floor(Math.random() * 7));
         addItem(n);
         n = 110001 + (int)(Math.floor(Math.random() * 7));
-        addItem(n);
-        n = 120001 + (int)(Math.floor(Math.random() * 7));
         addItem(n);
     }
     
@@ -36,23 +34,28 @@ public class Inventory
     {
         //draw inventory here
         g.drawRect(x, y, w, h);
-        for(int i = 0; i < size; i++) {
-            g.drawRect(x + 3 + (Game.TILESIZE + 2) * i, y + 3, Game.TILESIZE + 2, Game.TILESIZE + 2);
+        for(int i = 0; i < 5; i++) {
+            g.drawRect(x + 3 + Game.TILESIZE * i, y + 3, Game.TILESIZE, Game.TILESIZE);
         }
+       //Draw acutal inventory
     }    
     
     public void render2(Graphics g)
     {
         //Draw all items
         g.setColor(Color.BLUE);
-        for(int i = 0; i < size; i++) {
-            g.drawRect(x + 3 + (Game.TILESIZE + 2) * i, y + 3, 10, 10);
+        for(int i = 0; i < 5; i++) {
+            g.drawRect(x + 3 + Game.TILESIZE * i, y + 3, 10, 10);
         }
+        /*for(int i = 0; i < count; i++)
+        {
+            //draw all spritesn in locations here   
+            itemList[i].render(x + 3 + Game.TILESIZE * i, y + 3, g);
+        }*/
         for(int i = 0; i < size; i++) //Change back to count later if you want to beable to not move to null
         {   
-            if(itemList[i] != null) {
-                itemList[i].render(x + 4 + (Game.TILESIZE + 2) * i, y + 4, g);
-            }
+            if(itemList[i] != null)
+                itemList[i].render(x + 3 + Game.TILESIZE * i, y + 3, g);
         }
     }
     
@@ -111,16 +114,10 @@ public class Inventory
         }
     }
     
-    public int[] area(int n) {
-        return new int []{x + 4 + (Game.TILESIZE + 2) * n, x + 4 + (Game.TILESIZE + 2) * n + Game.TILESIZE, y + 4, y + 4 + Game.TILESIZE};
-    }
     public int getX() {
         return x;    
     }
     public int getY() {
         return y;
-    }
-    public int getSize() {
-        return size;
     }
 }
