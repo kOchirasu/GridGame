@@ -24,6 +24,7 @@ public class Inventory
         y = 470;
         w = 166;
         h = 38;
+        addItem(100002);
     }
     
     public void render(Graphics g)
@@ -43,13 +44,10 @@ public class Inventory
         for(int i = 0; i < 5; i++) {
             g.drawRect(x + 3 + Game.TILESIZE * i, y + 3, 10, 10);
         }
-        for(int i = 0; i < itemList.length; i++)
+        for(int i = 0; i < count; i++)
         {
-            if(itemList[i] != null)
-            {
-                //g.fillRect(10,10,160,32);
-                //draw all spritesn in locations here
-            }   
+            //draw all spritesn in locations here   
+            itemList[i].render(x + 3 + Game.TILESIZE * i, y + 3, g);
         }
     }
     

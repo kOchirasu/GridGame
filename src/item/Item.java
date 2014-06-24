@@ -1,5 +1,9 @@
 package item;
 
+import graphics.SpriteLoader;
+import gridGame.Game;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -7,6 +11,7 @@ public class Item
 {
     int iD, type, minRange, maxRange, ability, atk, mAtk, acc, crit, value;
     String name;
+    BufferedImage image;
     
     public Item(ItemLoader lookup, int iD)
     {
@@ -28,6 +33,13 @@ public class Item
         {
             System.out.println(ex.getMessage());
         }
+        SpriteLoader loader = new SpriteLoader();
+        this.image = loader.load("/Item/" + iD + ".png");
+    }
+    
+    public void render(int x, int y, Graphics g)
+    {
+        g.drawImage(image, x, y, Game.TILESIZE, Game.TILESIZE, null);
     }
     
     @Override
