@@ -24,7 +24,9 @@ public class Inventory
         y = 470;
         w = 166;
         h = 38;
-        addItem(100002);
+        int n = 100001 + (int)(Math.floor(Math.random() * 7));
+        //System.out.println(n);
+        addItem(n);
     }
     
     public void render(Graphics g)
