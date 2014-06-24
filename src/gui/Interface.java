@@ -193,25 +193,21 @@ public class Interface
         
         if(window == null)
         {
-            //do shit here
-            if(cSelect != null && click == true) {
-                slot = whichSlot(x);
-            }
-            
-            if(cSelect != null && click == false && slot != -1)
+            if(cSelect != null)
             {
-                cSelect.getInventory().slotRequest(slot, whichSlot(x));
-                slot = -1;
+                cSelect.getInventory().slotRequest(slot, whichSlot());
+                slot = click ? whichSlot() : -1;
             }
             
             oBt = nBt;
-            nBt = clicked(x, y);
+            nBt = clicked();
             if(oBt != null || nBt != null)    
             {
                 if(oBt == nBt && oBt.pressed == true) {
                     nBt.click(cSelect);
                 }
-                else {
+                else 
+                {
                     if(oBt != null) {
                         oBt.update(false, false);
                     }
@@ -221,17 +217,6 @@ public class Interface
                 }
             }
         }
-    }
-    
-    public int whichSlot(int x)
-    {
-        for(int i = 0; i < 5; i++)
-        {
-            if(x >= cSelect.getInventory().getX() + 3 + Game.TILESIZE * i && x <= cSelect.getInventory().getX() + 3 + Game.TILESIZE + Game.TILESIZE * i && y >= cSelect.getInventory().getY() + 3 && y<= cSelect.getInventory().getY() + 3 + Game.TILESIZE) {
-                return i;
-            }
-        }
-        return -1;
     }
     
     //Updates unit info display, small bug with hasMoved not changing but too lazy to fix
@@ -298,28 +283,40 @@ public class Interface
         inWindow = b;
     }
     
+    //returns the inventory slot the mouse has clicked
+    private int whichSlot()
+    {
+        for(int i = 0; i < cSelect.getInventory().getSize(); i++)
+        {
+            if(within(cSelect.getInventory().area(i))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
     //Loops through button list and finds which button the mouse clicked on
     //Could implement with binary search if button coordinates are in order.
-    private Button clicked(int x, int y)
+    private Button clicked()
     {
-        int[] dat;
         for(int i = 0; i < BCOUNT; i++)
         {
-            dat = buttonArray[i].area();
-            if(dat[2] <= y && dat[3] >= y && dat[0] <= x && dat[1] >= x)
+            if(within(buttonArray[i].area()))
             {
                 return buttonArray[i];
             }
         }
         for(int i = 0; i < buttonList.size(); i++)
         {
-            //if(buttonList.get(i).area()[2] <= y && buttonList.get(i).area()[3] >= y && buttonList.get(i).area()[0] <= x && buttonList.get(i).area()[1] >= x)
-            dat = buttonList.get(i).area();
-            if(dat[2] <= y && dat[3] >= y && dat[0] <= x && dat[1] >= x)
-            {
+            if(within(buttonList.get(i).area())) {
                 return buttonList.get(i);
             }
         }
         return null;
+    }
+    
+    private boolean within(int[] area)
+    {
+        return area[2] <= y && area[3] >= y && area[0] <= x && area[1] >= x;
     }
 }
