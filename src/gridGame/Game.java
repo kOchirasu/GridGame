@@ -94,16 +94,17 @@ public class Game extends Canvas implements Runnable
         setCursor(toolkit.createCustomCursor(im.unit[1][9], new Point(0, 0), "Invisible"));
         
         //Create Units
-        addUnit(1, 0, 0, -1, -1, -1, 0);
-        addUnit(1, 1, 0, -1, -1, -1, 0);
-        addUnit(1, 2, 0, -1, -1, -1, 0);
-        addUnit(0, 0, 0, -1, -1, -1, 0);
-        addUnit(0, 3, 0, -1, -1, -1, 0);
-        addUnit(5, 3, 0, -1, -1, -1, 0);
+        addUnit(1, 0, 0, -1, 0);
+        addUnit(1, 1, 0, -1, 0);
+        addUnit(1, 2, 0, -1, 0);
+        addUnit(0, 0, 0, -1, 0);
+        addUnit(0, 3, 0, -1, 0);
+        addUnit(5, 3, 0, -1, 0);
+        addUnit(5, 4, 0, -1, 0);
         
         for(int i = 0; i < 16; i++)
         {
-            addUnit(i, 11, 0, 50, 1, 1, 1);
+            addUnit(i, 11, 0, 50, 1);
         }
         
         //MouseHandler
@@ -229,11 +230,11 @@ public class Game extends Canvas implements Runnable
     }
     
     //Add a unit to the map
-    public void addUnit(int x, int y, int type, int mov, int minRg, int maxRg, int team)
+    public void addUnit(int x, int y, int type, int mov, int team)
     {
         if(x >= 0 && y >= 0 && x < mapWidth && y < mapHeight && getUnit(x, y) == null)
         {
-            Unit temp = new Unit(x, y, im, mov, minRg, maxRg, team);
+            Unit temp = new Unit(x, y, im, mov, team);
             unitGrid[x][y] = temp;
             unitList.add(temp);
         }

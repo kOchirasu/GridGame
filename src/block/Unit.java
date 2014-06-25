@@ -29,7 +29,7 @@ public class Unit
     sprite              - Array of sprites
     */
     private int x, y, pX, pY, dX, dY, n[] = new int[3], xOff, yOff, count, dmgLen;
-    private int lv, exp, hp, maxHP, mp, maxMP, ftg, mov, atk, mAtk, def, acc, avoid, crit, minRange, maxRange, team;
+    private int lv, exp, hp, maxHP, mp, maxMP, ftg, mov, atk, mAtk, def, acc, avoid, crit, team;
     private int walkTick, dmgTick;
     private Inventory inventory;
     private boolean dead, moved, done, attacking;
@@ -51,7 +51,7 @@ public class Unit
         this.classID = classID;
     }
     
-    public Unit(int x, int y, Sprite sprite, int MOV, int minRANGE, int maxRANGE, int TEAM)
+    public Unit(int x, int y, Sprite sprite, int MOV, int TEAM)
     {
         this.x = this.pX = x;
         this.y = this.pY = y;
@@ -59,8 +59,6 @@ public class Unit
         this.dY = y * Game.TILESIZE;
         this.sprite = sprite;
         this.mov = MOV != -1 ? MOV : 5; //Defaults to 5
-        this.minRange = minRANGE != -1 ? minRANGE : 1; //Defaults to 1
-        this.maxRange = maxRANGE != -1 ? maxRANGE : 2; //Defaults to 2
         this.team = TEAM;
         this.inventory = new Inventory(5);
         classID = 0;
@@ -70,7 +68,7 @@ public class Unit
         this.hp = 40;
         this.maxMP = 20;
         this.mp = 15;
-        this.atk = 45-25*team;
+        this.atk = 25-10*team;
         this.def = 5;
         
         btList.put(0, "Attack " + x);
@@ -245,7 +243,7 @@ public class Unit
     {
         if(!done)
         {
-            Game.paths.findPath(new int[]{x, y, 0, minRange, maxRange, team});
+            Game.paths.findPath(new int[]{x, y, 0, getMinRANGE(), getMaxRANGE(), team});
             moved = true;
             attacking = true;
             return true;
@@ -260,7 +258,7 @@ public class Unit
         if(enemy != null && enemy.getHP() > 0 && team != enemy.getTEAM() && inRange(enemy) && attacking)
         {
             int expGain = Calculator.expGain(lv, enemy.getLV());
-            int tDmg = Calculator.dmgAmt(atk, enemy.getDEF());
+            int tDmg = Calculator.dmgAmt(atk + wepATK(), enemy.getDEF());
             enemy.damage(tDmg);
             attacking = false;
             done();
@@ -274,7 +272,7 @@ public class Unit
     //Displays damage in the unit
     public void damage(int dmg)
     {
-        dmg = dmg > 999 ? 999 : dmg;
+        dmg = dmg > 999 ? 999 : dmg < 0 ? 0 : dmg;
         hp -= dmg;
         if(hp <= 0){
             kill();
@@ -299,7 +297,9 @@ public class Unit
         return done;
     }
     public int[] pathInfo() {
-        return new int[]{x, y, mov, minRange, maxRange, team};
+        //System.out.println(inventory.getItem(0).getNAME());
+        //System.out.println("Range: " + getMinRANGE() + "~" + getMaxRANGE());
+        return new int[]{x, y, mov, getMinRANGE(), getMaxRANGE(), team};
     }
     public int getX() {
         return x;
@@ -361,12 +361,6 @@ public class Unit
     public int getCRIT() {
         return crit;
     }
-    public int getMinRANGE() {
-        return minRange;
-    }
-    public int getMaxRANGE() {
-        return maxRange;
-    }
     public int getTEAM() {
         return team;
     }
@@ -375,6 +369,16 @@ public class Unit
     }
     public Inventory getInventory() {
         return inventory;
+    }
+    //Should loop to find first compatible weap
+    public int wepATK() {
+        return inventory.getItem(0).getATK();
+    }
+    public int getMinRANGE() {
+        return inventory.getItem(0).getMinRANGE();
+    }
+    public int getMaxRANGE() {
+        return inventory.getItem(0).getMaxRANGE();
     }
     
     //Kills the unit, called when unit's HP is <= 0
@@ -391,6 +395,6 @@ public class Unit
     private boolean inRange(Unit unit)
     {
         int dist = Math.abs(unit.getX() - x) + Math.abs(unit.getY() - y);
-        return dist >= minRange && dist <= maxRange;
+        return dist >= getMinRANGE() && dist <= getMaxRANGE();
     }
 }

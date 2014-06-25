@@ -33,12 +33,30 @@ public class MouseHandler extends MouseAdapter
     @Override
     public void mousePressed(MouseEvent e) 
     {
-        int x = e.getX(), y = e.getY();
-        pX = (x - Game.MAPOFFX) / Game.TILESIZE;
-        pY = (y - Game.MAPOFFY) / Game.TILESIZE;
+        mX = e.getX();
+        mY = e.getY();
+        switch(e.getButton())
+        {
+            case MouseEvent.BUTTON1: //Left click
+                pX = (mX - Game.MAPOFFX) / Game.TILESIZE;
+                pY = (mY - Game.MAPOFFY) / Game.TILESIZE;
+
+                found = false;
+                Game.gui.update(mX, mY, true, 1);
+                //System.out.println("pressed left");
+                break;
+                
+            case MouseEvent.BUTTON2: //Middle click
+                Game.gui.update(mX, mY, true, 2);
+                //System.out.println("pressed middle");
+                break;
+                
+            case MouseEvent.BUTTON3: //Right click
+                Game.gui.update(mX, mY, true, 3);
+                //System.out.println("pressed right");
+                break;
+        }
         
-        found = false;
-        Game.gui.update(x, y, true);
     }
     
     //Updates the mouse coordinates, and interface.  Also does pathfinding
@@ -57,6 +75,7 @@ public class MouseHandler extends MouseAdapter
         {
             if(!pathed)
             {
+                //System.out.printf("%d , %d \n", cX, cY);
                 Game.paths.addPath(cX, cY);
                 pathed = true;
             }
@@ -87,24 +106,40 @@ public class MouseHandler extends MouseAdapter
         cX = (mX - Game.MAPOFFX) / Game.TILESIZE;
         cY = (mY - Game.MAPOFFY) / Game.TILESIZE;
 
-        Game.gui.update(mX, mY, false);
+        Game.gui.update(mX, mY, false, 1);
     }
     
     //Updates the interface, and also moves unit if applicable
     @Override
     public void mouseReleased(MouseEvent e) 
     {
-        //System.out.print("X: " + cX + ", Y: " + cY + "\t");
-        selected = Game.getUnit(pX, pY);
-        if(Game.gui.canSelect(selected))
+        switch(e.getButton())
         {
-            walkList = new ArrayList<>(Game.paths.getWalk());
-            Game.paths.clearPaths();
-            selected.move(cX, cY, walkList);
-            //selected.damage(77);
+            case MouseEvent.BUTTON1: //Left click
+                //System.out.print("X: " + cX + ", Y: " + cY + "\t");
+                selected = Game.getUnit(pX, pY);
+                if(Game.gui.canSelect(selected))
+                {
+                    walkList = new ArrayList<>(Game.paths.getWalk());
+                    Game.paths.clearPaths();
+                    selected.move(cX, cY, walkList);
+                    //selected.damage(77);
+                }
+                Game.gui.update(selected);
+                Game.gui.update(e.getX(), e.getY(), false, 1);
+                //System.out.println("released left");
+                break;
+                
+            case MouseEvent.BUTTON2: //Middle click
+                Game.gui.update(e.getX(), e.getY(), false, 2);
+                //System.out.println("released middle");
+                break;
+                
+            case MouseEvent.BUTTON3: //Right click
+                Game.gui.update(e.getX(), e.getY(), false, 3);
+                //System.out.println("released right");
+                break;
         }
-        Game.gui.update(selected);
-        Game.gui.update(e.getX(), e.getY(), false);
     }
     
     //Hides mouse if you move out of the window
@@ -112,7 +147,7 @@ public class MouseHandler extends MouseAdapter
     public void mouseExited(MouseEvent e)
     {
         Game.gui.update(false);
-        Game.gui.update(0, 0, false);
+        Game.gui.update(0, 0);
     }
     
     //Brings mouse back

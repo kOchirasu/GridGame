@@ -47,4 +47,32 @@ public class Item
     {
         return "Item ID: \t" + iD + "\nName: \t\t" + name + "\nRange: \t\t" + minRange + "~" + maxRange + "\nAtt/M.Att: \t" + atk + "/" + mAtk + "\nAccuracy: \t" + acc + "\nCritical: \t" + crit + "\nSale Price: \t" + value;
     }
+    
+    public int getID() {
+        return iD;
+    }
+    public String getNAME() {
+        return name;
+    }
+    public int getATK() {
+        return atk;
+    }
+    public int getMATK() {
+        return mAtk;
+    }
+    public int getACC() {
+        return acc;
+    }
+    public int getCRIT() {
+        return crit;
+    }
+    public int getMinRANGE() {
+        return minRange;
+    }
+    public int getMaxRANGE() {
+        return maxRange;
+    }
+    public int getValue() {
+        return value;
+    }
 }

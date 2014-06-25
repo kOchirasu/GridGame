@@ -8,6 +8,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeMap;
 
 public class Interface
 {
@@ -16,8 +18,8 @@ public class Interface
     x, y            - x, y mouse coordinates
     cX, cY          - x, y grid coordinates
     mouse           - Color of mouse cursor (see cursor.png)
-    buttonList      - List of buttons in interface
-    barList         - List of bars in interface
+    buttonMap       - Map of buttons in interface (not including button array)
+    barMap          - Map of bars in interface
     bg              - Background image
     line1,2,3,4,5   - Unit stat information
     cSelect        - Currently cSelect unit (will be null if no unit is actively cSelect)
@@ -30,8 +32,8 @@ public class Interface
     slot            - Used for inventory slot number
     */
     private int x, y, cX, cY, mouse, slot;
-    private final ArrayList<Button> buttonList;
-    private final ArrayList<Bar> barList;
+    private final HashMap<Integer, Button> buttonMap;
+    private final HashMap<Integer, Bar> barMap;
     private final BufferedImage bg;
     private Button[] buttonArray = new Button[BCOUNT];
     private String line1, line2, line3, line4, line5;
@@ -48,8 +50,8 @@ public class Interface
         this.sprite = sprite;
         this.cX = Game.mapWidth;
         this.cY = Game.mapHeight;
-        buttonList = new ArrayList<>();
-        barList = new ArrayList<>();
+        buttonMap = new HashMap<>();
+        barMap = new HashMap<>();
         selectColor = new Color(255, 255, 255, 128);
         line1 = line2 = line3 = line4 = line5 = "";
         for(int i = 0; i < BCOUNT; i++)
@@ -64,9 +66,9 @@ public class Interface
     
     public void tick()
     {
-        for(int i = 0; i < barList.size(); i++)
+        for(Integer i : barMap.keySet())
         {
-            barList.get(i).tick();
+            barMap.get(i).tick();
         }
     }
     
@@ -76,18 +78,18 @@ public class Interface
         //Renders the background image
         g.drawImage(bg, 0, 0, null);
         //Renders all buttons
-        for(int i = 0; i < buttonList.size(); i++)
+        for(Integer i : buttonMap.keySet())
         {
-            buttonList.get(i).render(g);
+            buttonMap.get(i).render(g);
         }
         for(int i = 0; i < BCOUNT; i++)
         {
             buttonArray[i].render(g);
         }
         //Renders all bars
-        for(int i = 0; i < barList.size(); i++)
+        for(Integer i : barMap.keySet())
         {
-            barList.get(i).render(g);
+            barMap.get(i).render(g);
         }
         //Displays cSelect unit's info
         if(cSelect != null)
@@ -167,14 +169,14 @@ public class Interface
     public Button addButton(int x, int y, int w, int h, String text, int iD)
     {
         Button bt = new Button(x, y, w, h, text, iD);
-        buttonList.add(bt);
+        buttonMap.put(iD, bt);
         return bt;
     }
     
     //Creates a new bar and adds it to the bar ArrayList
     public void addBar(int x, int y, int w, int h, int iD, Color barColorF)
     {
-        barList.add(new Bar(x, y, w, h, iD, barColorF)); //Unfinished
+        barMap.put(iD, new Bar(x, y, w, h, iD, barColorF));
     }
     
     //Updates mouse location
@@ -187,34 +189,45 @@ public class Interface
     }
     
     //Updates mouse location to highlight button and whether or not mouse is clicked
-    public void update(int x, int y, boolean click)
+    public void update(int x, int y, boolean click, int button)
     {
         update(x, y);
         
         if(window == null)
         {
-            if(cSelect != null)
+            switch(button)
             {
-                cSelect.getInventory().slotRequest(slot, whichSlot());
-                slot = click ? whichSlot() : -1;
-            }
-            
-            oBt = nBt;
-            nBt = clicked();
-            if(oBt != null || nBt != null)    
-            {
-                if(oBt == nBt && oBt.pressed == true) {
-                    nBt.click(cSelect);
-                }
-                else 
-                {
-                    if(oBt != null) {
-                        oBt.update(false, false);
+                case 1: //Left click
+                    if(cSelect != null)
+                    {
+                        cSelect.getInventory().slotRequest(slot, whichSlot());
+                        slot = click ? whichSlot() : -1;
                     }
-                    if(nBt != null) {
-                        nBt.update(true, click);
+
+                    oBt = nBt;
+                    nBt = clicked();
+                    if(oBt != null || nBt != null)    
+                    {
+                        if(oBt == nBt && oBt.pressed == true) {
+                            nBt.click(cSelect);
+                        }
+                        else 
+                        {
+                            if(oBt != null) {
+                                oBt.update(false, false);
+                            }
+                            if(nBt != null) {
+                                nBt.update(true, click);
+                            }
+                        }
                     }
-                }
+                    break;
+                    
+                case 2: //Middle click (wheel)
+                    break;
+                    
+                case 3: //Right click
+                    break;
             }
         }
     }
@@ -265,10 +278,9 @@ public class Interface
         line3 = "Fatigue: " + unit.getFTG() + "     Movement: " + unit.getMOV() + "     Range: " + unit.getMinRANGE() + "~" + unit.getMaxRANGE();
         line4 = "Attack: " + unit.getATK() + "     Magic Attack: " + unit.getMATK() + "     Defense: " + unit.getDEF();
         line5 = "Accuracy: " + unit.getACC() + "     Avoid: " + unit.getAVO() + "     Critical: " + unit.getCRIT() + "%";
-        //need to make this ID based instead of index based
-        barList.get(0).set(unit.getHPRatio());
-        barList.get(1).set(unit.getMPRatio());
-        barList.get(2).set(unit.getEXP());
+        barMap.get(0).set(unit.getHPRatio());
+        barMap.get(1).set(unit.getMPRatio());
+        barMap.get(2).set(unit.getEXP());
     }
     
     public boolean canSelect(Unit selected)
@@ -306,10 +318,10 @@ public class Interface
                 return buttonArray[i];
             }
         }
-        for(int i = 0; i < buttonList.size(); i++)
+        for(Integer i : buttonMap.keySet())
         {
-            if(within(buttonList.get(i).area())) {
-                return buttonList.get(i);
+            if(within(buttonMap.get(i).area())) {
+                return buttonMap.get(i);
             }
         }
         return null;

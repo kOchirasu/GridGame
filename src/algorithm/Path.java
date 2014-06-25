@@ -224,7 +224,7 @@ public class Path
                 //System.out.println("Invalid case: 3\t walkList.size() = " + walkList.size() + " > mov = " + mov);
                 repath(x, y);
             }
-            else if(Math.abs(x - walkList.get(walkList.size() - 1)[0]) + Math.abs(y - walkList.get(walkList.size() - 1)[1]) != 1)
+            else if(walkList.size() > 0 && Math.abs(x - walkList.get(walkList.size() - 1)[0]) + Math.abs(y - walkList.get(walkList.size() - 1)[1]) != 1)
             {
                 //System.out.println("Invalid case: 4\t distance > 1");
                 repath(x, y);
