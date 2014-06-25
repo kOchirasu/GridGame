@@ -29,7 +29,7 @@ public class Bar implements guiObj
         this.iD = iD;
         this.barColorF = new Color(255, 0, 0, 255);
         this.barColorB = new Color(255, 255, 255, 255);
-        this.value = this.dValue = (float) 1;
+        this.value = this.dValue = 1f;
     }
     
     public Bar(int x, int y, int w, int h, int iD, Color barColorF)
@@ -41,7 +41,7 @@ public class Bar implements guiObj
         this.iD = iD;
         this.barColorF = barColorF;
         this.barColorB = new Color(255, 255, 255, 255);
-        this.value = this.dValue = (float) 1;
+        this.value = this.dValue = 1f;
     }
     
     public void tick()

@@ -326,7 +326,7 @@ public class Unit
         return maxHP;
     }
     public float getHPRatio() {
-        return hp / (float) maxHP;
+        return (float) hp / maxHP;
     }
     public int getMP() {
         return mp;
@@ -335,7 +335,7 @@ public class Unit
         return maxMP;
     }
     public float getMPRatio() {
-        return mp / (float) maxMP;
+        return (float) mp / maxMP;
     }
     public int getFTG() {
         return ftg;
@@ -382,13 +382,10 @@ public class Unit
     }
     
     //Kills the unit, called when unit's HP is <= 0
-    private void kill() {
-        hp = 0;
-        mp = 0;
-        exp = 0;
-        dead = true;
-        moved = true;
-        done = true;
+    private void kill()
+    {
+        hp = mp = exp = 0;
+        dead = moved = done = true;
     }
     
     //Returns whether or not the unit is in range
