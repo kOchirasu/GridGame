@@ -29,7 +29,7 @@ public class Game extends Canvas implements Runnable
     TILESIZE                - Dimensions of a tile (Square)
     fieldWidth, fieldHeight - dimensions of map window
     gameSpeed               - fps of game (1 = 30fps, 2 = 60fps)
-    xShift, yShift              - x and y offset for shifting map location
+    xOff, yOff              - x and y offset for shifting map location
     running                 - True while the game is running
     map                     - Map class, contains map data
     paths                   - Pathfinding class
@@ -51,13 +51,10 @@ public class Game extends Canvas implements Runnable
     
     /* Private Variables
     im                      - Contains all pictures
-    mh                      - Mouse handler
     unitGrid                - Grid array that contains all units
     unitList                - List of all units
     */
-    
     private Sprite im;
-    //private MouseHandler mh;
     private static Unit[][] unitGrid;
     private static ArrayList<Unit> unitList;
     
@@ -72,7 +69,7 @@ public class Game extends Canvas implements Runnable
         BufferedImage tileGrid = loader.load("/tile.png");
         im = new Sprite(spriteGrid, damageGrid, cursorGrid, tileGrid);
         
-        //Temporarily used to write map files
+        //Temporarily used to write map files (Doesn't work i broke it)
         //MapEditor me = new MapEditor();
         //me.write();
         
@@ -86,11 +83,12 @@ public class Game extends Canvas implements Runnable
         unitList = new ArrayList<>();
         unitGrid = new Unit[map.width][map.height];
         
-        //Mot initializtion
+        //Etc. initializtion
         gui = new Interface(loader.load("/gui.png"), im);
         paths = new Path();
         lookup = new ItemLoader("jdbc:derby://localhost:1527/Item", "gridgame", "maplestory");
         
+        //Item load test
         //Item test = new Item(lookup, 100001);
         //System.out.println(test.toString());
         
@@ -113,12 +111,12 @@ public class Game extends Canvas implements Runnable
             addUnit(i, 11, 0, 50, 1);
         }
                 
-        //MouseHandler
+        //Mouse Handler
         MouseHandler mh = new MouseHandler();
         this.addMouseListener(mh);
         this.addMouseMotionListener(mh);
         
-        //KeyHandler
+        //Key Handler
         KeyHandler kh = new KeyHandler();
         this.addKeyListener(kh);
         
@@ -160,13 +158,11 @@ public class Game extends Canvas implements Runnable
         if(running)
         {
             running = false;
-            try 
-            {
+            try {
                 gameThread.join();
             } 
-            catch (InterruptedException ex) 
-            {
-                Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
+            catch (InterruptedException ex) {
+                System.out.println(ex.getMessage());
             }
         }
     }
@@ -270,12 +266,6 @@ public class Game extends Canvas implements Runnable
     {
         unitGrid[u.getX()][u.getY()] = null;
         unitGrid[x][y] = u;
-    }
-    
-    //Returns map grid
-    public static byte[][] getMap()
-    {
-        return map.getGrid();
     }
     
     public static void offset(int x, int y)

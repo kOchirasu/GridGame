@@ -14,22 +14,23 @@ import java.util.TreeMap;
 public class Interface
 {
     public final int BCOUNT = 8; // Button count
-    /*
+    /* Private Variables
     x, y            - x, y mouse coordinates
     cX, cY          - x, y grid coordinates
     mouse           - Color of mouse cursor (see cursor.png)
+    slot            - Used for inventory slot number
     buttonMap       - Map of buttons in interface (not including button array)
     barMap          - Map of bars in interface
     bg              - Background image
     line1,2,3,4,5   - Unit stat information
-    cSelect        - Currently cSelect unit (will be null if no unit is actively cSelect)
+    cSelect         - Currently cSelect unit (will be null if no unit is actively cSelect)
     sprite          - Image array to render from
     selectColor     - Color of the highlight over cSelect grid
     oBt, nBt        - Old button, New button used for detection
     inWindow        - True while mouse cursor is in the window
     lockSelect      - Prevents interface from updating cSelect unit.  True when a unit has moved but 
                       has not finished its actions.
-    slot            - Used for inventory slot number
+    window          - popup window, not really functional yet
     */
     private int x, y, cX, cY, mouse, slot;
     private final HashMap<Integer, Button> buttonMap;
@@ -64,6 +65,7 @@ public class Interface
         //window = new Window(125, 75, 450, 300);
     }
     
+    //tick for animations
     public void tick()
     {
         for(Integer i : barMap.keySet())
@@ -152,6 +154,7 @@ public class Interface
         //buttonMap.put(loc, buttonMap.get(loc));
     }
     
+    //Disables all buttons and sets text to ""
     public void hideButtons()
     {
         for(int i = 0; i < BCOUNT; i++) {
@@ -236,6 +239,7 @@ public class Interface
         }
     }
     
+    //Doesn't really work, but it should be able to click a button by iD
     public void click(int iD)
     {
         for(Integer i : buttonMap.keySet())
@@ -287,6 +291,7 @@ public class Interface
         }
     }
     
+    //Updates the unit data for the interface
     private void unitUpdate(Unit unit)
     {
         //display info
@@ -300,6 +305,7 @@ public class Interface
         barMap.get(2).set(unit.getEXP());
     }
     
+    //Is true if selection is possible
     public boolean canSelect(Unit selected)
     {
         lockSelect = cSelect != null && (cSelect.hasMoved() || cSelect.moving) && !cSelect.isDone();
@@ -337,6 +343,7 @@ public class Interface
         return null;
     }
     
+    //checks if mouse is within a certain area hitbox
     private boolean within(int[] area)
     {
         return area[2] <= y && area[3] >= y && area[0] <= x && area[1] >= x;

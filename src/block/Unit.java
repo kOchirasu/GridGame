@@ -6,7 +6,6 @@ import gridGame.Game;
 import item.Inventory;
 import java.awt.Graphics;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.TreeMap;
 
 public class Unit
@@ -16,7 +15,8 @@ public class Unit
     pX, pY              - Unit previous x, y grid coordinates
     dX, dY              - Unit x, y coordinates where unit is displayed
     n[]                 - Damage values to display
-    xShift, yShift          - Offsets to simulate movement
+    xOff, yOff          - Offsets to simulate movement
+    xOff2, yOff2        - Going to be used to shift unit when animation map shifting
     count               - counter variable
     dmgLen              - Number of digits in damage
     "..."               - Unit stat variables
@@ -24,11 +24,14 @@ public class Unit
     walkTick, dmgTick   - Ticks to time walking and damage taking
     inventory           - Inventory of unit
     dead, moved         - True if unit is dead, or unit has moved for the turn
+    done                - True is unit has performed an action for the turn
+    attacking           - True while user is slecting a target for the unit to attack
     ClassID             - Class ID of the unit
     walkList            - List of tiles that the unit will walk through to get to its destination
+    btList              - List of buttons of possible actions for the unit
     sprite              - Array of sprites
     */
-    private int x, y, pX, pY, dX, dY, rX, rY, n[] = new int[3], xOff, yOff, xOff2, yOff2, count, dmgLen;
+    private int x, y, pX, pY, dX, dY, n[] = new int[3], xOff, yOff, xOff2, yOff2, count, dmgLen;
     private int lv, exp, hp, maxHP, mp, maxMP, ftg, mov, atk, mAtk, def, acc, avoid, crit, team;
     private int walkTick, dmgTick;
     private Inventory inventory;
@@ -62,8 +65,6 @@ public class Unit
         this.team = TEAM;
         this.inventory = new Inventory(5);
         classID = 0;
-        this.rX = Game.xOff;
-        this.rY = Game.yOff;
         
         this.exp = 15;
         this.maxHP = 50;
@@ -181,20 +182,6 @@ public class Unit
     public void select()
     {
         listButtons(true);
-    }
-    
-    private void listButtons(boolean enable)
-    {
-        int i = 0;
-        for(Integer j : btList.keySet())
-        {
-            Game.gui.setButton(btList.get(j), j, i, !enable || done);
-            i++;
-        }
-        for(; i < Game.gui.BCOUNT; i++)
-        {
-            Game.gui.setButton("", i, i, true);
-        }
     }
     
     //Finishes unit's turn, no more changes
@@ -316,8 +303,6 @@ public class Unit
         return done;
     }
     public int[] pathInfo() {
-        //System.out.println(inventory.getItem(0).getNAME());
-        //System.out.println("Range: " + getMinRANGE() + "~" + getMaxRANGE());
         return new int[]{x, y, mov, getMinRANGE(), getMaxRANGE(), team};
     }
     public int getX() {
@@ -412,5 +397,20 @@ public class Unit
     {
         int dist = Math.abs(unit.getX() - x) + Math.abs(unit.getY() - y);
         return dist >= getMinRANGE() && dist <= getMaxRANGE();
+    }
+    
+    //Shows buttons that represent possible selections for unit
+    private void listButtons(boolean enable)
+    {
+        int i = 0;
+        for(Integer j : btList.keySet())
+        {
+            Game.gui.setButton(btList.get(j), j, i, !enable || done);
+            i++;
+        }
+        for(; i < Game.gui.BCOUNT; i++)
+        {
+            Game.gui.setButton("", i, i, true);
+        }
     }
 }

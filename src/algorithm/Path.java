@@ -216,7 +216,7 @@ public class Path
         {
             if((Game.getUnit(x, y) == null || Game.getUnit(x, y).getTEAM() == team)) //If tile is open
             {
-                if(movement[x][y] == 0 && Game.getMap()[x][y] == 1)
+                if(movement[x][y] == 0 && Game.map.getGrid()[x][y] == 1)
                 {
                     return true;
                 }
@@ -272,11 +272,6 @@ public class Path
         }
     }
     
-    //Returns walk path
-    public ArrayList<int[]> getWalk() {
-        return walkList;
-    }
-    
     //Automatically calculated walk path
     private void repath(int x, int y)
     {
@@ -318,6 +313,11 @@ public class Path
             }
         }
         return 2147483647;
+    }
+    
+    //Returns walk path
+    public ArrayList<int[]> getWalk() {
+        return walkList;
     }
     
     //Prints out the movement array

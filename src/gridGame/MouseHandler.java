@@ -75,7 +75,6 @@ public class MouseHandler extends MouseAdapter
         {
             if(!pathed)
             {
-                //System.out.printf("%d , %d \n", cX, cY);
                 Game.paths.addPath(cX, cY);
                 pathed = true;
             }
@@ -83,7 +82,6 @@ public class MouseHandler extends MouseAdapter
         else
         {  
             selected = Game.getUnit(pX, pY);
-            //if(selected != null && !selected.moving && !selected.hasMoved() && selected.getClassID() != -1)
             if(Game.gui.canSelect(selected))
             {
                 //Find Paths
@@ -126,9 +124,7 @@ public class MouseHandler extends MouseAdapter
                         //System.out.println("Moving unit");
                         selected.move(cX, cY, walkList);
                     }
-                    //selected.damage(77);
                 }
-                //Game.center(selected);
                 Game.gui.update(selected);
                 Game.gui.update(e.getX(), e.getY(), false, 1);
                 //System.out.println("released left");

@@ -47,19 +47,21 @@ public class MapEditor
             OutputStream out = null;
             try
             {
-                try {
-                    //out = new BufferedOutputStream(new FileOutputStream(new File(getClass().getResource(path).toURI())));
-                    System.out.println(Paths.get(getClass().getResource(path).toURI()).toFile());
-                    //out = new BufferedOutputStream(new FileOutputStream(new File(getClass().getResource(path).toURI())));
+                try
+                {
+                    String temp = Paths.get(getClass().getResource(path).toURI()).toFile().toString();
+                    int x = temp.indexOf("\\GridGame\\");
+                    temp = temp.substring(0, x + 10) + "res\\test.mf";
+                    out = new BufferedOutputStream(new FileOutputStream(temp));
+                    out.write(data);
                 } catch (URISyntaxException ex) {
                     Logger.getLogger(MapEditor.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                out = new BufferedOutputStream(new FileOutputStream("C:\\Users\\Computer\\Documents\\NetBeansProjects\\GridGame\\res\\test.mf"));
-                out.write(data);
+                
             }
             finally
             {
-                out.close();
+                //out.close();
             }
         }
         catch (IOException ex) 

@@ -15,21 +15,28 @@ import java.io.IOException;
 */
 public class Map 
 {
-    /*
-    x, y        - x, y dimensions of the map
-    grid        - Grid containing all tile information of map
-    sprite      - Sprite array to load images from
+    /* Private Variables
+    xShift, yShift      - Used to animate map shift
+    x, y                - Used to determine which parts of map to render
+    sX, sY              - Determines the direction the map is shifting in
+    grid                - Grid containing all tile information of map
+    sprite              - Sprite array to load images from
+    shifting            - True while the map is animating a shift
     */
-    public final int width, height;
     private int xShift, yShift;
     private int x, y;
+    private int sX, sY;
     private byte[][] grid;
     private Sprite sprite;
     private boolean shifting;
     
+    /* Public Variables
+    width, height       - Width and height of the map
+    mX, mY              - The amount of pixels the map will shift every frame
+    count               - Count used for animation
+    */
+    public final int width, height;
     public int mX, mY, count;
-    
-    private int sX, sY; //Used for shifting map
     
     //Creates a map object and loads data into array
     //public Map(BufferedReader br, Sprite sprite) throws IOException
@@ -57,6 +64,7 @@ public class Map
         x = y = 0;
     }
     
+    //Tick used for animation
     public void tick()
     {
         if(shifting)
