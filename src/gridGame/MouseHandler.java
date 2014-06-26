@@ -124,15 +124,9 @@ public class MouseHandler extends MouseAdapter
                     Game.paths.clearPaths();
                     if(cX >= Game.xOff && cY >= Game.yOff && cX < Game.fieldWidth + Game.xOff && cY < Game.fieldHeight + Game.yOff) {
                         //System.out.println("Moving unit");
-                        if(!selected.move(cX, cY, walkList)) {
-                            Game.center(selected);
-                        }
+                        selected.move(cX, cY, walkList);
                     }
                     //selected.damage(77);
-                }
-                else if(selected != null)
-                {
-                    Game.center(selected);
                 }
                 //Game.center(selected);
                 Game.gui.update(selected);

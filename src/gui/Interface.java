@@ -35,7 +35,7 @@ public class Interface
     private final HashMap<Integer, Button> buttonMap;
     private final HashMap<Integer, Bar> barMap;
     private final BufferedImage bg;
-    private Button[] buttonArray = new Button[BCOUNT];
+    //private Button[] buttonArray = new Button[BCOUNT];
     private String line1, line2, line3, line4, line5;
     private Unit cSelect;
     private Sprite sprite;
@@ -56,8 +56,8 @@ public class Interface
         line1 = line2 = line3 = line4 = line5 = "";
         for(int i = 0; i < BCOUNT; i++)
         {
-            buttonArray[i] = addButton("", i, i);
-            buttonArray[i].disabled = true;
+            buttonMap.put(i, addButton("", i, i));
+            buttonMap.get(i).disabled = true;
         }
         slot = -1;
         
@@ -81,10 +81,6 @@ public class Interface
         for(Integer i : buttonMap.keySet())
         {
             buttonMap.get(i).render(g);
-        }
-        for(int i = 0; i < BCOUNT; i++)
-        {
-            buttonArray[i].render(g);
         }
         //Renders all bars
         for(Integer i : barMap.keySet())
@@ -112,8 +108,13 @@ public class Interface
         {
             cSelect.getInventory().render(g);
             cSelect.getInventory().render2(g);
-            g.setColor(Color.BLUE);
-            g.fillRect(Game.MAPOFFX + (cSelect.getX() - Game.xOff) * Game.TILESIZE, Game.MAPOFFY + (cSelect.getY() - Game.yOff) * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE);
+            int x = (cSelect.getX() - Game.xOff) * Game.TILESIZE;
+            int y = (cSelect.getY() - Game.yOff) * Game.TILESIZE;
+            if(x >= 0 && y >= 0 && x < Game.fieldWidth * Game.TILESIZE && y < Game.fieldHeight * Game.TILESIZE)
+            {
+                g.setColor(Color.BLUE);
+                g.fillRect(Game.MAPOFFX + x, Game.MAPOFFY + y, Game.TILESIZE, Game.TILESIZE);
+            }
         }
     }
     
@@ -144,9 +145,11 @@ public class Interface
         }
     }
     
+    //need to fix button iDs
     public void setButton(String text, int iD, int loc, boolean disabled)
     {
-        buttonArray[loc].set(text, iD, disabled);
+        buttonMap.get(loc).set(text, iD, disabled);
+        //buttonMap.put(loc, buttonMap.get(loc));
     }
     
     public void hideButtons()
@@ -204,6 +207,7 @@ public class Interface
                         slot = click ? whichSlot() : -1;
                     }
 
+                    //There is some glitch where the button wont register sometimes, need to debug...
                     oBt = nBt;
                     nBt = clicked();
                     if(oBt != null || nBt != null)    
@@ -229,6 +233,19 @@ public class Interface
                 case 3: //Right click
                     break;
             }
+        }
+    }
+    
+    public void click(int iD)
+    {
+        for(Integer i : buttonMap.keySet())
+        {
+            System.out.println(i + ": " + buttonMap.get(i).getText());
+        }
+        if(cSelect != null)
+        {
+            System.out.println(buttonMap.get(iD).getText());
+            buttonMap.get(iD).click(cSelect);
         }
     }
     
@@ -311,13 +328,6 @@ public class Interface
     //Could implement with binary search if button coordinates are in order.
     private Button clicked()
     {
-        for(int i = 0; i < BCOUNT; i++)
-        {
-            if(within(buttonArray[i].area()))
-            {
-                return buttonArray[i];
-            }
-        }
         for(Integer i : buttonMap.keySet())
         {
             if(within(buttonMap.get(i).area())) {

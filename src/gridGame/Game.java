@@ -57,7 +57,7 @@ public class Game extends Canvas implements Runnable
     */
     
     private Sprite im;
-    private MouseHandler mh;
+    //private MouseHandler mh;
     private static Unit[][] unitGrid;
     private static ArrayList<Unit> unitList;
     
@@ -114,9 +114,13 @@ public class Game extends Canvas implements Runnable
         }
                 
         //MouseHandler
-        mh = new MouseHandler();
+        MouseHandler mh = new MouseHandler();
         this.addMouseListener(mh);
         this.addMouseMotionListener(mh);
+        
+        //KeyHandler
+        KeyHandler kh = new KeyHandler();
+        this.addKeyListener(kh);
         
         //Create Buttons
         /*gui.addButton("Attack", 0, 0);
@@ -276,19 +280,33 @@ public class Game extends Canvas implements Runnable
     
     public static void offset(int x, int y)
     {
-        xOff = x;
-        yOff = y;
+        xOff = x >= 0 && x <= map.width - fieldWidth ? x : xOff;
+        yOff = y >= 0 && y <= map.height - fieldHeight ? y : yOff;
     }
     
+    //some glitch with "theUnit" placeholder unit.
     public static void center(Unit unit)
     {
-        int lX = (int) (unit.getX() - 4);//- map.width / 2.0);
-        int hX = (int) (unit.getX() + 4);//+ map.width / 2.0);
-        int lY = (int) (unit.getY() - 4);//- map.height / 2.0);
-        int hY = (int) (unit.getY() + 4);//+ map.height / 2.0);
+        int lX = unit.getX() - 4;
+        int hX = unit.getX() + 4;
+        int lY = unit.getY() - 4;
+        int hY = unit.getY() + 4;
         
-        int tX = lX < 0 ? 0 : hX >= map.width ? map.width - fieldWidth : xOff;
-        int tY = lY < 0 ? 0 : hY >= map.height ? map.height - fieldHeight : yOff;
+        int tX = xOff, tY = yOff;
+        
+        if(lX < xOff) {
+            tX = lX < 0 ? 0 : lX;
+        }
+        if(hX > fieldWidth + xOff) {
+            tX = hX > map.width ? map.width - fieldWidth : hX - fieldWidth;
+        }
+        
+        if(lY < yOff) {
+            tY = lY < 0 ? 0 : lY;
+        }
+        if(hY > fieldHeight + yOff) {
+            tY = hY > map.height ? map.width - fieldHeight : hY - fieldHeight;
+        }
 
         System.out.printf("Low x: %d\tHigh x: %d\tOffset x: %d\n", lX, hX, tX);
         System.out.printf("Low y: %d\tHigh y: %d\tOffset y: %d\n", lY, hY, tY);

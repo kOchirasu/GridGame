@@ -91,11 +91,12 @@ public class Button implements guiObj
     //All button functions go here
     public int click(Unit selected)
     {
+        System.out.println(disabled);
         if(!disabled)
         {
             switch(iD)
             {
-                case 0: 
+                case 0:
                     selected.showAttack();
                     break;
                 case 1: case 2: case 3: case 4:
@@ -137,6 +138,10 @@ public class Button implements guiObj
     //Returns the button ID
     public int getID() {
         return iD;
+    }
+    
+    public String getText() {
+        return text;
     }
     
     //Allows the text of the button to be changed
