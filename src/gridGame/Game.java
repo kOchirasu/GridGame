@@ -24,21 +24,24 @@ public class Game extends Canvas implements Runnable
 {
     private static final long serialVersionUID = 1L; //I dont even know what this is
     /* Public Variables
-    WIDTH, HEIGHT       - Width and Height of the game window
-    MAPOFFX, MAPOFFY    - Map x, y offsets so that it doesnt need to start in top left corner
-    TILESIZE            - Dimensions of a tile (Square)
-    mapWidth, mapHeight - dimensions of map grid
-    gameSpeed           - fps of game (1 = 30fps, 2 = 60fps)
-    running             - True while the game is running
-    paths               - Pathfinding class
-    gui                 - Game interface class
-    gameThread          - Game thread
-    lookup              - Item database
+    WIDTH, HEIGHT           - Width and Height of the game window
+    MAPOFFX, MAPOFFY        - Map x, y offsets to shift map window
+    TILESIZE                - Dimensions of a tile (Square)
+    fieldWidth, fieldHeight - dimensions of map window
+    gameSpeed               - fps of game (1 = 30fps, 2 = 60fps)
+    xShift, yShift              - x and y offset for shifting map location
+    running                 - True while the game is running
+    map                     - Map class, contains map data
+    paths                   - Pathfinding class
+    gui                     - Game interface class
+    gameThread              - Game thread
+    lookup                  - Item database
     */
-    public static final int WIDTH = 700, HEIGHT = 575;
-    public static final int MAPOFFX = 9, MAPOFFY = 9, TILESIZE = 32;
-    public static int mapWidth, mapHeight, gameSpeed = 2;
+    public static final int WIDTH = 700, HEIGHT = 575, MAPOFFX = 9, MAPOFFY = 9, TILESIZE = 32;
+    public static final int fieldWidth = 16, fieldHeight = 12, gameSpeed = 2;
+    public static int xOff = 0, yOff = 0;
     public static boolean running = false;
+    public static Map map;
     public static Path paths;
     public static Interface gui;
     public Thread gameThread;
@@ -47,13 +50,12 @@ public class Game extends Canvas implements Runnable
     public static Unit theUnit = new Unit((short)-1); //Dummy unit used for keeping units selected, bad fix but w/e
     
     /* Private Variables
-    map                 - Map class, contains map data
-    im                  - Contains all pictures
-    mh                  - Mouse handler
-    unitGrid            - Grid array that contains all units
-    unitList            - List of all units
+    im                      - Contains all pictures
+    mh                      - Mouse handler
+    unitGrid                - Grid array that contains all units
+    unitList                - List of all units
     */
-    private static Map map;
+    
     private Sprite im;
     private MouseHandler mh;
     private static Unit[][] unitGrid;
@@ -70,16 +72,19 @@ public class Game extends Canvas implements Runnable
         BufferedImage tileGrid = loader.load("/tile.png");
         im = new Sprite(spriteGrid, damageGrid, cursorGrid, tileGrid);
         
+        //Temporarily used to write map files
+        //MapEditor me = new MapEditor();
+        //me.write();
+        
         //Map Data
         MapLoader mloader = new MapLoader();
-        map = mloader.load("/map.txt", im);
-        mapWidth = map.getWidth();
-        mapHeight = map.getHeight();
+        //map = mloader.load("/map.txt", im);
+        map = mloader.load("/test.mf", im);
         //map.printMap();
         
         //Unit Data
         unitList = new ArrayList<>();
-        unitGrid = new Unit[mapWidth][mapHeight];
+        unitGrid = new Unit[map.width][map.height];
         
         //Mot initializtion
         gui = new Interface(loader.load("/gui.png"), im);
@@ -101,12 +106,13 @@ public class Game extends Canvas implements Runnable
         addUnit(0, 3, 0, -1, 0);
         addUnit(5, 3, 0, -1, 0);
         addUnit(5, 4, 0, -1, 0);
+        addUnit(13, 3, 0, -1, 0);
         
-        for(int i = 0; i < 16; i++)
+        for(int i = 0; i < 17; i++)
         {
             addUnit(i, 11, 0, 50, 1);
         }
-        
+                
         //MouseHandler
         mh = new MouseHandler();
         this.addMouseListener(mh);
@@ -187,11 +193,11 @@ public class Game extends Canvas implements Runnable
     //Updates the game
     public void tick()
     {
+        //map.tick();
         gui.tick();
         paths.tick();
-        for(Unit u : unitList) 
-        {
-            u.tick();
+        for(int i = 0; i < unitList.size(); i++) {
+            unitList.get(i).tick();
         }
         render();
     }
@@ -207,12 +213,13 @@ public class Game extends Canvas implements Runnable
         }
         Graphics g = bs.getDrawGraphics();
         //Render Here
-        gui.render(g);
         map.render(g);
+        gui.render(g);
         paths.render(g);
         gui.render2(g);
-        for(Unit u : unitList) {
-            u.render(g);
+        
+        for(int i = 0; i < unitList.size(); i++) {
+            unitList.get(i).render(g);
         }
         gui.render3(g);
         
@@ -223,16 +230,15 @@ public class Game extends Canvas implements Runnable
     //Ends turn, resets all units' "moved" parameter
     public static void newTurn()
     {
-        for(Unit u : unitList) 
-        {
-            u.reset();
+        for(int i = 0; i < unitList.size(); i++) {
+            unitList.get(i).reset();
         }
     }
     
     //Add a unit to the map
     public void addUnit(int x, int y, int type, int mov, int team)
     {
-        if(x >= 0 && y >= 0 && x < mapWidth && y < mapHeight && getUnit(x, y) == null)
+        if(x >= 0 && y >= 0 && x < map.width && y < map.height && getUnit(x, y) == null)
         {
             Unit temp = new Unit(x, y, im, mov, team);
             unitGrid[x][y] = temp;
@@ -247,7 +253,7 @@ public class Game extends Canvas implements Runnable
     //Gets the unit at specified x, y
     public static Unit getUnit(int x, int y)
     {
-        if(x >= 0 && y >= 0 && x < mapWidth && y < mapHeight)
+        if(x >= 0 && y >= 0 && x < map.width && y < map.height)
         {
             return unitGrid[x][y];
         }
@@ -263,9 +269,30 @@ public class Game extends Canvas implements Runnable
     }
     
     //Returns map grid
-    public static int[][] getMap()
+    public static byte[][] getMap()
     {
         return map.getGrid();
+    }
+    
+    public static void offset(int x, int y)
+    {
+        xOff = x;
+        yOff = y;
+    }
+    
+    public static void center(Unit unit)
+    {
+        int lX = (int) (unit.getX() - 4);//- map.width / 2.0);
+        int hX = (int) (unit.getX() + 4);//+ map.width / 2.0);
+        int lY = (int) (unit.getY() - 4);//- map.height / 2.0);
+        int hY = (int) (unit.getY() + 4);//+ map.height / 2.0);
+        
+        int tX = lX < 0 ? 0 : hX >= map.width ? map.width - fieldWidth : xOff;
+        int tY = lY < 0 ? 0 : hY >= map.height ? map.height - fieldHeight : yOff;
+
+        System.out.printf("Low x: %d\tHigh x: %d\tOffset x: %d\n", lX, hX, tX);
+        System.out.printf("Low y: %d\tHigh y: %d\tOffset y: %d\n", lY, hY, tY);
+        offset(tX, tY);
     }
     
     //Main function, sets up game window

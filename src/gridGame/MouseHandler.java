@@ -23,10 +23,10 @@ public class MouseHandler extends MouseAdapter
     private ArrayList<int[]> walkList;
     
     //Initializes the selected grid to one that does not exist
-    public MouseHandler()
+    public MouseHandler()//Check again later
     {
-        cX = Game.mapWidth;
-        cY = Game.mapWidth;
+        cX = Game.fieldWidth + Game.xOff;
+        cY = Game.fieldWidth + Game.yOff;
     }
 
     //Updates the mouse coordinates, and interface
@@ -38,8 +38,8 @@ public class MouseHandler extends MouseAdapter
         switch(e.getButton())
         {
             case MouseEvent.BUTTON1: //Left click
-                pX = (mX - Game.MAPOFFX) / Game.TILESIZE;
-                pY = (mY - Game.MAPOFFY) / Game.TILESIZE;
+                pX = (mX - Game.MAPOFFX) / Game.TILESIZE + Game.xOff;
+                pY = (mY - Game.MAPOFFY) / Game.TILESIZE + Game.yOff;
 
                 found = false;
                 Game.gui.update(mX, mY, true, 1);
@@ -65,11 +65,11 @@ public class MouseHandler extends MouseAdapter
     {
         mX = e.getX();
         mY = e.getY();
-        if((mX - Game.MAPOFFX) / Game.TILESIZE != cX || (mY - Game.MAPOFFY) / Game.TILESIZE != cY) {
+        if((mX - Game.MAPOFFX) / Game.TILESIZE + Game.xOff != cX || (mY - Game.MAPOFFY) / Game.TILESIZE + Game.yOff != cY) {
             pathed = false;
         }
-        cX = (int)Math.floor((mX - Game.MAPOFFX) / (double)Game.TILESIZE);
-        cY = (int)Math.floor((mY - Game.MAPOFFY) / (double)Game.TILESIZE);
+        cX = (int)Math.floor((mX - Game.MAPOFFX) / (double)Game.TILESIZE) + Game.xOff;
+        cY = (int)Math.floor((mY - Game.MAPOFFY) / (double)Game.TILESIZE) + Game.yOff;
         
         if(found)
         {
@@ -87,12 +87,12 @@ public class MouseHandler extends MouseAdapter
             if(Game.gui.canSelect(selected))
             {
                 //Find Paths
+                Game.gui.update(selected);
                 Game.paths.findPath(selected.pathInfo());
                 //Game.paths.printPaths();
                 found = true;
             }
         }
-        Game.gui.update(selected);
         Game.gui.update(mX, mY);
     }
     
@@ -103,8 +103,8 @@ public class MouseHandler extends MouseAdapter
         mX = e.getX();
         mY = e.getY();
         //Might have to floor these if there are future problems
-        cX = (mX - Game.MAPOFFX) / Game.TILESIZE;
-        cY = (mY - Game.MAPOFFY) / Game.TILESIZE;
+        cX = (mX - Game.MAPOFFX) / Game.TILESIZE + Game.xOff;
+        cY = (mY - Game.MAPOFFY) / Game.TILESIZE + Game.yOff;
 
         Game.gui.update(mX, mY, false, 1);
     }
@@ -122,9 +122,19 @@ public class MouseHandler extends MouseAdapter
                 {
                     walkList = new ArrayList<>(Game.paths.getWalk());
                     Game.paths.clearPaths();
-                    selected.move(cX, cY, walkList);
+                    if(cX >= Game.xOff && cY >= Game.yOff && cX < Game.fieldWidth + Game.xOff && cY < Game.fieldHeight + Game.yOff) {
+                        //System.out.println("Moving unit");
+                        if(!selected.move(cX, cY, walkList)) {
+                            Game.center(selected);
+                        }
+                    }
                     //selected.damage(77);
                 }
+                else if(selected != null)
+                {
+                    Game.center(selected);
+                }
+                //Game.center(selected);
                 Game.gui.update(selected);
                 Game.gui.update(e.getX(), e.getY(), false, 1);
                 //System.out.println("released left");

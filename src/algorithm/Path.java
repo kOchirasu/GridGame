@@ -42,7 +42,7 @@ public class Path
             
     public Path()
     {
-        movement = new int[Game.mapWidth][Game.mapHeight];
+        movement = new int[Game.map.width][Game.map.height];
         pathColor = new Color(0, 75, 255, 128);
         attColor = new Color(255, 0, 0, 128);
         walkColor = new Color(0, 255, 144, 128);
@@ -71,33 +71,51 @@ public class Path
         //Renders path (blue) tiles
         for(int i = 0; i < pathList.size(); i++)
         {
-            x = Game.MAPOFFX + pathList.get(i)[0] * Game.TILESIZE + 1;
-            y = Game.MAPOFFY + pathList.get(i)[1] * Game.TILESIZE + 1;
-            GradientPaint gp = new GradientPaint(x + Game.TILESIZE + anim + sOffsetB, y - anim - sOffsetB, shine, x, y + Game.TILESIZE, pathColor, true);
-            g2.setPaint(gp);
-            g2.fillRect(x, y, Game.TILESIZE - 1, Game.TILESIZE - 1);
+            x = pathList.get(i)[0] - Game.xOff;
+            y = pathList.get(i)[1] - Game.yOff;
+            if(x >= 0 && y >= 0 && x < Game.fieldWidth && y < Game.fieldHeight)
+            {
+                x = Game.MAPOFFX + 1 + x * Game.TILESIZE;
+                y = Game.MAPOFFY + 1 + y * Game.TILESIZE;
+                GradientPaint gp = new GradientPaint(x + Game.TILESIZE + anim + sOffsetB, y - anim - sOffsetB, shine, x, y + Game.TILESIZE, pathColor, true);
+                g2.setPaint(gp);
+                g2.fillRect(x, y, Game.TILESIZE - 1, Game.TILESIZE - 1);
+            }
         }
         //Renders attack (red) tiles
         for(int i = 0; i < attList.size(); i++)
         {
-            x = Game.MAPOFFX + attList.get(i)[0] * Game.TILESIZE + 1;
-            y = Game.MAPOFFY + attList.get(i)[1] * Game.TILESIZE + 1;
-            GradientPaint gp = new GradientPaint(x + Game.TILESIZE + anim + sOffsetB, y - anim - sOffsetB, shine, x, y + Game.TILESIZE, attColor, true);
-            g2.setPaint(gp);
-            g2.fillRect(x, y, Game.TILESIZE - 1, Game.TILESIZE - 1);
+            x = attList.get(i)[0] - Game.xOff;
+            y = attList.get(i)[1] - Game.yOff;
+            if(x >= 0 && y >= 0 && x < Game.fieldWidth && y < Game.fieldHeight)
+            {
+                x = Game.MAPOFFX + 1 + x * Game.TILESIZE;
+                y = Game.MAPOFFY + 1 + y * Game.TILESIZE;
+                GradientPaint gp = new GradientPaint(x + Game.TILESIZE + anim + sOffsetB, y - anim - sOffsetB, shine, x, y + Game.TILESIZE, attColor, true);
+                g2.setPaint(gp);
+                g2.fillRect(x, y, Game.TILESIZE - 1, Game.TILESIZE - 1);
+            }
         }
         //Renders walking path
         g.setColor(walkColor);
         for(int i = 1; i < walkList.size(); i++)
         {
-            g.fillRect(Game.MAPOFFX + walkList.get(i)[0] * Game.TILESIZE + 1, Game.MAPOFFY + walkList.get(i)[1] * Game.TILESIZE + 1, Game.TILESIZE - 1, Game.TILESIZE - 1);
+            x = walkList.get(i)[0] - Game.xOff;
+            y = walkList.get(i)[1] - Game.yOff;
+            if(x >= 0 && y >= 0 && x < Game.fieldWidth && y < Game.fieldHeight) {
+                g.fillRect(Game.MAPOFFX + x * Game.TILESIZE + 1, Game.MAPOFFY + y * Game.TILESIZE + 1, Game.TILESIZE - 1, Game.TILESIZE - 1);
+            }
         }
         g.setColor(Color.BLACK);
         g.setFont(font);
         FontMetrics fm = g.getFontMetrics(font); 
         for(int i = 1; i < walkList.size(); i++)
         {
-            g.drawString("" + i, (int) (Game.MAPOFFX + walkList.get(i)[0] * Game.TILESIZE + Game.TILESIZE/2 - fm.getStringBounds("" + i, g).getWidth()/2), (int) (Game.MAPOFFY + walkList.get(i)[1] * Game.TILESIZE + Game.TILESIZE/2 + fm.getStringBounds("" + i, g).getHeight()/4));
+            x = walkList.get(i)[0] - Game.xOff;
+            y = walkList.get(i)[1] - Game.yOff;
+            if(x >= 0 && y >= 0 && x < Game.fieldWidth && y < Game.fieldHeight) {
+                g.drawString("" + i, (int) (Game.MAPOFFX + x * Game.TILESIZE + Game.TILESIZE/2 - fm.getStringBounds("" + i, g).getWidth()/2), (int) (Game.MAPOFFY + y * Game.TILESIZE + Game.TILESIZE/2 + fm.getStringBounds("" + i, g).getHeight()/4));
+            }
         }
         
     }
@@ -124,8 +142,8 @@ public class Path
         
     //Reset everything
         clearPaths();
-        for(int i = 0; i < Game.mapWidth; i++) {
-            for(int j = 0; j < Game.mapHeight; j++) {
+        for(int i = 0; i < Game.map.width; i++) {
+            for(int j = 0; j < Game.map.height; j++) {
                 movement[i][j] = 0;
             }
         }
@@ -179,7 +197,7 @@ public class Path
             for(int j = Math.abs(i) - maxRange; j <= maxRange - Math.abs(i); j++) {
                 nX = x + i;
                 nY = y + j;
-                if(nX >= 0 && nX < Game.mapWidth && nY >= 0 && nY < Game.mapHeight) {
+                if(nX >= 0 && nX < Game.map.width && nY >= 0 && nY < Game.map.height) {
                     if(Math.abs(i) + Math.abs(j) >= minRange) {
                         if(movement[nX][nY] == 0) {
                             attList.add(new int[]{nX, nY});
@@ -194,11 +212,14 @@ public class Path
     //Checks if a tile can be moved to
     private boolean moveable(int x, int y)
     {
-        if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight) //If within board
+        if(x >= 0 && y >= 0 && x < Game.map.width && y < Game.map.height) //If within board
         {
-            if((Game.getUnit(x, y) == null || Game.getUnit(x, y).getTEAM() == team) && movement[x][y] == 0 && Game.getMap()[x][y] == 1) //If tile is open
+            if((Game.getUnit(x, y) == null || Game.getUnit(x, y).getTEAM() == team)) //If tile is open
             {
-                return true;
+                if(movement[x][y] == 0 && Game.getMap()[x][y] == 1)
+                {
+                    return true;
+                }
             }
         }  
         return false;
@@ -207,7 +228,7 @@ public class Path
     //Add tile to user selected walk path
     public void addPath(int x, int y)
     {
-        if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight)
+        if(x >= Game.xOff && y >= Game.yOff && x < Game.fieldWidth + Game.xOff && y < Game.fieldHeight + Game.yOff)
         {
             if(movement[x][y] < 1 || movement[x][y] == 99)
             {
@@ -278,10 +299,10 @@ public class Path
                 else if(y > 0 && movement[x][y - 1] == i) {
                     y--;
                 }
-                else if(x < Game.mapWidth - 1 && movement[x + 1][y] == i) {
+                else if(x < Game.map.width - 1 && movement[x + 1][y] == i) {
                     x++;
                 }
-                else if(y < Game.mapHeight - 1 && movement[x][y + 1] == i) {
+                else if(y < Game.map.height - 1 && movement[x][y + 1] == i) {
                     y++;
                 }
             }
@@ -291,7 +312,7 @@ public class Path
     //Returns a specified index of the movement array
     public int getMove(int x, int y)
     {
-        if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight) {
+        if(x >= 0 && y >= 0 && x < Game.map.width && y < Game.map.height) {
             if(movement[x][y] != 0) {
                 return movement[x][y];
             }
@@ -302,10 +323,10 @@ public class Path
     //Prints out the movement array
     public void printPaths()
     {
-        for(int i = 0; i < Game.mapHeight; i++)
+        for(int i = 0; i < Game.map.height; i++)
         {
             System.out.print("[");
-            for(int j = 0; j < Game.mapWidth; j++)
+            for(int j = 0; j < Game.map.width; j++)
             {
                 if(movement[j][i] > 0) {
                     System.out.print(movement[j][i] + ",\t");

@@ -16,7 +16,7 @@ public class Unit
     pX, pY              - Unit previous x, y grid coordinates
     dX, dY              - Unit x, y coordinates where unit is displayed
     n[]                 - Damage values to display
-    xOff, yOff          - Offsets to simulate movement
+    xShift, yShift          - Offsets to simulate movement
     count               - counter variable
     dmgLen              - Number of digits in damage
     "..."               - Unit stat variables
@@ -28,7 +28,7 @@ public class Unit
     walkList            - List of tiles that the unit will walk through to get to its destination
     sprite              - Array of sprites
     */
-    private int x, y, pX, pY, dX, dY, n[] = new int[3], xOff, yOff, count, dmgLen;
+    private int x, y, pX, pY, dX, dY, rX, rY, n[] = new int[3], xOff, yOff, xOff2, yOff2, count, dmgLen;
     private int lv, exp, hp, maxHP, mp, maxMP, ftg, mov, atk, mAtk, def, acc, avoid, crit, team;
     private int walkTick, dmgTick;
     private Inventory inventory;
@@ -62,6 +62,8 @@ public class Unit
         this.team = TEAM;
         this.inventory = new Inventory(5);
         classID = 0;
+        this.rX = Game.xOff;
+        this.rY = Game.yOff;
         
         this.exp = 15;
         this.maxHP = 50;
@@ -127,35 +129,52 @@ public class Unit
             moving = true;
             //System.out.println("Started moving");
         }
+        
+        /*if(Game.map.count > 0)
+        {
+            xOff2 = Game.map.mX * Game.map.count + Game.xOff * Game.TILESIZE;
+            yOff2 = Game.map.mY * Game.map.count + Game.yOff * Game.TILESIZE;
+        }
+        else {
+            xOff2 = yOff2 = 0;
+        }*/
     }
     
     //Renders unit and damage on unit
     public void render(Graphics g)
     {
-        if(dead) {
-            g.drawImage(sprite.unit[0][8], Game.MAPOFFX + dX + xOff, Game.MAPOFFY + dY + yOff, Game.TILESIZE, Game.TILESIZE, null);
-        }
-        else if(done){
-            g.drawImage(sprite.unit[0][7], Game.MAPOFFX + dX + xOff, Game.MAPOFFY + dY + yOff, Game.TILESIZE, Game.TILESIZE, null);
-        }
-        else{
-            g.drawImage(sprite.unit[0][team], Game.MAPOFFX + dX + xOff, Game.MAPOFFY + dY + yOff, Game.TILESIZE, Game.TILESIZE, null);
-        }
-        
-        switch(dmgLen)
+        int x = dX - Game.xOff * Game.TILESIZE;
+        int y = dY - Game.yOff * Game.TILESIZE;
+        if(x >= 0 && y >= 0 && x < Game.fieldWidth * Game.TILESIZE && y < Game.fieldHeight * Game.TILESIZE)
         {
-            case 1:
-                g.drawImage(sprite.damage[n[0]], Game.MAPOFFX + dX + xOff + 11, Game.MAPOFFY + dY + yOff + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
-                break;
-            case 2:
-                g.drawImage(sprite.damage[n[1]], Game.MAPOFFX + dX + xOff + 6, Game.MAPOFFY + dY + yOff + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
-                g.drawImage(sprite.damage[n[0]], Game.MAPOFFX + dX + xOff + 16, Game.MAPOFFY + dY + yOff + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
-                break;
-            case 3:
-                g.drawImage(sprite.damage[n[2]], Game.MAPOFFX + dX + xOff + 1, Game.MAPOFFY + dY + yOff + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
-                g.drawImage(sprite.damage[n[1]], Game.MAPOFFX + dX + xOff + 11, Game.MAPOFFY + dY + yOff + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
-                g.drawImage(sprite.damage[n[0]], Game.MAPOFFX + dX + xOff + 21, Game.MAPOFFY + dY + yOff + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
-                break;
+            x += Game.MAPOFFX + xOff + xOff2;
+            y += Game.MAPOFFY + yOff + yOff2;
+                
+            if(dead) {
+                g.drawImage(sprite.unit[0][8], x, y, Game.TILESIZE, Game.TILESIZE, null);
+            }
+            else if(done){
+                g.drawImage(sprite.unit[0][7], x, y, Game.TILESIZE, Game.TILESIZE, null);
+            }
+            else{
+                g.drawImage(sprite.unit[0][team], x, y, Game.TILESIZE, Game.TILESIZE, null);
+            }
+
+            switch(dmgLen)
+            {
+                case 1:
+                    g.drawImage(sprite.damage[n[0]], x + 11, y + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+                    break;
+                case 2:
+                    g.drawImage(sprite.damage[n[1]], x + 6, y + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+                    g.drawImage(sprite.damage[n[0]], x + 16, y + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+                    break;
+                case 3:
+                    g.drawImage(sprite.damage[n[2]], x + 1, y + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+                    g.drawImage(sprite.damage[n[1]], x + 11, y + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+                    g.drawImage(sprite.damage[n[0]], x + 21, y + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
+                    break;
+            }
         }
     }
     
@@ -203,7 +222,7 @@ public class Unit
     //Moves the unit to x, y through each tile in the walkList array
     public boolean move(int x, int y, ArrayList<int[]> walkList)
     {
-        if(x >= 0 && y >= 0 && x < Game.mapWidth && y < Game.mapHeight)
+        if(x >= 0 && y >= 0 && x < Game.map.width && y < Game.map.height)
         {
             if(Game.paths.getMove(x, y) <= mov && Game.getUnit(x, y) == null)// && Game.paths.getMove(x, y) <= mov && mov != 0)
             {

@@ -1,5 +1,6 @@
 package map;
 
+import algorithm.Path;
 import graphics.Sprite;
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,6 +9,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class MapLoader 
 {
@@ -21,7 +24,9 @@ public class MapLoader
             inputStream = new FileInputStream(new File(getClass().getResource(path).toURI())); //Some crap to read file
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             
-            return new Map(br, sprite);
+            byte[] data = Files.readAllBytes(Paths.get(getClass().getResource(path).toURI()));
+            
+            return new Map(data, sprite, br);
         }
         catch (FileNotFoundException ex) 
         {

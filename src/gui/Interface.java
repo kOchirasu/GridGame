@@ -48,8 +48,8 @@ public class Interface
     {
         this.bg = bg;
         this.sprite = sprite;
-        this.cX = Game.mapWidth;
-        this.cY = Game.mapHeight;
+        this.cX = Game.fieldWidth;
+        this.cY = Game.fieldHeight;
         buttonMap = new HashMap<>();
         barMap = new HashMap<>();
         selectColor = new Color(255, 255, 255, 128);
@@ -113,7 +113,7 @@ public class Interface
             cSelect.getInventory().render(g);
             cSelect.getInventory().render2(g);
             g.setColor(Color.BLUE);
-            g.fillRect(Game.MAPOFFX + cSelect.getX() * Game.TILESIZE, Game.MAPOFFY + cSelect.getY() * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE);
+            g.fillRect(Game.MAPOFFX + (cSelect.getX() - Game.xOff) * Game.TILESIZE, Game.MAPOFFY + (cSelect.getY() - Game.yOff) * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE);
         }
     }
     
@@ -124,7 +124,7 @@ public class Interface
         {
             window.render(g);
         }
-        else if(cX >= 0 && cY >= 0 && cX < Game.mapWidth && cY < Game.mapHeight) //Highlights the grid that the mouse is hovering over
+        else if(cX >= 0 && cY >= 0 && cX < Game.fieldWidth && cY < Game.fieldHeight) //Highlights the grid that the mouse is hovering over
         {
             g.setColor(selectColor);
             g.fillRect(Game.MAPOFFX + cX * Game.TILESIZE, Game.MAPOFFY + cY * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE);
