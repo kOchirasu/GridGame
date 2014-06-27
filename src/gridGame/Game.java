@@ -15,8 +15,6 @@ import java.awt.Toolkit;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFrame;
 import map.*;
 
@@ -253,7 +251,7 @@ public class Game extends Canvas implements Runnable
     //Gets the unit at specified x, y
     public static Unit getUnit(int x, int y)
     {
-        if(x >= 0 && y >= 0 && x < map.width && y < map.height)
+        if(x >= xOff && y >= yOff && x < fieldWidth + xOff && y < fieldHeight + yOff)
         {
             return unitGrid[x][y];
         }

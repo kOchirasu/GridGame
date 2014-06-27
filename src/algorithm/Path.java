@@ -214,7 +214,7 @@ public class Path
     {
         if(x >= 0 && y >= 0 && x < Game.map.width && y < Game.map.height) //If within board
         {
-            if((Game.getUnit(x, y) == null || Game.getUnit(x, y).getTEAM() == team)) //If tile is open
+            if((Game.getUnit(x, y) == null || Game.getUnit(x, y).getTEAM() == team) || Game.getUnit(x, y).getClassID() == -1) //If tile is open
             {
                 if(movement[x][y] == 0 && Game.map.getGrid()[x][y] == 1)
                 {
@@ -340,5 +340,6 @@ public class Path
             }
             System.out.println("]");
         }
+        System.out.println("");
     }
 }

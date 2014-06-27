@@ -3,7 +3,6 @@ package map;
 //This does nothing.  Not sure if I will make it in the same project
 
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;

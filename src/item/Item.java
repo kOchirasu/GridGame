@@ -2,7 +2,14 @@ package item;
 
 import graphics.SpriteLoader;
 import gridGame.Game;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.MultipleGradientPaint.CycleMethod;
+import java.awt.RadialGradientPaint;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,9 +44,25 @@ public class Item
         this.image = loader.load("/Item/" + iD + ".png");
     }
     
+    //Normal item rendering function
     public void render(int x, int y, Graphics g)
     {
         g.drawImage(image, x, y, Game.TILESIZE, Game.TILESIZE, null);
+    }
+    
+    //used to render semi-transparent item when dragging
+    public void render(int x, int y, int m, Graphics g)
+    {
+        Graphics2D g2 = (Graphics2D) g;
+        Point2D center = new Point2D.Float(x + Game.TILESIZE / 2, y + Game.TILESIZE /2);
+        float radius = 15;
+        float[] dist = {0.1f, 1f};
+        Color[] colors = {Color.DARK_GRAY, new Color(255, 255, 255, 0)};
+        RadialGradientPaint p = new RadialGradientPaint(center, radius, dist, colors, CycleMethod.NO_CYCLE);
+        g2.setPaint(p);
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) 0.5));
+        g2.fillOval(x, y, Game.TILESIZE, Game.TILESIZE);
+        g2.drawImage(image, x, y, Game.TILESIZE * m, Game.TILESIZE * m, null);
     }
     
     @Override

@@ -7,9 +7,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.TreeMap;
 
 public class Interface
 {
@@ -136,7 +134,10 @@ public class Interface
         //Renders mouse pointer
         if(inWindow)
         {
-            if(nBt != null) {
+            if(slot != -1 && cSelect.getInventory().getItem(slot) != null) {
+                cSelect.getInventory().getItem(slot).render(x - Game.TILESIZE / 2, y - Game.TILESIZE / 2, 2, g);
+            }
+            else if(nBt != null) {
                 //Hand pointer
                 g.drawImage(sprite.cursor[mouse][1], x - 7, y, 32, 32, null);
             }
@@ -206,7 +207,7 @@ public class Interface
                 case 1: //Left click
                     if(cSelect != null)
                     {
-                        cSelect.getInventory().slotRequest(slot, whichSlot());
+                        cSelect.getInventory().swap(slot, whichSlot());
                         slot = click ? whichSlot() : -1;
                     }
 

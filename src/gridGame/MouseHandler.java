@@ -18,7 +18,7 @@ public class MouseHandler extends MouseAdapter
     walkList - List of tiles that the unit will walk on
     */
     private int pX, pY, cX, cY, mX, mY;
-    private boolean found, pathed;
+    private boolean found, pathed, canPath;
     private Unit selected;
     private ArrayList<int[]> walkList;
     
@@ -42,6 +42,7 @@ public class MouseHandler extends MouseAdapter
                 pY = (mY - Game.MAPOFFY) / Game.TILESIZE + Game.yOff;
 
                 found = false;
+                canPath = true;
                 Game.gui.update(mX, mY, true, 1);
                 //System.out.println("pressed left");
                 break;
@@ -65,30 +66,35 @@ public class MouseHandler extends MouseAdapter
     {
         mX = e.getX();
         mY = e.getY();
-        if((mX - Game.MAPOFFX) / Game.TILESIZE + Game.xOff != cX || (mY - Game.MAPOFFY) / Game.TILESIZE + Game.yOff != cY) {
-            pathed = false;
-        }
-        cX = (int)Math.floor((mX - Game.MAPOFFX) / (double)Game.TILESIZE) + Game.xOff;
-        cY = (int)Math.floor((mY - Game.MAPOFFY) / (double)Game.TILESIZE) + Game.yOff;
         
-        if(found)
+        if(canPath)
         {
-            if(!pathed)
-            {
-                Game.paths.addPath(cX, cY);
-                pathed = true;
+            //If moved off game screen, need to repath once it gets back on screen
+            if((mX - Game.MAPOFFX) / Game.TILESIZE + Game.xOff != cX || (mY - Game.MAPOFFY) / Game.TILESIZE + Game.yOff != cY) {
+                pathed = false;
             }
-        }
-        else
-        {  
-            selected = Game.getUnit(pX, pY);
-            if(Game.gui.canSelect(selected))
+            cX = (int)Math.floor((mX - Game.MAPOFFX) / (double) Game.TILESIZE) + Game.xOff;
+            cY = (int)Math.floor((mY - Game.MAPOFFY) / (double) Game.TILESIZE) + Game.yOff;
+
+            if(found)
             {
-                //Find Paths
-                Game.gui.update(selected);
-                Game.paths.findPath(selected.pathInfo());
-                //Game.paths.printPaths();
-                found = true;
+                if(!pathed)
+                {
+                    Game.paths.addPath(cX, cY);
+                    pathed = true;
+                }
+            }
+            else
+            {  
+                selected = Game.getUnit(pX, pY);
+                if(Game.gui.canSelect(selected))
+                {
+                    //Find Paths
+                    Game.gui.update(selected);
+                    Game.paths.findPath(selected.pathInfo());
+                    //Game.paths.printPaths();
+                    found = true;
+                }
             }
         }
         Game.gui.update(mX, mY);
@@ -125,6 +131,7 @@ public class MouseHandler extends MouseAdapter
                         selected.move(cX, cY, walkList);
                     }
                 }
+                canPath = false;
                 Game.gui.update(selected);
                 Game.gui.update(e.getX(), e.getY(), false, 1);
                 //System.out.println("released left");

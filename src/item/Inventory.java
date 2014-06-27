@@ -39,6 +39,10 @@ public class Inventory
         for(int i = 0; i < size; i++) {
             g.drawRect(x + 3 + (Game.TILESIZE + 2) * i, y + 3, Game.TILESIZE + 2, Game.TILESIZE + 2);
         }
+        if(this.size > 0)
+        {
+            g.drawString(itemList[0].getNAME(), x + 10, y + 60);
+        }
     }    
     
     public void render2(Graphics g)
@@ -92,7 +96,7 @@ public class Inventory
         return null;
     }
     
-    //Removes item at specified index if it exists
+    //Retrives item at specified index if it exists
     public Item getItem(int index)
     {
         if(index < size) {
@@ -101,13 +105,27 @@ public class Inventory
         return null;
     }
     
-    public void slotRequest(int s1, int s2)
+    //Swaps two items from their respective slot.  If items have gap between them, it shifts up all the items.
+    public void swap(int s1, int s2)
     {
-        if(s1 >= 0 && s2 >= 0)
+        if(s1 >= 0 && s2 >= 0 && s1 < size && s2 < size)
         {
             Item temp = itemList[s1];
             itemList[s1] = itemList[s2];
             itemList[s2] = temp;
+            int n = size;
+            for(int i = 0; i < n; i++)
+            {
+                if(itemList[i] == null)
+                {
+                    for(int j = i; j < n - 1; j++) {
+                        itemList[j] = itemList[j + 1];
+                        itemList[j + 1] = null;
+                    }
+                    i--;
+                    n--;
+                }
+            }
         }
     }
     
