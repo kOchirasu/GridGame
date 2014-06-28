@@ -91,6 +91,9 @@ public class Inventory
         {
             Item ret = itemList[index];
             itemList[index] = null;
+            for(int i = index; i < size; i++) {
+                itemList[i] = itemList[i + 1];
+            }
             return ret;
         }
         return null;
@@ -114,7 +117,7 @@ public class Inventory
             itemList[s1] = itemList[s2];
             itemList[s2] = temp;
             int n = size;
-            for(int i = 0; i < n; i++)
+            for(int i = Math.min(s1, s2); i < n; i++)
             {
                 if(itemList[i] == null)
                 {

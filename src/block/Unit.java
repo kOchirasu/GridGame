@@ -46,14 +46,6 @@ public class Unit
     */
     public boolean moving;
     
-    //Dummy unit
-    public Unit(short classID)
-    {
-        this.x = this.pX = -1000;
-        this.y = this.pY = -1000;
-        this.classID = classID;
-    }
-    
     public Unit(int x, int y, Sprite sprite, int MOV, int TEAM)
     {
         this.x = this.pX = x;
@@ -209,7 +201,7 @@ public class Unit
     //Moves the unit to x, y through each tile in the walkList array
     public boolean move(int x, int y, ArrayList<int[]> walkList)
     {
-        if(x >= 0 && y >= 0 && x < Game.map.width && y < Game.map.height)
+        if(Game.inMap(x, y))
         {
             if(Game.paths.getMove(x, y) <= mov && Game.getUnit(x, y) == null)// && Game.paths.getMove(x, y) <= mov && mov != 0)
             {
@@ -267,9 +259,8 @@ public class Unit
             int tDmg = Calculator.dmgAmt(atk + wepATK(), enemy.getDEF());
             enemy.damage(tDmg);
             attacking = false;
+            addEXP(expGain + 50);
             done();
-            exp += expGain;
-            //addExp(expGain);
             return true;
         }
         return false;
@@ -290,6 +281,16 @@ public class Unit
         dmg -= n[1] * 10;
         n[2] = dmg / 100;
         //System.out.println(n[2] + " " + n[1] + " " + n[0]);
+    }
+    
+    private void addEXP(int a)
+    {
+        exp += a;
+        if(exp >= 100)
+        {
+            exp -= 100;
+            lv++;
+        }
     }
     
     //Lots of 'get' functions because no public variables

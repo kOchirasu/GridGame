@@ -212,9 +212,9 @@ public class Path
     //Checks if a tile can be moved to
     private boolean moveable(int x, int y)
     {
-        if(x >= 0 && y >= 0 && x < Game.map.width && y < Game.map.height) //If within board
+        if(Game.inMap(x, y)) //If within board
         {
-            if((Game.getUnit(x, y) == null || Game.getUnit(x, y).getTEAM() == team) || Game.getUnit(x, y).getClassID() == -1) //If tile is open
+            if((Game.getUnit(x, y) == null || Game.getUnit(x, y).getTEAM() == team)) //If tile is open
             {
                 if(movement[x][y] == 0 && Game.map.getGrid()[x][y] == 1)
                 {
@@ -228,7 +228,8 @@ public class Path
     //Add tile to user selected walk path
     public void addPath(int x, int y)
     {
-        if(x >= Game.xOff && y >= Game.yOff && x < Game.fieldWidth + Game.xOff && y < Game.fieldHeight + Game.yOff)
+        //if(x >= Game.xOff && y >= Game.yOff && x < Game.fieldWidth + Game.xOff && y < Game.fieldHeight + Game.yOff)
+        if(Game.inGrid(x, y))
         {
             if(movement[x][y] < 1 || movement[x][y] == 99)
             {
@@ -307,7 +308,8 @@ public class Path
     //Returns a specified index of the movement array
     public int getMove(int x, int y)
     {
-        if(x >= 0 && y >= 0 && x < Game.map.width && y < Game.map.height) {
+        if(Game.inMap(x, y))
+        {
             if(movement[x][y] != 0) {
                 return movement[x][y];
             }

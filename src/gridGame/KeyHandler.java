@@ -11,21 +11,22 @@ public class KeyHandler implements KeyListener
     {
         switch(e.getKeyCode())
         {
-            case VK_UP:
+            case VK_UP: case VK_W:
                 Game.offset(Game.xOff, Game.yOff - 1);
                 break;
                 
-            case VK_RIGHT:
+            case VK_RIGHT: case VK_D:
                 Game.offset(Game.xOff + 1, Game.yOff);
                 break;
                 
-            case VK_DOWN:
+            case VK_DOWN: case VK_S:
                 Game.offset(Game.xOff, Game.yOff + 1);
                 break;
             
-            case VK_LEFT:
+            case VK_LEFT: case VK_A:
                 Game.offset(Game.xOff - 1, Game.yOff);
                 break;
+                
             case VK_ESCAPE:
                 Game.gui.click(1);
                 break;

@@ -45,8 +45,6 @@ public class Game extends Canvas implements Runnable
     public Thread gameThread;
     public static ItemLoader lookup;
     
-    public static Unit theUnit = new Unit((short)-1); //Dummy unit used for keeping units selected, bad fix but w/e
-    
     /* Private Variables
     im                      - Contains all pictures
     unitGrid                - Grid array that contains all units
@@ -236,7 +234,7 @@ public class Game extends Canvas implements Runnable
     //Add a unit to the map
     public void addUnit(int x, int y, int type, int mov, int team)
     {
-        if(x >= 0 && y >= 0 && x < map.width && y < map.height && getUnit(x, y) == null)
+        if(inMap(x, y) && getUnit(x, y) == null)
         {
             Unit temp = new Unit(x, y, im, mov, team);
             unitGrid[x][y] = temp;
@@ -244,19 +242,19 @@ public class Game extends Canvas implements Runnable
         }
         else
         {
-            System.out.println("Unable to add unit. Game.java @ Line " + Thread.currentThread().getStackTrace()[1].getLineNumber());
+            System.out.println("Unable to add unit at (" + x + ", " + y + ") . Game.java @ Line " + Thread.currentThread().getStackTrace()[1].getLineNumber());
         }
     }
     
     //Gets the unit at specified x, y
     public static Unit getUnit(int x, int y)
     {
-        if(x >= xOff && y >= yOff && x < fieldWidth + xOff && y < fieldHeight + yOff)
+        if(inGrid(x, y))
         {
             return unitGrid[x][y];
         }
         //return null;
-        return theUnit;
+        return null;
     }
     
     //Moves a unit to specified x, y from current x, y
@@ -270,6 +268,18 @@ public class Game extends Canvas implements Runnable
     {
         xOff = x >= 0 && x <= map.width - fieldWidth ? x : xOff;
         yOff = y >= 0 && y <= map.height - fieldHeight ? y : yOff;
+    }
+    
+    //checks if x, y grid based coordinates are in the window
+    public static boolean inGrid(int x, int y)
+    {
+        return x >= xOff && y >= yOff && x < fieldWidth + xOff && y < fieldHeight + yOff;
+    }
+    
+    //checks if x, y grid based coordinates are in the map
+    public static boolean inMap(int x, int y)
+    {
+        return x >= 0 && y >= 0 && x < map.width && y < map.height;
     }
     
     //some glitch with "theUnit" placeholder unit.

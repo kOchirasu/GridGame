@@ -91,7 +91,6 @@ public class Button implements guiObj
     //All button functions go here
     public int click(Unit selected)
     {
-        System.out.println(disabled);
         if(!disabled)
         {
             switch(iD)

@@ -40,7 +40,7 @@ public class Interface
     private Sprite sprite;
     private Color selectColor;
     private Button oBt, nBt;
-    private boolean inWindow = true, lockSelect;
+    private boolean inWindow = true, lockSelect, inGrid;
     private Window window;
     
     public Interface(BufferedImage bg, Sprite sprite)
@@ -135,7 +135,8 @@ public class Interface
         if(inWindow)
         {
             if(slot != -1 && cSelect.getInventory().getItem(slot) != null) {
-                cSelect.getInventory().getItem(slot).render(x - Game.TILESIZE / 2, y - Game.TILESIZE / 2, 2, g);
+                //Draw dragged item instead of mouse pointer
+                cSelect.getInventory().getItem(slot).render(x - Game.TILESIZE / 2, y - Game.TILESIZE / 2, 1, g);
             }
             else if(nBt != null) {
                 //Hand pointer
@@ -200,7 +201,7 @@ public class Interface
     {
         update(x, y);
         
-        if(window == null)
+        if(window == null)//Game.inGrid(cX, cY)
         {
             switch(button)
             {
@@ -257,7 +258,7 @@ public class Interface
     //Updates unit info display, small bug with hasMoved not changing but too lazy to fix
     public void update(Unit selected)
     {
-        if((selected == null || selected.getClassID() >= 0) && window == null)
+        if(Game.inGrid(cX, cY) && window == null)
         {
             //lock select after unit moves
             //unlock select if move canceled or unit done
@@ -310,7 +311,7 @@ public class Interface
     public boolean canSelect(Unit selected)
     {
         lockSelect = cSelect != null && (cSelect.hasMoved() || cSelect.moving) && !cSelect.isDone();
-        return !lockSelect && selected != null && !selected.moving && !selected.hasMoved() && selected.getClassID() != -1 && window == null;
+        return !lockSelect && selected != null && !selected.moving && !selected.hasMoved() && window == null;
     }
     
     //Determines whether or not mouse is in the window
