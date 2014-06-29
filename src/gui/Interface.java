@@ -41,7 +41,7 @@ public class Interface
     private Color selectColor;
     private Button oBt, nBt;
     private boolean inWindow = true, lockSelect, inGrid;
-    private Window window;
+    public static Window window, battleWindow;
     
     public Interface(BufferedImage bg, Sprite sprite)
     {
@@ -59,8 +59,7 @@ public class Interface
             buttonMap.get(i).disabled = true;
         }
         slot = -1;
-        
-        //window = new Window(125, 75, 450, 300);
+        battleWindow = new Window(125, 75, 450, 300);
     }
     
     //tick for animations
@@ -69,6 +68,10 @@ public class Interface
         for(Integer i : barMap.keySet())
         {
             barMap.get(i).tick();
+        }
+        if(window != null)
+        {
+            window.tick();
         }
     }
     
@@ -107,13 +110,10 @@ public class Interface
         if(cSelect != null)
         {
             cSelect.getInventory().render(g);
-            cSelect.getInventory().render2(g);
-            int x = (cSelect.getX() - Game.xOff) * Game.TILESIZE;
-            int y = (cSelect.getY() - Game.yOff) * Game.TILESIZE;
-            if(x >= 0 && y >= 0 && x < Game.fieldWidth * Game.TILESIZE && y < Game.fieldHeight * Game.TILESIZE)
+            if(Game.inGrid(cSelect.getX(), cSelect.getY()))
             {
                 g.setColor(Color.BLUE);
-                g.fillRect(Game.MAPOFFX + x, Game.MAPOFFY + y, Game.TILESIZE, Game.TILESIZE);
+                g.fillRect(Game.MAPOFFX + (cSelect.getX() - Game.xOff) * Game.TILESIZE, Game.MAPOFFY + (cSelect.getY() - Game.yOff) * Game.TILESIZE, Game.TILESIZE, Game.TILESIZE);
             }
         }
     }
@@ -136,7 +136,7 @@ public class Interface
         {
             if(slot != -1 && cSelect.getInventory().getItem(slot) != null) {
                 //Draw dragged item instead of mouse pointer
-                cSelect.getInventory().getItem(slot).render(x - Game.TILESIZE / 2, y - Game.TILESIZE / 2, 1, g);
+                cSelect.getInventory().getItem(slot).render(x - Game.TILESIZE / 2, y - Game.TILESIZE / 2, g);
             }
             else if(nBt != null) {
                 //Hand pointer
@@ -191,12 +191,12 @@ public class Interface
     public void update(int x, int y)
     {
         this.x = x;
-        this.cX = (int)Math.floor((x - Game.MAPOFFX) / (double)Game.TILESIZE);
+        this.cX = (int) Math.floor((x - Game.MAPOFFX) / (double) Game.TILESIZE);
         this.y = y;
-        this.cY = (int)Math.floor((y - Game.MAPOFFY) / (double)Game.TILESIZE);
+        this.cY = (int) Math.floor((y - Game.MAPOFFY) / (double) Game.TILESIZE);
     }
     
-    //Updates mouse location to highlight button and whether or not mouse is clicked
+    //Updates mouse location to highlight button and whether or not mouse is whichButton
     public void update(int x, int y, boolean click, int button)
     {
         update(x, y);
@@ -214,7 +214,7 @@ public class Interface
 
                     //There is some glitch where the button wont register sometimes, need to debug...
                     oBt = nBt;
-                    nBt = clicked();
+                    nBt = whichButton();
                     if(oBt != null || nBt != null)    
                     {
                         if(oBt == nBt && oBt.pressed == true) {
@@ -255,19 +255,26 @@ public class Interface
         }
     }
     
-    //Updates unit info display, small bug with hasMoved not changing but too lazy to fix
+    //Updates unit info display, small bug with hasMoved not changing but too lazy to fix, FIXED
     public void update(Unit selected)
     {
         if(Game.inGrid(cX, cY) && window == null)
         {
             //lock select after unit moves
             //unlock select if move canceled or unit done
-            lockSelect = cSelect != null && (cSelect.hasMoved() || cSelect.moving) && !cSelect.isDone();
+            lockSelect = cSelect != null && (cSelect.hasMoved() || cSelect.isMoving()) && !cSelect.isDone();
             if(lockSelect)
             {
                 if(cSelect.isAttacking())
                 {
-                    if(!cSelect.attack(selected)) {
+                    if(cSelect.canAttack(selected))
+                    {
+                        battleWindow.set(cSelect, selected);
+                        window = battleWindow;
+                        window.start();
+                    }
+                    else
+                    {
                         System.out.println("Invalid target");
                     }
                 }
@@ -293,6 +300,12 @@ public class Interface
         }
     }
     
+    //Determines whether or not mouse is in the window
+    public void update(boolean b)
+    {
+        inWindow = b;
+    }
+    
     //Updates the unit data for the interface
     private void unitUpdate(Unit unit)
     {
@@ -310,17 +323,17 @@ public class Interface
     //Is true if selection is possible
     public boolean canSelect(Unit selected)
     {
-        lockSelect = cSelect != null && (cSelect.hasMoved() || cSelect.moving) && !cSelect.isDone();
-        return !lockSelect && selected != null && !selected.moving && !selected.hasMoved() && window == null;
+        lockSelect = cSelect != null && (cSelect.hasMoved() || cSelect.isMoving()) && !cSelect.isDone();
+        return !lockSelect && selected != null && !selected.isMoving() && !selected.hasMoved() && window == null;
     }
     
-    //Determines whether or not mouse is in the window
-    public void update(boolean b)
-    {
-        inWindow = b;
+    public void closeWindow() {
+        window = null;
     }
     
-    //returns the inventory slot the mouse has clicked
+    
+    
+    //returns the inventory slot the mouse has whichButton
     private int whichSlot()
     {
         for(int i = 0; i < cSelect.getInventory().getSize(); i++)
@@ -332,9 +345,9 @@ public class Interface
         return -1;
     }
     
-    //Loops through button list and finds which button the mouse clicked on
+    //Loops through button list and finds which button the mouse whichButton on
     //Could implement with binary search if button coordinates are in order.
-    private Button clicked()
+    private Button whichButton()
     {
         for(Integer i : buttonMap.keySet())
         {

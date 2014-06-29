@@ -4,7 +4,6 @@ import graphics.SpriteLoader;
 import gridGame.Game;
 import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.MultipleGradientPaint.CycleMethod;
@@ -26,6 +25,7 @@ public class Item
         {
             ResultSet rs = lookup.search(iD);
             this.iD         = iD;
+            this.type       = iD / 10000; //Gets first two digits of iD
             this.name       = rs.getString("NAME");
             this.minRange   = rs.getInt("MINRANGE");
             this.maxRange   = rs.getInt("MAXRANGE");
@@ -45,13 +45,13 @@ public class Item
     }
     
     //Normal item rendering function
-    public void render(int x, int y, Graphics g)
+    public void render(int x, int y, int r, Graphics g)
     {
-        g.drawImage(image, x, y, Game.TILESIZE, Game.TILESIZE, null);
+        g.drawImage(image, x, y, Game.TILESIZE / r, Game.TILESIZE / r, null);
     }
     
     //used to render semi-transparent item when dragging
-    public void render(int x, int y, int m, Graphics g)
+    public void render(int x, int y, Graphics g)
     {
         Graphics2D g2 = (Graphics2D) g;
         Point2D center = new Point2D.Float(x + Game.TILESIZE / 2, y + Game.TILESIZE /2);
@@ -62,7 +62,7 @@ public class Item
         g2.setPaint(p);
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) 0.5));
         g2.fillOval(x, y, Game.TILESIZE, Game.TILESIZE);
-        g2.drawImage(image, x, y, Game.TILESIZE * m, Game.TILESIZE * m, null);
+        g2.drawImage(image, x, y, Game.TILESIZE, Game.TILESIZE, null);
     }
     
     @Override

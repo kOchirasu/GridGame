@@ -9,16 +9,17 @@ import java.util.ArrayList;
 public class MouseHandler extends MouseAdapter
 {
     /* Private Variables
-    pX, pY   - The selected units x and y grid coordinates
-    cX, cY   - The current mouse x and y grid coordinates
-    mX, mY   - The mouse x and y coordinates
-    found    - True when the walk path has been found
-    pathed   - True when the movement path has been found
-    selected - Unit that is currently selected (Unit at [pX][pY])
-    walkList - List of tiles that the unit will walk on
+    pX, pY      - The selected units x and y grid coordinates
+    cX, cY      - The current mouse x and y grid coordinates
+    mX, mY      - The mouse x and y coordinates
+    found       - True when the walk path has been found
+    added       - True after walk path has been calculated up to current tile
+    canPath     - True while left click is pressed
+    selected    - Unit that is currently selected (Unit at [pX][pY])
+    walkList    - List of tiles that the unit will walk on
     */
     private int pX, pY, cX, cY, mX, mY;
-    private boolean found, pathed, canPath;
+    private boolean found, added, canPath;
     private Unit selected;
     private ArrayList<int[]> walkList;
     
@@ -35,12 +36,13 @@ public class MouseHandler extends MouseAdapter
     {
         mX = e.getX();
         mY = e.getY();
+        pX = (int) Math.floor((mX - Game.MAPOFFX) / (double) Game.TILESIZE) + Game.xOff;
+        pY = (int) Math.floor((mY - Game.MAPOFFY) / (double) Game.TILESIZE) + Game.yOff;
+        
         switch(e.getButton())
         {
             case MouseEvent.BUTTON1: //Left click
-                pX = (mX - Game.MAPOFFX) / Game.TILESIZE + Game.xOff;
-                pY = (mY - Game.MAPOFFY) / Game.TILESIZE + Game.yOff;
-
+                        
                 found = false;
                 canPath = true;
                 Game.gui.update(mX, mY, true, 1);
@@ -57,7 +59,7 @@ public class MouseHandler extends MouseAdapter
                 //System.out.println("pressed right");
                 break;
         }
-        
+        Game.gui.update(mX, mY);
     }
     
     //Updates the mouse coordinates, and interface.  Also does pathfinding
@@ -69,20 +71,18 @@ public class MouseHandler extends MouseAdapter
         
         if(canPath)
         {
-            //If moved off game screen, need to repath once it gets back on screen
-            if((mX - Game.MAPOFFX) / Game.TILESIZE + Game.xOff != cX || (mY - Game.MAPOFFY) / Game.TILESIZE + Game.yOff != cY) {
-                pathed = false;
-            }
-            cX = (int)Math.floor((mX - Game.MAPOFFX) / (double) Game.TILESIZE) + Game.xOff;
-            cY = (int)Math.floor((mY - Game.MAPOFFY) / (double) Game.TILESIZE) + Game.yOff;
-
-            if(found)
+            if(found) //After all possible movement paths have been found, it can start finding walk path
             {
-                if(!pathed)
+                //sets added to false if current tile changes, floor and cast to properly handle negatives
+                added = (int) Math.floor((mX - Game.MAPOFFX) / (double) Game.TILESIZE) + Game.xOff == cX && (int) Math.floor((mY - Game.MAPOFFY) / (double) Game.TILESIZE) + Game.yOff == cY;
+                
+                if(!added) //If moved to new tile, find walk path to new tile
                 {
-                    Game.paths.addPath(cX, cY);
-                    pathed = true;
+                    cX = (int) Math.floor((mX - Game.MAPOFFX) / (double) Game.TILESIZE) + Game.xOff;
+                    cY = (int) Math.floor((mY - Game.MAPOFFY) / (double) Game.TILESIZE) + Game.yOff;
+                    added = Game.paths.addPath(cX, cY);
                 }
+                //System.out.println(cX + " & " + cY);
             }
             else
             {  
@@ -106,9 +106,8 @@ public class MouseHandler extends MouseAdapter
     {
         mX = e.getX();
         mY = e.getY();
-        //Might have to floor these if there are future problems
-        cX = (mX - Game.MAPOFFX) / Game.TILESIZE + Game.xOff;
-        cY = (mY - Game.MAPOFFY) / Game.TILESIZE + Game.yOff;
+        cX = (int) Math.floor((mX - Game.MAPOFFX) / (double) Game.TILESIZE) + Game.xOff;
+        cY = (int) Math.floor((mY - Game.MAPOFFY) / (double) Game.TILESIZE) + Game.yOff;
 
         Game.gui.update(mX, mY, false, 1);
     }
@@ -120,16 +119,15 @@ public class MouseHandler extends MouseAdapter
         switch(e.getButton())
         {
             case MouseEvent.BUTTON1: //Left click
-                //System.out.print("X: " + cX + ", Y: " + cY + "\t");
+                //System.out.println("X: " + cX + ", Y: " + cY + "\t");
                 selected = Game.getUnit(pX, pY);
                 if(Game.gui.canSelect(selected))
                 {
                     walkList = new ArrayList<>(Game.paths.getWalk());
                     Game.paths.clearPaths();
-                    if(cX >= Game.xOff && cY >= Game.yOff && cX < Game.fieldWidth + Game.xOff && cY < Game.fieldHeight + Game.yOff) {
-                        //System.out.println("Moving unit");
-                        selected.move(cX, cY, walkList);
-                    }
+                    //if(Game.inGrid(cX, cY)) Shouldn't need this check, move function already performs check
+                    //System.out.println("Moving unit");
+                    selected.move(cX, cY, walkList);
                 }
                 canPath = false;
                 Game.gui.update(selected);

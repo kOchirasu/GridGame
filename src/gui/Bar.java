@@ -58,20 +58,24 @@ public class Bar implements guiObj
     {
         Graphics2D g2 = (Graphics2D) g;
         //System.out.println("" + dValue + " " + value);
-        int length = (int)(w * dValue);
+        int length = (int)((w - 2 * bW) * dValue);
         g.setColor(Color.BLACK);
-        g.fillRect(x, y, w + 2 * bW, h + 2 * bW);
-        g.setColor(barColorF);
-        GradientPaint gp = new GradientPaint(x, y, Color.WHITE, x, y + h, barColorF, true);
-        g2.setPaint(gp);
-        g2.fillRect(x + bW, y + bW, length, h);
+        g.fillRect(x, y, w, h);
         g.setColor(barColorB);
-        g.fillRect(x + length + bW, y + bW, w - length, h);
+        g.fillRect(x + bW, y + bW, w - 2 * bW, h - 2 * bW);
+        GradientPaint gp = new GradientPaint(x, y, Color.WHITE, x, y + h - 2 * bW, barColorF, true);
+        g2.setPaint(gp);
+        g2.fillRect(x + bW, y + bW, length, h - 2 * bW);
     }
     
     public void set(float value)
     {
         increase = value > dValue;
         this.value = value;
+    }
+    
+    public void get()
+    {
+        System.out.print(value);
     }
 }

@@ -43,19 +43,15 @@ public class Inventory
         {
             g.drawString(itemList[0].getNAME(), x + 10, y + 60);
         }
-    }    
-    
-    public void render2(Graphics g)
-    {
         //Draw all items
         g.setColor(Color.BLUE);
         for(int i = 0; i < size; i++) {
             g.drawRect(x + 3 + (Game.TILESIZE + 2) * i, y + 3, 10, 10);
         }
-        for(int i = 0; i < size; i++) //Change back to count later if you want to beable to not move to null
+        for(int i = 0; i < size; i++) //Change back to count later if you want to be able to not move to null
         {   
             if(itemList[i] != null) {
-                itemList[i].render(x + 4 + (Game.TILESIZE + 2) * i, y + 4, g);
+                itemList[i].render(x + 4 + (Game.TILESIZE + 2) * i, y + 4, 1, g);
             }
         }
     }

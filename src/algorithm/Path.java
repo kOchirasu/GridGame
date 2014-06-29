@@ -226,7 +226,7 @@ public class Path
     }
     
     //Add tile to user selected walk path
-    public void addPath(int x, int y)
+    public boolean addPath(int x, int y)
     {
         //if(x >= Game.xOff && y >= Game.yOff && x < Game.fieldWidth + Game.xOff && y < Game.fieldHeight + Game.yOff)
         if(Game.inGrid(x, y))
@@ -259,7 +259,7 @@ public class Path
                     {
                         //System.out.println("Invalid case: 5\t duplicate list entries");
                         repath(x, y);
-                        return;
+                        return true;
                     }
                 }
                 //System.out.println("Added: (" + x + ", " + y + ")");
@@ -271,6 +271,7 @@ public class Path
             walkList.clear();
             walkList.add(new int[]{this.x, this.y});
         }
+        return true;
     }
     
     //Automatically calculated walk path

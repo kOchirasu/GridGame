@@ -44,6 +44,7 @@ public class Game extends Canvas implements Runnable
     public static Interface gui;
     public Thread gameThread;
     public static ItemLoader lookup;
+    public static Sprite tempim;
     
     /* Private Variables
     im                      - Contains all pictures
@@ -64,6 +65,7 @@ public class Game extends Canvas implements Runnable
         BufferedImage cursorGrid = loader.load("/cursor.png");
         BufferedImage tileGrid = loader.load("/tile.png");
         im = new Sprite(spriteGrid, damageGrid, cursorGrid, tileGrid);
+        tempim = im;
         
         //Temporarily used to write map files (Doesn't work i broke it)
         //MapEditor me = new MapEditor();
@@ -130,9 +132,9 @@ public class Game extends Canvas implements Runnable
         gui.addButton(544, 14, 140, 16, "Up", 9);
         gui.addButton(544, 378, 140, 16, "Down", 10);
         
-        gui.addBar(10, 412, 250, 10, 0, new Color(200, 0, 0, 255));
-        gui.addBar(10, 430, 250, 10, 1, new Color(0, 75, 255, 255));
-        gui.addBar(10, 448, 250, 10, 2, new Color(255, 225, 0, 255));
+        gui.addBar(10, 412, 250, 16, 0, new Color(200, 0, 0, 255));
+        gui.addBar(10, 430, 250, 16, 1, new Color(0, 75, 255, 255));
+        gui.addBar(10, 448, 250, 16, 2, new Color(255, 225, 0, 255));
         //gui.addButton(50, 425, 500, 125, "random button", 11);
     }
     
@@ -226,7 +228,8 @@ public class Game extends Canvas implements Runnable
     //Ends turn, resets all units' "moved" parameter
     public static void newTurn()
     {
-        for(int i = 0; i < unitList.size(); i++) {
+        for(int i = 0; i < unitList.size(); i++) //Loops through all units
+        {
             unitList.get(i).reset();
         }
     }
@@ -234,7 +237,7 @@ public class Game extends Canvas implements Runnable
     //Add a unit to the map
     public void addUnit(int x, int y, int type, int mov, int team)
     {
-        if(inMap(x, y) && getUnit(x, y) == null)
+        if(inMap(x, y) && getUnit(x, y) == null) //Make sure adding unit within map grid, and that there is no unit currently there
         {
             Unit temp = new Unit(x, y, im, mov, team);
             unitGrid[x][y] = temp;
@@ -249,11 +252,10 @@ public class Game extends Canvas implements Runnable
     //Gets the unit at specified x, y
     public static Unit getUnit(int x, int y)
     {
-        if(inGrid(x, y))
+        if(inMap(x, y)) //Make sure unit is in map
         {
             return unitGrid[x][y];
         }
-        //return null;
         return null;
     }
     

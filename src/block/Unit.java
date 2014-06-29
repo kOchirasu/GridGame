@@ -24,6 +24,7 @@ public class Unit
     walkTick, dmgTick   - Ticks to time walking and damage taking
     inventory           - Inventory of unit
     dead, moved         - True if unit is dead, or unit has moved for the turn
+    moving              - True while unit is moving
     done                - True is unit has performed an action for the turn
     attacking           - True while user is slecting a target for the unit to attack
     ClassID             - Class ID of the unit
@@ -35,16 +36,11 @@ public class Unit
     private int lv, exp, hp, maxHP, mp, maxMP, ftg, mov, atk, mAtk, def, acc, avoid, crit, team;
     private int walkTick, dmgTick;
     private Inventory inventory;
-    private boolean dead, moved, done, attacking;
+    private boolean dead, moved, moving, done, attacking;
     private short classID;
     private ArrayList<int[]> walkList = new ArrayList<>();
     private TreeMap<Integer, String> btList = new TreeMap<>();;
     private Sprite sprite;
-    
-    /* Public Variables
-    moving              - True while unit is moving
-    */
-    public boolean moving;
     
     public Unit(int x, int y, Sprite sprite, int MOV, int TEAM)
     {
@@ -81,10 +77,9 @@ public class Unit
         if(dmgLen > 0)
         {
             dmgTick++;
-            if(dmgTick > 120)
+            if(dmgTick > 120) //120 = 2 seconds
             {
-                dmgLen = 0;
-                dmgTick = 0;
+                dmgLen = dmgTick = 0;
             }
         }
         
@@ -106,9 +101,7 @@ public class Unit
                 yOff += 4 * (walkList.get(count)[1] - this.dY / Game.TILESIZE);
                 if(walkTick >= 8)
                 {
-                    xOff = 0;
-                    yOff = 0;
-                    walkTick = 0;
+                    xOff = yOff = walkTick = 0;
                     this.dX = walkList.get(count)[0] * Game.TILESIZE;
                     this.dY = walkList.get(count)[1] * Game.TILESIZE;
                     //System.out.println("x: " + x + " y: " + y);
@@ -143,13 +136,13 @@ public class Unit
             x += Game.MAPOFFX + xOff + xOff2;
             y += Game.MAPOFFY + yOff + yOff2;
                 
-            if(dead) {
+            if(dead) { //Gravestone
                 g.drawImage(sprite.unit[0][8], x, y, Game.TILESIZE, Game.TILESIZE, null);
             }
-            else if(done){
+            else if(done) { //Grayed out unit
                 g.drawImage(sprite.unit[0][7], x, y, Game.TILESIZE, Game.TILESIZE, null);
             }
-            else{
+            else { //Normal unit depending on team
                 g.drawImage(sprite.unit[0][team], x, y, Game.TILESIZE, Game.TILESIZE, null);
             }
 
@@ -168,6 +161,27 @@ public class Unit
                     g.drawImage(sprite.damage[n[0]], x + 21, y + 5, Sprite.dmwDIM, Sprite.dmhDIM, null);
                     break;
             }
+        }
+    }
+    
+    public void render(int x, int y, int m, Graphics g)
+    {
+        g.drawImage(sprite.unit[0][team], x, y, Game.TILESIZE * m, Game.TILESIZE * m, null);
+        
+        switch(dmgLen)
+        {
+            case 1:
+                g.drawImage(sprite.damage[n[0]], x + 11 * m, y + 5 * m, Sprite.dmwDIM * m, Sprite.dmhDIM * m, null);
+                break;
+            case 2:
+                g.drawImage(sprite.damage[n[1]], x + 6 * m, y + 5 * m, Sprite.dmwDIM * m, Sprite.dmhDIM * m, null);
+                g.drawImage(sprite.damage[n[0]], x + 16 * m, y + 5 * m, Sprite.dmwDIM * m, Sprite.dmhDIM * m, null);
+                break;
+            case 3:
+                g.drawImage(sprite.damage[n[2]], x + 1 * m, y + 5 * m, Sprite.dmwDIM * m, Sprite.dmhDIM * m, null);
+                g.drawImage(sprite.damage[n[1]], x + 11 * m, y + 5 * m, Sprite.dmwDIM * m, Sprite.dmhDIM * m, null);
+                g.drawImage(sprite.damage[n[0]], x + 21 * m, y + 5 * m, Sprite.dmwDIM * m, Sprite.dmhDIM * m, null);
+                break;
         }
     }
     
@@ -211,6 +225,7 @@ public class Unit
                 this.walkList = walkList;
                 this.x = x;
                 this.y = y;
+                //moved is set to true once the animation has completed, but can't I set it to true here?
                 //System.out.println("Moved to Grid(" + this.x + ", " + this.y + ")");
                 return true;
             }
@@ -222,15 +237,14 @@ public class Unit
     public boolean cancelMove()
     {
         Game.paths.clearPaths();
-        if(moved && !done)
+        if(moved && !done) //If unit has made a move, but has not confirmed the action
         {
             Game.moveUnit(pX, pY, this);
             dX = pX * Game.TILESIZE;
             dY = pY * Game.TILESIZE;
             this.x = pX;
             this.y = pY;
-            attacking = false;
-            moved = false;
+            attacking = moved = false;
             return true;
         }
         return false;
@@ -253,10 +267,10 @@ public class Unit
     public boolean attack(Unit enemy)
     {
         //this != enemy: this cannot be enemy if different teams, should be redundant check
-        if(enemy != null && enemy.getHP() > 0 && team != enemy.getTEAM() && inRange(enemy) && attacking)
+        if(canAttack(enemy))
         {
             int expGain = Calculator.expGain(lv, enemy.getLV());
-            int tDmg = Calculator.dmgAmt(atk + wepATK(), enemy.getDEF());
+            int tDmg = Calculator.dmgAmt(atk + wepATK(), enemy.getDEF()) * 0;
             enemy.damage(tDmg);
             attacking = false;
             addEXP(expGain + 50);
@@ -266,36 +280,27 @@ public class Unit
         return false;
     }
     
-    //Displays damage in the unit
-    public void damage(int dmg)
+    //temp attacking function, return 0 and 1 to skip certain amount of ticks
+    public int autoAttack(Unit enemy)
     {
-        dmg = dmg > 999 ? 999 : dmg < 0 ? 0 : dmg;
-        hp -= dmg;
-        if(hp <= 0){
-            kill();
-        }
-        dmgLen = dmg < 10 ? 1 : dmg < 100 ? 2 : 3;
-        n[0] = dmg % 10;
-        dmg -= n[0];
-        n[1] = (dmg % 100) / 10;
-        dmg -= n[1] * 10;
-        n[2] = dmg / 100;
-        //System.out.println(n[2] + " " + n[1] + " " + n[0]);
-    }
-    
-    private void addEXP(int a)
-    {
-        exp += a;
-        if(exp >= 100)
+        if(enemy != null && this.getHP() > 0 && enemy.getHP() > 0 && team != enemy.getTEAM() && inRange(enemy))
         {
-            exp -= 100;
-            lv++;
+            int tDmg = Calculator.dmgAmt(atk + wepATK(), enemy.getDEF());
+            enemy.damage(tDmg);
+            return 0;
         }
+        return 1;
     }
     
     //Lots of 'get' functions because no public variables
+    public boolean canAttack(Unit enemy) {
+        return enemy != null && enemy.getHP() > 0 && team != enemy.getTEAM() && inRange(enemy) && attacking;
+    }
     public boolean hasMoved() {
         return moved;
+    }
+    public boolean isMoving() {
+        return moving;
     }
     public boolean isAttacking() {
         return attacking;
@@ -391,6 +396,34 @@ public class Unit
     {
         hp = mp = exp = 0;
         dead = moved = done = true;
+    }
+    
+    //Displays damage in the unit
+    private void damage(int dmg)
+    {
+        dmg = dmg > 999 ? 999 : dmg < 0 ? 0 : dmg;
+        hp -= dmg;
+        if(hp <= 0){
+            kill();
+        }
+        dmgLen = dmg < 10 ? 1 : dmg < 100 ? 2 : 3;
+        n[0] = dmg % 10;
+        dmg -= n[0];
+        n[1] = (dmg % 100) / 10;
+        dmg -= n[1] * 10;
+        n[2] = dmg / 100;
+        //System.out.println(n[2] + " " + n[1] + " " + n[0]);
+    }
+    
+    //Adds EXP to a unit, and causes level up if exp is >= 100
+    private void addEXP(int a)
+    {
+        exp += a;
+        if(exp >= 100)
+        {
+            exp -= 100;
+            lv++;
+        }
     }
     
     //Returns whether or not the unit is in range
