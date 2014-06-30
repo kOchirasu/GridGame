@@ -210,6 +210,7 @@ public class Interface
                     {
                         cSelect.getInventory().swap(slot, whichSlot());
                         slot = click ? whichSlot() : -1;
+                        unitUpdate(cSelect);
                     }
 
                     //There is some glitch where the button wont register sometimes, need to debug...
@@ -307,7 +308,7 @@ public class Interface
     }
     
     //Updates the unit data for the interface
-    private void unitUpdate(Unit unit)
+    public void unitUpdate(Unit unit)
     {
         //display info
         line1 = "Team: " + unit.getTEAM() + "     Coordinates: (" + unit.getX() + ", " + unit.getY() + ")     " + (unit.hasMoved() ? "[Can't Move]" : "[Can Move]");

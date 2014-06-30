@@ -185,6 +185,7 @@ public class Unit
         }
     }
     
+    
     public void select()
     {
         listButtons(true);
@@ -199,6 +200,7 @@ public class Unit
             listButtons(false);
             done = true;
             moved = true;
+            Game.gui.unitUpdate(this);
         }
     }
     
@@ -446,5 +448,91 @@ public class Unit
         {
             Game.gui.setButton("", i, i, true);
         }
+    }
+    
+    public void cloak()
+    {
+        
+    }
+    
+    public void teleport()
+    {
+        
+    }
+    
+    public void dash()
+    {
+        
+    }
+    
+    public void gamble()
+    {
+        
+    }
+    
+    public void eleShift()
+    {
+        
+    }
+    
+    public void imbue()
+    {
+        
+    }
+    
+    public void sacrifice()
+    {
+        
+    }
+    
+    public void turtle()
+    {
+        
+    }
+    
+    public void illusion()
+    {
+        
+    }
+    
+    //Target skills
+    public void mindControl()
+    {
+        
+    }
+    
+    public void capture()
+    {
+        
+    }
+    
+    public void setup()
+    {
+        
+    }
+    
+    public void blockade()
+    {
+        
+    }
+    
+    public void mend()
+    {
+        
+    }
+    
+    public void reinforce()
+    {
+        
+    }
+    
+    public void pickpocket()
+    {
+        
+    }
+    
+    public void smash()
+    {
+        
     }
 }

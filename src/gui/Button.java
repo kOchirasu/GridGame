@@ -124,23 +124,10 @@ public class Button implements guiObj
     }
     
     //Updates the shade and pressed states of the button
-    public void update(boolean shade, boolean pressed) {
+    public void update(boolean shade, boolean pressed)
+    {
         this.shade = shade;
         this.pressed = pressed;
-    }
-    
-    //Returns the x, y of the 4 corners of the button
-    public int[] area() {
-        return new int[]{x, x + w, y, y + h};
-    }
-    
-    //Returns the button ID
-    public int getID() {
-        return iD;
-    }
-    
-    public String getText() {
-        return text;
     }
     
     //Allows the text of the button to be changed
@@ -167,5 +154,17 @@ public class Button implements guiObj
         this.y = y;
         this.w = w;
         this.h = h;
+    }
+    
+    //Returns the x, y of the 4 corners of the button
+    public int[] area() {
+        return new int[]{x, x + w, y, y + h};
+    }
+    //Returns the button ID
+    public int getID() {
+        return iD;
+    }
+    public String getText() {
+        return text;
     }
 }
