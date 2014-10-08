@@ -86,7 +86,7 @@ public class MouseHandler extends MouseAdapter
             }
             else
             {  
-                selected = Game.getUnit(pX, pY);
+                selected = Game.map.getUnit(pX, pY);
                 if(Game.gui.canSelect(selected))
                 {
                     //Find Paths
@@ -109,7 +109,7 @@ public class MouseHandler extends MouseAdapter
         cX = (int) Math.floor((mX - Game.MAPOFFX) / (double) Game.TILESIZE) + Game.xOff;
         cY = (int) Math.floor((mY - Game.MAPOFFY) / (double) Game.TILESIZE) + Game.yOff;
 
-        Game.gui.update(mX, mY, false, 1);
+        Game.gui.update(mX, mY, false, 0); //need 1 so that buttons highlight
     }
     
     //Updates the interface, and also moves unit if applicable
@@ -120,7 +120,7 @@ public class MouseHandler extends MouseAdapter
         {
             case MouseEvent.BUTTON1: //Left click
                 //System.out.println("X: " + cX + ", Y: " + cY + "\t");
-                selected = Game.getUnit(pX, pY);
+                selected = Game.map.getUnit(pX, pY);
                 if(Game.gui.canSelect(selected))
                 {
                     walkList = new ArrayList<>(Game.paths.getWalk());

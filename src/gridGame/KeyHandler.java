@@ -28,7 +28,39 @@ public class KeyHandler implements KeyListener
                 break;
                 
             case VK_ESCAPE:
-                Game.gui.click(1);
+                Game.gui.click(5, 0);
+                break;
+                
+            case VK_1:
+                Game.gui.click(0, 1);
+                break;
+            
+            case VK_2:
+                Game.gui.click(1, 1);
+                break;
+            
+            case VK_3:
+                Game.gui.click(2, 1);
+                break;
+               
+            case VK_4:
+                Game.gui.click(3, 1);
+                break;
+                
+            case VK_5:
+                Game.gui.click(4, 1);
+                break;
+                
+            case VK_6:
+                Game.gui.click(5, 1);
+                break;
+                
+            case VK_7:
+                Game.gui.click(6, 1);
+                break;
+                
+            case VK_8:
+                Game.gui.click(7, 1);
                 break;
         }
     }

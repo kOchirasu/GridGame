@@ -1,5 +1,7 @@
 package map;
 
+import block.Tile;
+import block.Unit;
 import graphics.Sprite;
 import gridGame.Game;
 import java.awt.Graphics;
@@ -26,7 +28,7 @@ public class Map
     private int xShift, yShift;
     private int x, y;
     private int sX, sY;
-    private byte[][] grid;
+    private Tile[][] grid;
     private Sprite sprite;
     private boolean shifting;
     
@@ -46,7 +48,7 @@ public class Map
 
         x = width = data[0];
         y = height = data[1];
-        grid = new byte[x][y];
+        grid = new Tile[x][y];
         
         if(data.length < x * y + 2) {
             System.out.println("Invalid map file...");
@@ -56,8 +58,8 @@ public class Map
         {
             for (int j = 0; j < x; j++)
             {
-                //System.out.println("x:" + j + " y:" + i + " n:" + (i*x + j + 2));
-                grid[j][i] = data[i*x + j + 2];
+                //System.out.println("x:" + j + " y:" + i + " n:" + data[i*x + j + 2]);//(i*x + j + 2));
+                grid[j][i] = new Tile(j, i, data[i*x + j + 2]);
 
             }
         }
@@ -95,7 +97,7 @@ public class Map
                 
                 if(count >= Game.TILESIZE)
                 {
-                    xShift = yShift = count = 0;;
+                    xShift = yShift = count = 0;
                     x = Game.xOff;
                     y = Game.yOff;
                     shifting = false;
@@ -123,9 +125,10 @@ public class Map
             for(int j = -1; j < Game.fieldWidth + 1; j++)
             {
                 //int n = getTile(j + x, i + y);
-                int n = getTile(j + Game.xOff, i + Game.yOff);
-                if(n > 0 && n < 10) {
-                    g.drawImage(sprite.tile[3][n], Game.MAPOFFX + j * Game.TILESIZE + xShift, Game.MAPOFFY + i * Game.TILESIZE + yShift, Game.TILESIZE, Game.TILESIZE, null);
+                Tile t = getTile(j + Game.xOff, i + Game.yOff);
+                if (t != null && t.getType() > 0 && t.getType() < 10) {
+                    //System.out.println("x:" + j + " y:" + i + " n:" + t.getType());
+                    g.drawImage(sprite.tile[3][t.getType()], Game.MAPOFFX + j * Game.TILESIZE + xShift, Game.MAPOFFY + i * Game.TILESIZE + yShift, Game.TILESIZE, Game.TILESIZE, null);
                 }
                 else {
                     g.drawImage(sprite.tile[2][4], Game.MAPOFFX + j * Game.TILESIZE + xShift, Game.MAPOFFY + i * Game.TILESIZE + yShift, Game.TILESIZE, Game.TILESIZE, null);
@@ -135,12 +138,37 @@ public class Map
     }
     
     //Gets tile
-    private byte getTile(int x, int y){
-        return x >= 0 && y >= 0 && x < width && y < height ? grid[x][y] : -1;
+    private Tile getTile(int x, int y){
+        return x >= 0 && y >= 0 && x < width && y < height ? grid[x][y] : null;
     }
     //Returns map grid
-    public byte[][] getGrid() {
+    public Tile[][] getGrid() {
         return grid;
+    }
+    
+    public boolean addUnit(int x, int y, Unit u)
+    {
+        return grid[x][y].addUnit(u);
+    }
+    
+    public void setUnit(int x, int y, Unit u)
+    {
+        grid[x][y].setUnit(u);
+    }
+    
+    //Gets the unit at specified x, y
+    public Unit getUnit(int x, int y)
+    {
+        if(inMap(x, y)) //Make sure unit is in map
+        {
+            return grid[x][y].getUnit();
+        }
+        return null;
+    }
+    
+    private boolean inMap(int x, int y)
+    {
+        return x >= 0 && y >= 0 && x < width && y < height;
     }
     
     //Prints out map

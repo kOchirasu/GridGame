@@ -52,7 +52,6 @@ public class Game extends Canvas implements Runnable
     unitList                - List of all units
     */
     private Sprite im;
-    private static Unit[][] unitGrid;
     private static ArrayList<Unit> unitList;
     
     //Initializes the game
@@ -79,7 +78,7 @@ public class Game extends Canvas implements Runnable
         
         //Unit Data
         unitList = new ArrayList<>();
-        unitGrid = new Unit[map.width][map.height];
+//unitGrid = new Unit[map.width][map.height];
         
         //Etc. initializtion
         gui = new Interface(loader.load("/gui.png"), im);
@@ -237,10 +236,10 @@ public class Game extends Canvas implements Runnable
     //Add a unit to the map
     public void addUnit(int x, int y, int type, int mov, int team)
     {
-        if(inMap(x, y) && getUnit(x, y) == null) //Make sure adding unit within map grid, and that there is no unit currently there
+        if(inMap(x, y) && map.getUnit(x, y) == null) //Make sure adding unit within map grid, and that there is no unit currently there
         {
             Unit temp = new Unit(x, y, im, mov, team);
-            unitGrid[x][y] = temp;
+            map.addUnit(x, y, temp);
             unitList.add(temp);
         }
         else
@@ -249,21 +248,11 @@ public class Game extends Canvas implements Runnable
         }
     }
     
-    //Gets the unit at specified x, y
-    public static Unit getUnit(int x, int y)
-    {
-        if(inMap(x, y)) //Make sure unit is in map
-        {
-            return unitGrid[x][y];
-        }
-        return null;
-    }
-    
     //Moves a unit to specified x, y from current x, y
     public static void moveUnit(int x, int y, Unit u)
     {
-        unitGrid[u.getX()][u.getY()] = null;
-        unitGrid[x][y] = u;
+        map.setUnit(u.getX(), u.getY(), null);
+        map.addUnit(x, y, u);
     }
     
     public static void offset(int x, int y)

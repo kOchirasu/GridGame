@@ -63,8 +63,8 @@ public class Unit
         this.def = 5;
         
         btList.put(0, "Attack " + x);
-        btList.put(5, "Cancel " + y);
-        btList.put(6, "Done " + dX);
+        //btList.put(5, "Cancel " + y);
+        //btList.put(6, "Done " + dX);
         if(TEAM == 1)
         {
             btList.put(7, "Reset Moves " + dY);
@@ -197,9 +197,11 @@ public class Unit
         if(!moving)
         {
             Game.paths.clearPaths();
-            listButtons(false);
             done = true;
             moved = true;
+            pX = x;
+            pY = y;
+            listButtons(false);
             Game.gui.unitUpdate(this);
         }
     }
@@ -211,7 +213,9 @@ public class Unit
         {
             done = false;
             moved = false;
+            attacking = false;
         }
+        updateActions();
     }
     
     //Moves the unit to x, y through each tile in the walkList array
@@ -219,15 +223,16 @@ public class Unit
     {
         if(Game.inMap(x, y))
         {
-            if(Game.paths.getMove(x, y) <= mov && Game.getUnit(x, y) == null)// && Game.paths.getMove(x, y) <= mov && mov != 0)
+            if(Game.paths.getMove(x, y) <= mov && Game.map.getUnit(x, y) == null)// && Game.paths.getMove(x, y) <= mov && mov != 0)
             {
-                pX = this.x;
-                pY = this.y;
+                //pX = this.x;
+                //pY = this.y;
                 Game.moveUnit(x, y, this);
                 this.walkList = walkList;
                 this.x = x;
                 this.y = y;
                 //moved is set to true once the animation has completed, but can't I set it to true here?
+                moved = true;
                 //System.out.println("Moved to Grid(" + this.x + ", " + this.y + ")");
                 return true;
             }
@@ -438,6 +443,15 @@ public class Unit
     //Shows buttons that represent possible selections for unit
     private void listButtons(boolean enable)
     {
+        /*for(int i = 0; i < Game.gui.BCOUNT; i++)
+        {
+            if(btList.get(i) == null) {
+                Game.gui.setButton("", i, true);
+            }
+            else {
+                Game.gui.setButton(btList.get(i), i, !enable || done);
+            }
+        }*/
         int i = 0;
         for(Integer j : btList.keySet())
         {
@@ -448,6 +462,32 @@ public class Unit
         {
             Game.gui.setButton("", i, i, true);
         }
+    }
+    
+    public void updateActions()
+    {
+        if (moved)
+        {
+            btList.put(5, "Cancel");
+            btList.put(6, "Done");
+        }
+        else
+        {
+            btList.remove(5);
+            btList.remove(6);
+        }
+        
+        if (!attacking) //Also check if unit has usable weapon!
+        {
+            btList.put(0, "Attack");
+        }
+        else
+        {
+            btList.remove(0);
+            btList.remove(6);
+        }
+        
+        listButtons(true);
     }
     
     public void cloak()

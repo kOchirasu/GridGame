@@ -43,6 +43,8 @@ public class Interface
     private boolean inWindow = true, lockSelect, inGrid;
     public static Window window, battleWindow;
     
+    private final Button[] buttonArray;
+    
     public Interface(BufferedImage bg, Sprite sprite)
     {
         this.bg = bg;
@@ -53,10 +55,14 @@ public class Interface
         barMap = new HashMap<>();
         selectColor = new Color(255, 255, 255, 128);
         line1 = line2 = line3 = line4 = line5 = "";
+        
+        buttonArray = new Button[BCOUNT];
         for(int i = 0; i < BCOUNT; i++)
         {
-            buttonMap.put(i, addButton("", i, i));
-            buttonMap.get(i).disabled = true;
+            //buttonMap.put(i, addButton("", i, i));
+            //buttonMap.get(i).disabled = true;
+            buttonArray[i] = addButton("", i, i);
+            buttonArray[i].disabled = true;
         }
         slot = -1;
         battleWindow = new Window(125, 75, 450, 300);
@@ -84,6 +90,10 @@ public class Interface
         for(Integer i : buttonMap.keySet())
         {
             buttonMap.get(i).render(g);
+        }
+        for(int i = 0; i < BCOUNT; i++)
+        {
+            buttonArray[i].render(g);
         }
         //Renders all bars
         for(Integer i : barMap.keySet())
@@ -152,15 +162,15 @@ public class Interface
     //need to fix button iDs
     public void setButton(String text, int iD, int loc, boolean disabled)
     {
-        buttonMap.get(loc).set(text, iD, disabled);
-        //buttonMap.put(loc, buttonMap.get(loc));
+        buttonArray[loc].set(text, iD, disabled);
     }
     
     //Disables all buttons and sets text to ""
     public void hideButtons()
     {
         for(int i = 0; i < BCOUNT; i++) {
-            setButton("", i, i, true);
+            //buttonArray[i].set("", buttonArray[i].getID(), true);
+            buttonArray[i].set("", -1, true);
         }
     }
     
@@ -204,15 +214,8 @@ public class Interface
         if(window == null)//Game.inGrid(cX, cY)
         {
             switch(button)
-            {
-                case 1: //Left click
-                    if(cSelect != null)
-                    {
-                        cSelect.getInventory().swap(slot, whichSlot());
-                        slot = click ? whichSlot() : -1;
-                        unitUpdate(cSelect);
-                    }
-
+            {              
+                case 0: case 1: //Moving/Left click
                     //There is some glitch where the button wont register sometimes, need to debug...
                     oBt = nBt;
                     nBt = whichButton();
@@ -231,6 +234,13 @@ public class Interface
                             }
                         }
                     }
+                    
+                    if(button == 1 && cSelect != null) //This must come 2nd so that data is updated correctly
+                    {
+                        cSelect.getInventory().swap(slot, whichSlot());
+                        slot = click ? whichSlot() : -1;
+                        unitUpdate(cSelect);
+                    }
                     break;
                     
                 case 2: //Middle click (wheel)
@@ -243,16 +253,38 @@ public class Interface
     }
     
     //Doesn't really work, but it should be able to click a button by iD
-    public void click(int iD)
+    public void click(int iD, int mode)
     {
-        for(Integer i : buttonMap.keySet())
-        {
-            System.out.println(i + ": " + buttonMap.get(i).getText());
-        }
         if(cSelect != null)
         {
-            System.out.println(buttonMap.get(iD).getText());
-            buttonMap.get(iD).click(cSelect);
+            if(mode == 0)
+            {
+                if(buttonMap.get(iD) == null)
+                {
+                    for(int i = 0; i < BCOUNT; i++)
+                    {
+                        if(buttonArray[i].getID() == iD)
+                        {
+                            System.out.println(buttonArray[i].getText());
+                            buttonArray[i].click(cSelect);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    System.out.println(buttonMap.get(iD).getText());
+                    buttonMap.get(iD).click(cSelect);
+                }
+            }
+            else if(mode == 1)
+            {
+                if(buttonArray[iD] != null)
+                {
+                    System.out.println(buttonArray[iD].getText());
+                    buttonArray[iD].click(cSelect);
+                }
+            }
         }
     }
     
@@ -308,9 +340,10 @@ public class Interface
     }
     
     //Updates the unit data for the interface
-    public void unitUpdate(Unit unit)
+    public void unitUpdate(Unit unit) //can optimize calls later so that it isn't called multiple times for no reason.
     {
         //display info
+        unit.updateActions();
         line1 = "Team: " + unit.getTEAM() + "     Coordinates: (" + unit.getX() + ", " + unit.getY() + ")     " + (unit.hasMoved() ? "[Can't Move]" : "[Can Move]");
         line2 = "HP: " + unit.getHP() +  "/" + unit.getMaxHP() + "     MP: " + unit.getMP() +  "/" + unit.getMaxMP() + "     LV: " + unit.getLV() + "     EXP: " + (int) (unit.getEXP() * 100) + "%";
         line3 = "Fatigue: " + unit.getFTG() + "     Movement: " + unit.getMOV() + "     Range: " + unit.getMinRANGE() + "~" + unit.getMaxRANGE();
@@ -332,8 +365,6 @@ public class Interface
         window = null;
     }
     
-    
-    
     //returns the inventory slot the mouse has whichButton
     private int whichSlot()
     {
@@ -350,6 +381,12 @@ public class Interface
     //Could implement with binary search if button coordinates are in order.
     private Button whichButton()
     {
+        for(int i = 0; i < BCOUNT; i++)
+        {
+            if(within(buttonArray[i].area())) {
+                return buttonArray[i];
+            }
+        }
         for(Integer i : buttonMap.keySet())
         {
             if(within(buttonMap.get(i).area())) {

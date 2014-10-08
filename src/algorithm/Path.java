@@ -181,7 +181,7 @@ public class Path
         addAttack(x, y, pathInfo[3], pathInfo[4]);
         //Check using all possible movement tiles
         for(int[] k : pathList) {
-            if(Game.getUnit(k[0], k[1]) == null) {
+            if(Game.map.getUnit(k[0], k[1]) == null) {
                 addAttack(k[0], k[1], pathInfo[3], pathInfo[4]);
             }
         }
@@ -214,9 +214,9 @@ public class Path
     {
         if(Game.inMap(x, y)) //If within board
         {
-            if((Game.getUnit(x, y) == null || Game.getUnit(x, y).getTEAM() == team)) //If tile is open
+            if((Game.map.getUnit(x, y) == null || Game.map.getUnit(x, y).getTEAM() == team)) //If tile is open
             {
-                if(movement[x][y] == 0 && Game.map.getGrid()[x][y] == 1)
+                if(movement[x][y] == 0 && Game.map.getGrid()[x][y].getType() == 1)
                 {
                     return true;
                 }
